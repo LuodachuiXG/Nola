@@ -1,6 +1,6 @@
-package cc.loac.sql.dao
+package cc.loac.data.dao
 
-import cc.loac.sql.models.Article
+import cc.loac.data.models.Article
 
 interface DAOFacade {
     suspend fun allArticles(): List<Article>

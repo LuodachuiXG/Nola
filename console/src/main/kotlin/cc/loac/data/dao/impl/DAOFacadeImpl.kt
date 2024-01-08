@@ -1,9 +1,9 @@
-package cc.loac.sql.dao.impl
+package cc.loac.data.dao.impl
 
-import cc.loac.sql.dao.DAOFacade
-import cc.loac.sql.models.Article
-import cc.loac.sql.models.Articles
-import cc.loac.sql.DatabaseSingleton.dbQuery
+import cc.loac.data.dao.DAOFacade
+import cc.loac.data.models.Article
+import cc.loac.data.models.tables.Articles
+import cc.loac.data.DatabaseSingleton.dbQuery
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -12,7 +12,8 @@ class DAOFacadeImpl : DAOFacade {
     private fun resultRowToArticle(row: ResultRow) = Article (
         id = row[Articles.id],
         title = row[Articles.title],
-        body = row[Articles.body]
+        body = row[Articles.body],
+        createDate = row[Articles.createDate]
     )
 
     override suspend fun allArticles(): List<Article> = dbQuery {

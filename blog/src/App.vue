@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
+import '@material/web/button/filled-button.js'
 </script>
 
 <template>
   <div>
+    <md-filled-button>Complete</md-filled-button>
     <a href="https://vitejs.dev" target="_blank">
       <img src="/vite.svg" class="logo" alt="Vite logo" />
     </a>

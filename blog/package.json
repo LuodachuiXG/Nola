@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@material/web": "^1.1.1",
     "vue": "^3.3.11"
   },
   "devDependencies": {
