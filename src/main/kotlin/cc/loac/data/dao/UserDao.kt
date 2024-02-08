@@ -10,6 +10,7 @@ import cc.loac.data.models.User
 interface UserDao {
     suspend fun allUsers(): List<User>
     suspend fun user(id: Int): User?
+    suspend fun user(name: String): User?
     suspend fun addUser(user: User): User?
     suspend fun editUser(user: User): Boolean
     suspend fun deleteUser(id: Int): Boolean

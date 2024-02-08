@@ -11,8 +11,6 @@ import java.time.format.DateTimeFormatter
 
 /**
  * 对 [LocalDateTime] 的序列以及反序列化器
- * @author Loac
- * @version 1.0 2024-01-09
  */
 @OptIn(ExperimentalSerializationApi::class)
 @Serializer(forClass = LocalDate::class)

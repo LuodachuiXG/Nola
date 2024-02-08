@@ -1,17 +1,11 @@
 package cc.loac.data.models.tables
 
-import cc.loac.data.models.UserRole
-import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.javatime.datetime
-import java.time.LocalDateTime
 
 
 /**
  * 用户表
- * @author Loac
- * @version 1.0, 2024-01-08
  */
 object Users : Table("user") {
 
@@ -30,6 +24,9 @@ object Users : Table("user") {
     /** 密码 **/
     val password = varchar("password", 100)
 
+    /** 盐值，用于加密密码 **/
+    val salt = varchar("salt", 100)
+
     /** 描述 **/
     val description = varchar("description", 1000).nullable()
 
@@ -38,9 +35,6 @@ object Users : Table("user") {
 
     /** 头像地址 URL **/
     val avatar = varchar("avatar", 100).nullable()
-
-    /** 用户角色 [UserRole] **/
-    val role = enumerationByName<UserRole>("role", 20)
 
 
     override val primaryKey = PrimaryKey(id)
