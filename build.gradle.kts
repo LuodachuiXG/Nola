@@ -34,7 +34,10 @@ dependencies {
     implementation("io.ktor:ktor-server-sessions-jvm")
     implementation("io.ktor:ktor-server-cors-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
-    implementation("io.ktor:ktor-serialization-kotlinx-json-jvm")
+    implementation("io.ktor:ktor-serialization-jackson:$ktor_version")
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.datatype/jackson-datatype-jsr310
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
+
     implementation("io.ktor:ktor-server-html-builder-jvm")
     implementation("org.jetbrains:kotlin-css-jvm:1.0.0-pre.129-kotlin-1.4.20")
 
@@ -45,9 +48,15 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed_version")
     implementation("com.h2database:h2:$h2_version")
 
+    // 根据异常返回指定的页面
+    implementation("io.ktor:ktor-server-status-pages:$ktor_version")
 
     implementation("io.ktor:ktor-server-netty-jvm")
     testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
+
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    implementation("commons-codec:commons-codec:1.16.0")
+
 }

@@ -10,8 +10,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 /**
  * 数据库单例类
  * 使用 H2 数据库作为博客默认数据库
- * @author Loac
- * @version 1.0 2024-01-09
  */
 object DatabaseSingleton {
 
