@@ -1,26 +1,29 @@
 package cc.loac.data.models
 
-import cc.loac.data.serializer.LocalDateTimeSerializer
-import com.fasterxml.jackson.annotation.JsonFormat
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
-import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
+import java.util.Date
 
 /**
- * 用户实体类
+ * 用户数据类
  */
 data class User(
-    val id: Int = -1,
-    val name: String,
+    /** 用户 ID **/
+    val userId: Int = -1,
+    /** 用户名 **/
+    val username: String,
+    /** 电子邮箱 **/
     val email: String,
+    /** 显示名称 **/
     val displayName: String,
+    /** 密码 **/
     val password: String,
+    /** 盐值，用于加密密码 **/
     val salt: String,
+    /** 描述 **/
     val description: String? = null,
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    val createDate: LocalDateTime = LocalDateTime.now(),
+    /** 注册日期 **/
+    val createDate: ULong = Date().time.toULong(),
+    /** 最后登录日期 **/
+    val lastLoginDate: ULong? = null,
+    /** 头像地址 URL **/
     val avatar: String? = null
 )

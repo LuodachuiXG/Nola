@@ -1,19 +1,18 @@
-package cc.loac.data.models.tables
+package cc.loac.data.sql.tables
 
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.javatime.datetime
 
 
 /**
  * 用户表
  */
-object Users : Table("user") {
+object Users : Table("`user`") {
 
     /** 用户 ID **/
-    val id = integer("id").autoIncrement()
+    val userId = integer("userId").autoIncrement()
 
     /** 用户名 **/
-    val name = varchar("name", 50)
+    val username = varchar("username", 50)
 
     /** 电子邮箱 **/
     val email = varchar("email", 50)
@@ -31,11 +30,14 @@ object Users : Table("user") {
     val description = varchar("description", 1000).nullable()
 
     /** 注册日期 **/
-    val createDate = datetime("create_date")
+    val createDate = ulong("create_date")
+
+    /** 最后登录日期 **/
+    val lastLoginDate = ulong("last_login_time").nullable()
 
     /** 头像地址 URL **/
     val avatar = varchar("avatar", 100).nullable()
 
 
-    override val primaryKey = PrimaryKey(id)
+    override val primaryKey = PrimaryKey(userId)
 }
