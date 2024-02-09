@@ -1,9 +1,9 @@
 package cc.loac.routes
 
-import cc.loac.data.dao.impl.userDao
-import cc.loac.data.exceptions.MyException
+import cc.loac.data.sql.dao.impl.userDao
+import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.data.models.User
-import cc.loac.data.requests.AuthRequest
+import cc.loac.data.requests.*
 import cc.loac.data.responses.AuthResponse
 import cc.loac.data.responses.respondSuccess
 import cc.loac.security.hashing.HashingService
@@ -22,26 +22,19 @@ import io.ktor.server.routing.*
 /**
  * 用户路由
  */
-fun Routing.userRouting(
+fun Route.userRouting(
     hashingService: HashingService,
     tokenService: TokenService,
     tokenConfig: TokenConfig
 ) {
     route("/user") {
         post("/login") {
-            val request = runCatching {
-                call.receiveNullable<AuthRequest>()
-            }.getOrNull() ?: run {
-                call.respond(HttpStatusCode.BadRequest)
-                return@post
-            }
-
+            val request = call.receiveByDataClass<AuthRequest>()
             val user = userDao.user(request.username)
             if (user == null) {
                 call.respond(HttpStatusCode.Conflict, "非法用户名或密码")
                 return@post
             }
-
             val isValidPassword = hashingService.verify(
                 value = request.password,
                 saltedHash = SaltedHash(
@@ -59,7 +52,7 @@ fun Routing.userRouting(
                 config = tokenConfig,
                 TokenClaim(
                     name = "userId",
-                    value = user.id.toString()
+                    value = user.userId.toString()
                 )
             )
 
@@ -69,7 +62,6 @@ fun Routing.userRouting(
                     token = token
                 )
             )
-
         }
 
         get {
@@ -81,7 +73,7 @@ fun Routing.userRouting(
             val request = runCatching {
                 call.receiveNullable<AuthRequest>()
             }.getOrNull() ?: run {
-                throw MyException("参数不匹配")
+                throw ParamMismatchException()
             }
 
             val areFieldsBlank = request.username.isBlank() ||
@@ -94,7 +86,7 @@ fun Routing.userRouting(
 
             val saltHash = hashingService.generatedSaltedHash(request.password)
             val user = User(
-                name = request.username,
+                username = request.username,
                 password = saltHash.hash,
                 salt = saltHash.salt,
                 email = "admin@loac.cc",

@@ -3,10 +3,7 @@ package cc.loac.data.responses
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 /**
  * 响应类数据类
@@ -21,7 +18,7 @@ data class MyResponse<T> (
     val data: T?
 )
 
-suspend fun ApplicationCall.respondFail(
+suspend fun ApplicationCall.respondFailure(
     errMsg: String,
     status: HttpStatusCode = HttpStatusCode.Conflict
 ) {
