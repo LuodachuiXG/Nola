@@ -22,12 +22,13 @@ fun Application.configureRouting(
         route("/admin") {
             // user 用户相关路由
             userRouting(hashingService, tokenService, tokenConfig)
-            // config 博客配置信息路由
+            // config 博客配置管理员路由
             configAdminRouting()
         }
 
         /** 博客接口 **/
         route("/api") {
+            // config 博客配置 API 路由
             configApiRouting()
         }
     }

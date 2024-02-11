@@ -1,36 +1,52 @@
 package cc.loac.routes
 
-import cc.loac.data.models.enums.ConfigKey
 import cc.loac.data.responses.respondSuccess
-import cc.loac.data.sql.dao.impl.configDao
-import cc.loac.utils.toJSON
+import cc.loac.services.ConfigService
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import org.koin.java.KoinJavaComponent.inject
+
+val configService: ConfigService by inject(ConfigService::class.java)
 
 /**
- * 配置信息后台路由
+ * “配置”管理员路由
  */
 fun Route.configAdminRouting() {
     route("/config") {
+        /** 博客相关接口 **/
+        route("/blog") {
+            adminBlog()
+        }
+    }
+}
+
+/**
+ * “配置”API 路由
+ */
+fun Route.configApiRouting() {
+    route("/config") {
+        /** 博客相关接口 **/
+        route("/blog") {
+            apiBlog()
+        }
+    }
+}
+
+/**
+ * 管理员 博客相关接口
+ */
+private fun Route.adminBlog() {
+    post {
 
     }
 }
 
 /**
- * 配置信息博客接口
+ * API 博客相关接口
  */
-fun Route.configApiRouting() {
-    route("/config") {
-        /**
-         * 博客信息
-         */
-        get("/blog_info") {
-            val result = configDao.config(ConfigKey.BLOG_INFO)
-            if (result == null) {
-                call.respondSuccess(null)
-                return@get
-            }
-            call.respondSuccess(result.toJSON())
-        }
+private fun Route.apiBlog() {
+    /** 博客信息 **/
+    get {
+        call.respondSuccess(configService.blogInfo())
     }
 }

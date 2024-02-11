@@ -6,6 +6,7 @@ import cc.loac.data.responses.respondFailure
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
 
 /**
  * 配置状态页面插件
@@ -21,19 +22,23 @@ fun Application.configureStatusPage() {
 
         /** 401 未授权状态 **/
         status(HttpStatusCode.Unauthorized) { call, status ->
+            log.error("${call.request.host()} 无权访问受保护资源：${call.request.uri}")
             call.respondFailure("无权访问受保护资源", status)
         }
 
         /** MyException 异常 **/
         exception<MyException> { call, e ->
+            log.error("${call.request.host()} 自定义异常：${e.message}")
             call.respondFailure(e.message ?: "Unknown Error")
         }
 
         /** 参数不匹配异常 **/
-        exception<ParamMismatchException> { call, _ ->
+        exception<ParamMismatchException> { call, e ->
+            log.error("${call.request.host()} 请求参数不匹配：${e.message}")
             call.respondFailure("请求参数不匹配", HttpStatusCode.Conflict)
         }
 
+        /** 默认异常类 **/
         exception<Exception> { call, e ->
             e.printStackTrace()
             call.respondFailure("未知错误", HttpStatusCode.InternalServerError)

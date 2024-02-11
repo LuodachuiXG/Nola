@@ -5,6 +5,7 @@ val logback_version: String by project
 
 val exposed_version: String by project
 val h2_version: String by project
+val koin_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.22"
@@ -49,6 +50,10 @@ dependencies {
 
     // 根据异常返回指定的页面
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
+
+    // Ktor 依赖注入
+    implementation("io.insert-koin:koin-ktor:$koin_version")
+    implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
 
     implementation("io.ktor:ktor-server-netty-jvm")
     testImplementation("io.ktor:ktor-server-tests-jvm")
