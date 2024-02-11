@@ -28,6 +28,8 @@ fun Application.module() {
     )
     val hashingService = SHA256HashingService()
 
+    // Koin 依赖注入配置
+    configureKoin()
     // JWT 验证配置
     configureSecurity(tokenConfig)
     // 序列化器配置

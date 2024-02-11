@@ -7,9 +7,6 @@ import cc.loac.data.sql.tables.Users
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 
-/** 实现用户表操作接口 **/
-val userDao: UserDao = UserDaoImpl()
-
 /**
  * 用户表操作接口实现类
  */
