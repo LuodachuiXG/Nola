@@ -1,4 +1,4 @@
-package cc.loac.data.requests
+package cc.loac.utils
 
 import cc.loac.data.exceptions.ParamMismatchException
 import com.fasterxml.jackson.databind.ObjectMapper

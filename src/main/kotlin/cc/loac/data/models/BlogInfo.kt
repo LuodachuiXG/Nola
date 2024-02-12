@@ -10,11 +10,11 @@ data class BlogInfo (
     /** 副标题 **/
     val subtitle: String?,
     /** 博主（User 的显示名称 displayName） **/
-    val blogger: String?,
+    val blogger: String? = null,
     /** LOGO **/
-    val logo: String?,
+    val logo: String? = null,
     /** Favicon **/
-    val favicon: String?,
+    val favicon: String? = null,
     /** 创建时间 **/
-    val createDate: Long?
+    val createDate: Long? = null
 )

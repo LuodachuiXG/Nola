@@ -41,7 +41,7 @@ fun Application.configureStatusPage() {
         /** 默认异常类 **/
         exception<Exception> { call, e ->
             e.printStackTrace()
-            call.respondFailure("未知错误", HttpStatusCode.InternalServerError)
+            call.respondFailure("未知错误，请查看服务端日志", HttpStatusCode.InternalServerError)
         }
     }
 }

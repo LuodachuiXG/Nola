@@ -11,15 +11,9 @@ object Configs : Table("config") {
     /** 配置表 ID **/
     val configId = integer("configId").autoIncrement()
     /** 配置键 **/
-    val key = enumerationByName<ConfigKey>("key", 50)
+    val key = enumerationByName<ConfigKey>("key", 50).uniqueIndex()
     /** 配置数据 **/
-    val value = text("value")
-
+    val value = text("value");
 
     override val primaryKey = PrimaryKey(configId)
-
-    init {
-        // 设置唯一键
-        uniqueIndex(key)
-    }
 }
