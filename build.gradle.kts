@@ -62,5 +62,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     implementation("commons-codec:commons-codec:1.16.0")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.8")
 
 }

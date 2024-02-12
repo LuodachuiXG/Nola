@@ -13,7 +13,6 @@ import io.ktor.server.routing.*
  * 配置博客路由
  */
 fun Application.configureRouting(
-    hashingService: HashingService,
     tokenService: TokenService,
     tokenConfig: TokenConfig
 ) {
@@ -21,7 +20,7 @@ fun Application.configureRouting(
         /** 后台接口 **/
         route("/admin") {
             // user 用户相关路由
-            userRouting(hashingService, tokenService, tokenConfig)
+            userRouting(tokenService, tokenConfig)
             // config 博客配置管理员路由
             configAdminRouting()
         }

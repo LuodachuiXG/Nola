@@ -6,12 +6,13 @@ import cc.loac.data.sql.dao.ConfigDao
 import cc.loac.services.ConfigService
 import org.koin.java.KoinJavaComponent.inject
 
-val configDao: ConfigDao by inject(ConfigDao::class.java)
+
 
 /**
  * “配置”服务接口实现类
  */
 class ConfigServiceImpl : ConfigService {
+    private val configDao: ConfigDao by inject(ConfigDao::class.java)
 
     /**
      * 添加配置信息

@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.Table
 /**
  * 用户表
  */
-object Users : Table("`user`") {
+object Users : Table("user") {
 
     /** 用户 ID **/
     val userId = integer("userId").autoIncrement()
