@@ -26,7 +26,7 @@ fun Application.module() {
         expiresIn = 3 * 1000 * 60 * 60,
         secret = System.getenv("JWT_SECRET")
     )
-    val hashingService = SHA256HashingService()
+
 
     // Koin 依赖注入配置
     configureKoin()
@@ -35,7 +35,7 @@ fun Application.module() {
     // 序列化器配置
     configureSerialization()
     // 路由配置
-    configureRouting(hashingService, tokenService, tokenConfig)
+    configureRouting(tokenService, tokenConfig)
     // 状态页面配置（异常拦截器）
     configureStatusPage()
 }

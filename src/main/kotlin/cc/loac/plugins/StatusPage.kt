@@ -3,6 +3,7 @@ package cc.loac.plugins
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.data.responses.respondFailure
+import cc.loac.utils.error
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -22,19 +23,19 @@ fun Application.configureStatusPage() {
 
         /** 401 未授权状态 **/
         status(HttpStatusCode.Unauthorized) { call, status ->
-            log.error("${call.request.host()} 无权访问受保护资源：${call.request.uri}")
+            "${call.request.host()} 无权访问受保护资源：${call.request.uri}".error()
             call.respondFailure("无权访问受保护资源", status)
         }
 
         /** MyException 异常 **/
         exception<MyException> { call, e ->
-            log.error("${call.request.host()} 自定义异常：${e.message}")
+            "${call.request.host()} 自定义异常：${e.message}".error()
             call.respondFailure(e.message ?: "Unknown Error")
         }
 
         /** 参数不匹配异常 **/
         exception<ParamMismatchException> { call, e ->
-            log.error("${call.request.host()} 请求参数不匹配：${e.message}")
+            "${call.request.host()} 请求参数不匹配：${e.message}".error()
             call.respondFailure("请求参数不匹配", HttpStatusCode.Conflict)
         }
 

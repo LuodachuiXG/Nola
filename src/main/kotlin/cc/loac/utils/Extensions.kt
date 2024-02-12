@@ -1,9 +1,11 @@
 package cc.loac.utils
 
+import cc.loac.data.exceptions.MyException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.util.regex.Pattern
 
 val logger: Logger = LoggerFactory.getLogger("Ktor-Logger")
 
@@ -56,4 +58,25 @@ fun Any.toJSON(): JsonNode {
 fun Any.toJSONString(): String {
     val om = jacksonObjectMapper()
     return om.writeValueAsString(this)
+}
+
+/**
+ * String 扩展函数
+ * 验证当前 String 字符串是否是邮箱
+ */
+fun String.isEmail(): Boolean {
+    val emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+    val pattern = Pattern.compile(emailRegex)
+    val matcher = pattern.matcher(this)
+    return matcher.matches()
+}
+
+/**
+ * String 扩展函数
+ * 验证当前 String 字符串是否是由字母和数字组成
+ */
+fun String.isAlphaAndNumeric(): Boolean {
+    val pattern = Pattern.compile("^[A-Za-z0-9]+$")
+    val matcher = pattern.matcher(this)
+    return matcher.matches()
 }

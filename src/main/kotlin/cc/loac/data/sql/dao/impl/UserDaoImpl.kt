@@ -28,10 +28,17 @@ class UserDaoImpl : UserDao {
         avatar = row[Users.avatar],
     )
 
+    /**
+     * 获取所有用户
+     */
     override suspend fun allUsers(): List<User> = dbQuery {
         Users.selectAll().map(::resultRowToUser)
     }
 
+    /**
+     * 根据用户 ID 获取用户
+     * @param id 用户 ID
+     */
     override suspend fun user(id: Int): User? = dbQuery {
         Users
             .select { Users.userId eq id }
@@ -39,13 +46,20 @@ class UserDaoImpl : UserDao {
             .singleOrNull()
     }
 
-    override suspend fun user(name: String): User? = dbQuery {
-        Users
-            .select { Users.username eq name }
+    /**
+     * 根据用户名获取用户
+     * @param username 用户名
+     */
+    override suspend fun user(username: String): User? = dbQuery {
+        Users.selectAll().where { Users.username eq username }
             .map(::resultRowToUser)
             .singleOrNull()
     }
 
+    /**
+     * 添加用户
+     * @param user 用户数据类
+     */
     override suspend fun addUser(user: User): User? = dbQuery {
         val insertStatement = Users.insert {
             it[username] = user.username
@@ -60,7 +74,11 @@ class UserDaoImpl : UserDao {
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToUser)
     }
 
-    override suspend fun editUser(user: User): Boolean = dbQuery {
+    /**
+     * 修改用户
+     * @param user 用户数据类
+     */
+    override suspend fun updateUser(user: User): Boolean = dbQuery {
         Users.update({
             Users.userId eq user.userId
         }) {
@@ -70,6 +88,10 @@ class UserDaoImpl : UserDao {
         } > 0
     }
 
+    /**
+     * 删除用户
+     * @param id 用户 ID
+     */
     override suspend fun deleteUser(id: Int): Boolean = dbQuery {
         Users.deleteWhere { Users.userId eq id } > 0
     }

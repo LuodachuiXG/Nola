@@ -1,108 +1,65 @@
 package cc.loac.routes
 
-import cc.loac.data.exceptions.ParamMismatchException
-import cc.loac.data.models.User
-import cc.loac.data.requests.*
+import cc.loac.data.exceptions.MyException
 import cc.loac.data.responses.AuthResponse
+import cc.loac.data.responses.respondFailure
 import cc.loac.data.responses.respondSuccess
-import cc.loac.security.hashing.HashingService
+import cc.loac.security.hashing.SHA256HashingService
 import cc.loac.security.hashing.SaltedHash
 import cc.loac.security.token.TokenClaim
 import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
-import io.ktor.http.*
+import cc.loac.utils.receiveMapByName
 import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
+
+private val hashingService = SHA256HashingService()
 
 /**
  * 用户路由
  */
 fun Route.userRouting(
-    hashingService: HashingService,
     tokenService: TokenService,
     tokenConfig: TokenConfig
 ) {
-//    route("/user") {
-//        post("/login") {
-//            val request = call.receiveByDataClass<AuthRequest>()
-//            val user = userDao.user(request.username)
-//            if (user == null) {
-//                call.respond(HttpStatusCode.Conflict, "非法用户名或密码")
-//                return@post
-//            }
-//            val isValidPassword = hashingService.verify(
-//                value = request.password,
-//                saltedHash = SaltedHash(
-//                    salt = user.salt,
-//                    hash = user.password
-//                )
-//            )
-//
-//            if (!isValidPassword) {
-//                call.respond(HttpStatusCode.Conflict, "非法用户名或密码")
-//                return@post
-//            }
-//
-//            val token = tokenService.generate(
-//                config = tokenConfig,
-//                TokenClaim(
-//                    name = "userId",
-//                    value = user.userId.toString()
-//                )
-//            )
-//
-//            call.respond(
-//                status = HttpStatusCode.OK,
-//                message = AuthResponse(
-//                    token = token
-//                )
-//            )
-//        }
-//
-//        get {
-//            call.respondSuccess(userDao.allUsers())
-//        }
-//
-//
-//        post {
-//            val request = runCatching {
-//                call.receiveNullable<AuthRequest>()
-//            }.getOrNull() ?: run {
-//                throw ParamMismatchException()
-//            }
-//
-//            val areFieldsBlank = request.username.isBlank() ||
-//                    request.password.isBlank()
-//            val isPwTooShort = request.password.length < 8
-//            if (areFieldsBlank || isPwTooShort) {
-//                call.respond(HttpStatusCode.Conflict)
-//                return@post
-//            }
-//
-//            val saltHash = hashingService.generatedSaltedHash(request.password)
-//            val user = User(
-//                username = request.username,
-//                password = saltHash.hash,
-//                salt = saltHash.salt,
-//                email = "admin@loac.cc",
-//                displayName = "Loac",
-//            )
-//
-//            val wasAcknowledged = userDao.addUser(user)
-//            if (wasAcknowledged == null) {
-//                call.respond(HttpStatusCode.Conflict)
-//                return@post
-//            }
-//
-//            call.respond(HttpStatusCode.OK)
-//
-//        }
-//    }
-//
+    /** 用户相关接口 **/
+    route("/user") {
+        /** 用户登录 **/
+        post("/login") {
+            val receive = call.receiveMapByName("username", "password")
+            val user = userService.user(receive["username"]!!) ?: throw MyException("非法用户名或密码")
+            // 验证密码合法性
+            val isValidPassword = hashingService.verify(
+                value = receive["password"]!!,
+                saltedHash = SaltedHash(
+                    salt = user.salt,
+                    hash = user.password
+                )
+            )
+
+            // 密码不合法
+            if (!isValidPassword) {
+                throw MyException("非法用户名或密码")
+            }
+
+            // 生成 Token
+            val token = tokenService.generate(
+                config = tokenConfig,
+                TokenClaim(
+                    name = "userId",
+                    value = user.userId.toString()
+                )
+            )
+
+            // 返回 Token
+            call.respondSuccess(
+                AuthResponse(
+                    token = token
+                )
+            )
+        }
+    }
+
 //    authenticate {
 //        get("/authenticate") {
 //            call.respond(HttpStatusCode.OK)
