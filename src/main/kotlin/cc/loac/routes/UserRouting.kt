@@ -9,11 +9,17 @@ import cc.loac.security.hashing.SaltedHash
 import cc.loac.security.token.TokenClaim
 import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
+import cc.loac.services.UserService
 import cc.loac.utils.receiveMapByName
+import cc.loac.utils.toJSON
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import kotlinx.css.em
+import org.koin.java.KoinJavaComponent
+import org.koin.java.KoinJavaComponent.inject
 
 private val hashingService = SHA256HashingService()
+private val userService: UserService by inject(UserService::class.java)
 
 /**
  * 用户路由
@@ -42,6 +48,9 @@ fun Route.userRouting(
                 throw MyException("非法用户名或密码")
             }
 
+            // 修改最后登录时间
+            userService.updateLastLoginTime(user.userId)
+
             // 生成 Token
             val token = tokenService.generate(
                 config = tokenConfig,
@@ -51,12 +60,20 @@ fun Route.userRouting(
                 )
             )
 
-            // 返回 Token
-            call.respondSuccess(
-                AuthResponse(
-                    token = token
-                )
+            // 封装登录响应数据类
+            val authResponse = AuthResponse(
+                username = user.username,
+                email = user.email,
+                displayName = user.displayName,
+                description = user.description,
+                createDate = user.createDate,
+                lastLoginDate = user.lastLoginDate,
+                avatar = user.avatar,
+                token = token
             )
+
+            // 返回登录响应数据类
+            call.respondSuccess(authResponse)
         }
     }
 

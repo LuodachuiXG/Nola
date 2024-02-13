@@ -36,6 +36,12 @@ interface UserDao {
     suspend fun updateUser(user: User): Boolean
 
     /**
+     * 修改用户最后登录时间
+     * @param userId 用户 ID
+     */
+    suspend fun updateUserLastLoginTime(userId: Int): Boolean
+
+    /**
      * 删除用户
      * @param id 用户 ID
      */
