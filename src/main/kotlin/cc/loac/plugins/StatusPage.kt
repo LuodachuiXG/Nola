@@ -2,7 +2,7 @@ package cc.loac.plugins
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
-import cc.loac.data.responses.respondFailure
+import cc.loac.utils.respondFailure
 import cc.loac.utils.error
 import io.ktor.http.*
 import io.ktor.server.application.*

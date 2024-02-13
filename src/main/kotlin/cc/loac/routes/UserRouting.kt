@@ -2,8 +2,7 @@ package cc.loac.routes
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.responses.AuthResponse
-import cc.loac.data.responses.respondFailure
-import cc.loac.data.responses.respondSuccess
+import cc.loac.utils.respondSuccess
 import cc.loac.security.hashing.SHA256HashingService
 import cc.loac.security.hashing.SaltedHash
 import cc.loac.security.token.TokenClaim
@@ -11,11 +10,8 @@ import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
 import cc.loac.services.UserService
 import cc.loac.utils.receiveMapByName
-import cc.loac.utils.toJSON
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
-import kotlinx.css.em
-import org.koin.java.KoinJavaComponent
 import org.koin.java.KoinJavaComponent.inject
 
 private val hashingService = SHA256HashingService()
@@ -76,16 +72,4 @@ fun Route.userRouting(
             call.respondSuccess(authResponse)
         }
     }
-
-//    authenticate {
-//        get("/authenticate") {
-//            call.respond(HttpStatusCode.OK)
-//        }
-//
-//        get("/secret") {
-//            val principal = call.principal<JWTPrincipal>()
-//            val userId = principal?.getClaim("userId", String::class)
-//            call.respond(HttpStatusCode.OK, "Your userId is $userId")
-//        }
-//    }
 }

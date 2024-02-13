@@ -4,6 +4,8 @@ import cc.loac.data.exceptions.ParamMismatchException
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 
 /**
@@ -74,6 +76,14 @@ suspend fun ApplicationCall.receiveMapByName(
 }
 
 /**
+ * 获取请求的 Token 的 Claim
+ */
+suspend fun ApplicationCall.getTokenClaim(name: String): String? {
+    val principal = this.principal<JWTPrincipal>()
+    return principal?.getClaim(name, String::class)
+}
+
+/**
  * 请求参数数据类
  * @param paramName 请求的参数名
  * @param nullable 参数是否可为空
@@ -87,6 +97,7 @@ data class RequestParam(
  * 将一个 String 字符串封装成可为空的 [RequestParam] 数据类
  */
 fun String.nullable() = RequestParam(this, true)
+
 /**
  * 将一个 String 字符串封装成不可为空的 [RequestParam] 数据类
  */
