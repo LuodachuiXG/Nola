@@ -1,7 +1,6 @@
 package cc.loac.data.sql
 
-import cc.loac.data.sql.tables.Configs
-import cc.loac.data.sql.tables.Users
+import cc.loac.data.sql.tables.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -26,9 +25,17 @@ object DatabaseSingleton {
 
         // 开启事物，要么全部成功，要么回滚
         transaction(database) {
-            // 创建表
+            // 用户表
             SchemaUtils.create(Users)
+            // 配置表
             SchemaUtils.create(Configs)
+            // 文章表
+            SchemaUtils.create(Posts)
+            // 标签表
+            SchemaUtils.create(Tags)
+            // 分类表
+            SchemaUtils.create(Categories)
+
         }
     }
 

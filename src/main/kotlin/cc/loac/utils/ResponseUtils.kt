@@ -1,4 +1,4 @@
-package cc.loac.data.responses
+package cc.loac.utils
 
 import io.ktor.http.*
 import io.ktor.server.application.*
