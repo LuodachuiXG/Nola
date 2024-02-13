@@ -38,8 +38,17 @@ class UserServiceImpl : UserService {
 
     /**
      * 根据用户名获取用户
+     * @param username 用户名
      */
     override suspend fun user(username: String): User? {
         return userDao.user(username)
+    }
+
+    /**
+     * 根据用户 ID 修改最后登录时间
+     * @param userId 用户 ID
+     */
+    override suspend fun updateLastLoginTime(userId: Int): Boolean {
+        return userDao.updateUserLastLoginTime(userId)
     }
 }

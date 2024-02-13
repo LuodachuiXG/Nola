@@ -30,10 +30,10 @@ object Users : Table("user") {
     val description = varchar("description", 1000).nullable()
 
     /** 注册日期 **/
-    val createDate = ulong("create_date")
+    val createDate = long("create_date")
 
     /** 最后登录日期 **/
-    val lastLoginDate = ulong("last_login_time").nullable()
+    val lastLoginDate = long("last_login_time").nullable()
 
     /** 头像地址 URL **/
     val avatar = varchar("avatar", 100).nullable()

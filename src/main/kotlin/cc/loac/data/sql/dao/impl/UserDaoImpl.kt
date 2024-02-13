@@ -6,6 +6,7 @@ import cc.loac.data.models.User
 import cc.loac.data.sql.tables.Users
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import java.util.Date
 
 /**
  * 用户表操作接口实现类
@@ -85,6 +86,18 @@ class UserDaoImpl : UserDao {
             it[displayName] = user.displayName
             it[description] = user.description
             it[avatar] = user.avatar
+        } > 0
+    }
+
+    /**
+     * 修改用户最后登录时间
+     * @param userId 用户 ID
+     */
+    override suspend fun updateUserLastLoginTime(userId: Int): Boolean = dbQuery {
+        Users.update({
+            Users.userId eq userId
+        }) {
+            it[lastLoginDate] = Date().time
         } > 0
     }
 

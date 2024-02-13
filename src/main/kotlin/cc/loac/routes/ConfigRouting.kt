@@ -20,8 +20,8 @@ import org.jetbrains.exposed.sql.exposedLogger
 import org.koin.java.KoinJavaComponent.inject
 import java.util.*
 
-val configService: ConfigService by inject(ConfigService::class.java)
-val userService: UserService by inject(UserService::class.java)
+private val configService: ConfigService by inject(ConfigService::class.java)
+private val userService: UserService by inject(UserService::class.java)
 
 /**
  * “配置”管理员路由

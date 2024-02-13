@@ -1,10 +1,12 @@
 package cc.loac.data.models
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import java.util.Date
 
 /**
  * 用户数据类
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class User(
     /** 用户 ID **/
     val userId: Int = -1,
@@ -21,9 +23,9 @@ data class User(
     /** 描述 **/
     val description: String? = null,
     /** 注册日期 **/
-    val createDate: ULong = Date().time.toULong(),
+    val createDate: Long = Date().time,
     /** 最后登录日期 **/
-    val lastLoginDate: ULong? = null,
+    val lastLoginDate: Long? = null,
     /** 头像地址 URL **/
     val avatar: String? = null
 )
