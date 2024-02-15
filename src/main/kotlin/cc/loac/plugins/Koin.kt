@@ -1,14 +1,18 @@
 package cc.loac.plugins
 
+import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.data.sql.dao.ConfigDao
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.dao.UserDao
+import cc.loac.data.sql.dao.impl.CategoryDaoImpl
 import cc.loac.data.sql.dao.impl.ConfigDaoImpl
 import cc.loac.data.sql.dao.impl.TagDaoImpl
 import cc.loac.data.sql.dao.impl.UserDaoImpl
+import cc.loac.services.CategoryService
 import cc.loac.services.ConfigService
 import cc.loac.services.TagService
 import cc.loac.services.UserService
+import cc.loac.services.impl.CategoryServiceImpl
 import cc.loac.services.impl.ConfigServiceImpl
 import cc.loac.services.impl.TagServiceImpl
 import cc.loac.services.impl.UserServiceImpl
@@ -38,4 +42,8 @@ val appModule = module {
 
     single<TagService> { TagServiceImpl() }
     single<TagDao> { TagDaoImpl() }
+
+    single<CategoryService> { CategoryServiceImpl() }
+    single<CategoryDao> { CategoryDaoImpl() }
+
 }

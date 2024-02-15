@@ -24,8 +24,8 @@ class TagServiceImpl : TagService {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    override suspend fun deleteTag(tagIds: List<Int>): Boolean {
-        return tagDao.deleteTag(tagIds)
+    override suspend fun deleteTags(tagIds: List<Int>): Boolean {
+        return tagDao.deleteTags(tagIds)
     }
 
     /**
@@ -52,8 +52,8 @@ class TagServiceImpl : TagService {
     }
 
     /**
-     * 根据标签显示名称获取标签
-     * @param displayName 标签显示名称
+     * 根据标签名称获取标签
+     * @param displayName 标签名称
      */
     override suspend fun tag(displayName: String): Tag? {
         return tagDao.tag(displayName)

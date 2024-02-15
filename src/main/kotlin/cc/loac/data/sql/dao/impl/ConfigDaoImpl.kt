@@ -12,8 +12,9 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
  * 配置表操作接口实现类
  */
 class ConfigDaoImpl : ConfigDao {
+
     /**
-     * 将数据库检索结果转为 [Config] 实体类
+     * 将数据库检索结果转为 [Config] 配置数据类
      */
     private fun resultRowToConfig(row: ResultRow) = Config(
         configId = row[Configs.configId],

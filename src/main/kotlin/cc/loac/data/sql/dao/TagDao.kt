@@ -16,7 +16,7 @@ interface TagDao {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    suspend fun deleteTag(tagIds: List<Int>): Boolean
+    suspend fun deleteTags(tagIds: List<Int>): Boolean
 
     /**
      * 修改标签
@@ -36,8 +36,8 @@ interface TagDao {
     suspend fun tag(tagId: Int): Tag?
 
     /**
-     * 根据标签显示名称获取标签
-     * @param displayName 标签显示名称
+     * 根据标签名称获取标签
+     * @param displayName 标签名称
      */
     suspend fun tag(displayName: String): Tag?
 }

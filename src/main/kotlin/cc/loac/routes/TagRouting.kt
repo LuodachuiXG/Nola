@@ -42,7 +42,7 @@ fun Route.tagAdminRouting() {
                 }
 
                 // 删除标签
-                call.respondSuccess(tagService.deleteTag(ids))
+                call.respondSuccess(tagService.deleteTags(ids))
             }
 
             /** 修改标签 **/
