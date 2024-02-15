@@ -1,10 +1,7 @@
 package cc.loac
 
-import cc.loac.data.models.BlogInfo
-import cc.loac.data.models.enums.ConfigKey
 import cc.loac.plugins.*
 import cc.loac.data.sql.DatabaseSingleton
-import cc.loac.security.hashing.SHA256HashingService
 import cc.loac.security.token.JwtTokenService
 import cc.loac.security.token.TokenConfig
 import io.ktor.server.application.*
@@ -24,7 +21,7 @@ fun Application.module() {
         audience = environment.config.property("jwt.audience").getString(),
         // Token 令牌过期时间 3 小时
         expiresIn = 3 * 1000 * 60 * 60,
-        secret = System.getenv("JWT_SECRET")
+        secret = environment.config.property("jwt.secret").getString()
     )
 
 

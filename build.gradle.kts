@@ -47,6 +47,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
     // MariaDB 驱动
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
+    // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
+    implementation("com.mysql:mysql-connector-j:8.3.0")
+
 
     // 根据异常返回指定的页面
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
