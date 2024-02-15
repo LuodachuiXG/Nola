@@ -1,6 +1,5 @@
 package cc.loac.services
 
-import cc.loac.data.models.BlogInfo
 import cc.loac.data.models.Config
 import cc.loac.data.models.enums.ConfigKey
 
@@ -11,14 +10,26 @@ import cc.loac.data.models.enums.ConfigKey
 interface ConfigService {
     /**
      * 添加配置信息
-     * @param config [Config] 实体类，包含 key and value
+     * @param config 配置数据类
      */
     suspend fun addConfig(config: Config): Config?
+
+    /**
+     * 删除配置信息
+     * @param key 配置键
+     */
+    suspend fun deleteConfig(key: ConfigKey): Boolean
+
+    /**
+     * 修改配置信息
+     * @param config 配置数据类
+     */
+    suspend fun updateConfig(config: Config): Boolean
 
 
     /**
      * 获取配置信息
-     * @param key 枚举类 [ConfigKey] 传入配置键
+     * @param key 配置键
      */
     suspend fun config(key: ConfigKey): String?
 }

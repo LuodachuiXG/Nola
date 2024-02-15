@@ -9,7 +9,7 @@ object Tags : Table("tag") {
     /** 标签 ID **/
     val tagId = integer("tagId").autoIncrement()
     /** 标签名 **/
-    val displayName = varchar("displayName", 256)
+    val displayName = varchar("displayName", 256).uniqueIndex()
     /** 标签别名 **/
     val slug = varchar("slug", 256)
 

@@ -78,7 +78,7 @@ suspend fun ApplicationCall.receiveMapByName(
 /**
  * 获取请求的 Token 的 Claim
  */
-suspend fun ApplicationCall.getTokenClaim(name: String): String? {
+fun ApplicationCall.getTokenClaim(name: String): String? {
     val principal = this.principal<JWTPrincipal>()
     return principal?.getClaim(name, String::class)
 }
