@@ -42,7 +42,7 @@ class UserDaoImpl : UserDao {
      */
     override suspend fun user(id: Int): User? = dbQuery {
         Users
-            .select { Users.userId eq id }
+            .selectAll().where { Users.userId eq id }
             .map(::resultRowToUser)
             .singleOrNull()
     }

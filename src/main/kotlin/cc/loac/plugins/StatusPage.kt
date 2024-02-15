@@ -18,6 +18,7 @@ fun Application.configureStatusPage() {
     install(StatusPages) {
         /** 404 Not Found 状态 **/
         status(HttpStatusCode.NotFound) { call, status ->
+            "${call.request.host()} 404：${call.request.uri}".error()
             call.respondFailure("404 Not Found.", status)
         }
 

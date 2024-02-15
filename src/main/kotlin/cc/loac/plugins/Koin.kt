@@ -1,12 +1,16 @@
 package cc.loac.plugins
 
 import cc.loac.data.sql.dao.ConfigDao
+import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.dao.UserDao
 import cc.loac.data.sql.dao.impl.ConfigDaoImpl
+import cc.loac.data.sql.dao.impl.TagDaoImpl
 import cc.loac.data.sql.dao.impl.UserDaoImpl
 import cc.loac.services.ConfigService
+import cc.loac.services.TagService
 import cc.loac.services.UserService
 import cc.loac.services.impl.ConfigServiceImpl
+import cc.loac.services.impl.TagServiceImpl
 import cc.loac.services.impl.UserServiceImpl
 import io.ktor.server.application.*
 import org.koin.dsl.module
@@ -31,4 +35,7 @@ val appModule = module {
 
     single<UserService> { UserServiceImpl() }
     single<UserDao> { UserDaoImpl() }
+
+    single<TagService> { TagServiceImpl() }
+    single<TagDao> { TagDaoImpl() }
 }

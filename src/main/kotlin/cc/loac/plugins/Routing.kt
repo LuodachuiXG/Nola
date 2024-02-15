@@ -1,8 +1,6 @@
 package cc.loac.plugins
 
-import cc.loac.routes.configAdminRouting
-import cc.loac.routes.configApiRouting
-import cc.loac.routes.userRouting
+import cc.loac.routes.*
 import cc.loac.security.hashing.HashingService
 import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
@@ -23,12 +21,16 @@ fun Application.configureRouting(
             userRouting(tokenService, tokenConfig)
             // config 博客配置管理员路由
             configAdminRouting()
+            // tag 标签管理员路由
+            tagAdminRouting()
         }
 
         /** 博客接口 **/
         route("/api") {
             // config 博客配置 API 路由
             configApiRouting()
+            // tag 标签 API 路由
+            tagApiRouting()
         }
     }
 }
