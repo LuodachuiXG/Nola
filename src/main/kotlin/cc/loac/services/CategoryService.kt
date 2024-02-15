@@ -1,0 +1,44 @@
+package cc.loac.services
+
+import cc.loac.data.models.Category
+
+/**
+ * 分类服务接口
+ */
+interface CategoryService {
+
+    /**
+     * 添加分类
+     * @param category 分类数据类
+     */
+    suspend fun addCategory(category: Category): Category?
+
+    /**
+     * 删除分类
+     * @param ids 分类 ID 集合
+     */
+    suspend fun deleteCategories(ids: List<Int>): Boolean
+
+    /**
+     * 修改分类
+     * @param category 分类数据类
+     */
+    suspend fun updateCategory(category: Category): Boolean
+
+    /**
+     * 获取所有分类
+     */
+    suspend fun categories(): List<Category>
+
+    /**
+     * 根据分类 ID 获取分类
+     * @param id 分类 ID
+     */
+    suspend fun category(id: Int): Category?
+
+    /**
+     * 根据分类名称获取分类
+     * @param displayName 分类名称
+     */
+    suspend fun category(displayName: String): Category?
+}

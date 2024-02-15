@@ -14,7 +14,7 @@ import java.util.Date
 class UserDaoImpl : UserDao {
 
     /**
-     * 将数据库检索结果转为 [User] 实体类
+     * 将数据库检索结果转为 [User] 用户数据类
      */
     private fun resultRowToUser(row: ResultRow) = User(
         userId = row[Users.userId],

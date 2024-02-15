@@ -1,7 +1,6 @@
 package cc.loac.plugins
 
 import cc.loac.routes.*
-import cc.loac.security.hashing.HashingService
 import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
 import io.ktor.server.application.*
@@ -23,6 +22,8 @@ fun Application.configureRouting(
             configAdminRouting()
             // tag 标签管理员路由
             tagAdminRouting()
+            // category 分类管理员路由
+            categoryAdminRouting()
         }
 
         /** 博客接口 **/
@@ -31,6 +32,8 @@ fun Application.configureRouting(
             configApiRouting()
             // tag 标签 API 路由
             tagApiRouting()
+            // category 分类 API 路由
+            categoryApiRouting()
         }
     }
 }

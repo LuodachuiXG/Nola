@@ -11,8 +11,9 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
  * 标签表操作接口实现类
  */
 class TagDaoImpl : TagDao {
+
     /**
-     * 将数据库检索结果转为 [Tag] 实体类
+     * 将数据库检索结果转为 [Tag] 标签数据类
      */
     private fun resultRowToTag(row: ResultRow) = Tag(
         tagId = row[Tags.tagId],
@@ -36,7 +37,7 @@ class TagDaoImpl : TagDao {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    override suspend fun deleteTag(tagIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteTags(tagIds: List<Int>): Boolean = dbQuery {
         Tags.deleteWhere {
             tagId inList tagIds
         } > 0
@@ -73,8 +74,8 @@ class TagDaoImpl : TagDao {
     }
 
     /**
-     * 根据标签显示名称获取标签
-     * @param displayName 标签显示名称
+     * 根据标签名称获取标签
+     * @param displayName 标签名称
      */
     override suspend fun tag(displayName: String): Tag? = dbQuery {
         Tags
