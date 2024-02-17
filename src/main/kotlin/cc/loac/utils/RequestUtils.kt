@@ -1,7 +1,7 @@
 package cc.loac.utils
 
 import cc.loac.data.exceptions.ParamMismatchException
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -10,14 +10,19 @@ import io.ktor.server.request.*
 
 /**
  * 根据数据类获取请求的参数
- * 如果参数不匹配，就抛出参数不匹配异常
+ * 如果参数不匹配或条件不满足，就抛出参数不匹配异常
+ * @param check 附加条件，如果不满足条件就抛出参数不匹配异常
  */
-suspend inline fun <reified T> ApplicationCall.receiveByDataClass(): T {
+suspend inline fun <reified T> ApplicationCall.receiveByDataClass(
+    check: (T) -> Boolean = { true }
+): T {
     val request = runCatching {
         this.receiveNullable<T>()
     }.getOrNull() ?: run {
         throw ParamMismatchException()
     }
+    // 如果不满足条件，也抛出参数不匹配异常
+    if (!check(request)) throw ParamMismatchException()
     return request
 }
 
@@ -73,6 +78,14 @@ suspend fun ApplicationCall.receiveMapByName(
     }
     // * 将数组转为可变数量的参数
     return receiveMapByName(*list.toTypedArray())
+}
+
+/**
+ * 接收 JsonNode 对象
+ */
+suspend fun ApplicationCall.receiveJSON(): JsonNode {
+    val text = this.receiveText()
+    return text.toJSON()
 }
 
 /**

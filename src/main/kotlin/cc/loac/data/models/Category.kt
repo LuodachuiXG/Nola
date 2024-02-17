@@ -1,11 +1,13 @@
 package cc.loac.data.models
 
+import org.jetbrains.annotations.NotNull
+
 /**
  * 文章分类数据类
  */
 data class Category(
     /** 分类 ID **/
-    val categoryId: Int = -1,
+    val categoryId: Int,
     /** 分类名 **/
     val displayName: String,
     /** 分类别名 **/

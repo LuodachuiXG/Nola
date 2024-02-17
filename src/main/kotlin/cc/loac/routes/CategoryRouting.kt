@@ -3,8 +3,7 @@ package cc.loac.routes
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Category
 import cc.loac.services.CategoryService
-import cc.loac.utils.receiveByDataClass
-import cc.loac.utils.respondSuccess
+import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
@@ -47,7 +46,7 @@ fun Route.categoryAdminRouting() {
 
             /** 修改分类 **/
             put {
-                val category = call.receiveByDataClass<Category>()
+                val category = call.receiveByDataClass<Category> { it.categoryId != 0 }
                 call.respondSuccess(categoryService.updateCategory(category))
             }
 
