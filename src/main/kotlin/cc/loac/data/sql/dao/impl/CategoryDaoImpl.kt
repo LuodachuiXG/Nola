@@ -29,7 +29,6 @@ class CategoryDaoImpl : CategoryDao {
      */
     override suspend fun addCategory(category: Category): Category? = dbQuery {
         val insertStatement = Categories.insert {
-            it[categoryId] = category.categoryId
             it[displayName] = category.displayName
             it[slug] = category.slug
             it[cover] = category.cover

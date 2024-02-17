@@ -6,7 +6,7 @@ package cc.loac.data.models
  */
 data class Tag(
     /** 标签 ID **/
-    val tagId: Int = -1,
+    val tagId: Int,
     /** 标签名 **/
     val displayName: String,
     /** 标签别名 **/
