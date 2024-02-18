@@ -53,6 +53,7 @@ suspend fun ApplicationCall.receiveMapByName(
     vararg names: RequestParam
 ): Map<String, String> {
     val requestText = this.receiveText()
+    requestText.error()
     val json = requestText.toJSON()
     val map = mutableMapOf<String, String>()
     names.forEach { name ->

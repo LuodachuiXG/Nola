@@ -11,9 +11,6 @@ import io.ktor.server.netty.*
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
-    // 初始化数据库
-    DatabaseSingleton.init()
-
     // 初始化 JWT 及相关认证服务
     val tokenService = JwtTokenService()
     val tokenConfig = TokenConfig(
@@ -24,7 +21,10 @@ fun Application.module() {
         secret = environment.config.property("jwt.secret").getString()
     )
 
-
+    // 初始化数据库
+    DatabaseSingleton.init()
+    // 跨域配置
+    configureCORS()
     // Koin 依赖注入配置
     configureKoin()
     // JWT 验证配置
