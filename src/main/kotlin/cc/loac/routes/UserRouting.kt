@@ -10,7 +10,10 @@ import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
 import cc.loac.services.UserService
 import cc.loac.utils.receiveMapByName
+import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -26,6 +29,13 @@ fun Route.userRouting(
 ) {
     /** 用户相关接口 **/
     route("/user") {
+        /** 验证登录是否过期 **/
+        authenticate {
+            get {
+                call.respondSuccess(true)
+            }
+        }
+
         /** 用户登录 **/
         post("/login") {
             val receive = call.receiveMapByName("username", "password")
