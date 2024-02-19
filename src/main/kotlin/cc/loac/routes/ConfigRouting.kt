@@ -63,8 +63,8 @@ fun Route.configAdminRouting() {
                     throw MyException("用户名只支持英文和数字")
                 }
 
-                if (receive["username"]!!.length < 5) {
-                    throw MyException("用户名不能小于 5 位")
+                if (receive["username"]!!.length < 4) {
+                    throw MyException("用户名不能小于 4 位")
                 }
 
                 if (!receive["email"]!!.isEmail()) {
