@@ -1,6 +1,7 @@
 package cc.loac.services
 
 import cc.loac.data.models.Tag
+import cc.loac.data.responses.Pager
 
 /**
  * 标签服务接口
@@ -35,6 +36,13 @@ interface TagService {
      * 获取所有标签
      */
     suspend fun tags(): List<Tag>
+
+    /**
+     * 分页获取所有标签
+     * @param page 当前页
+     * @param size 每页条数
+     */
+    suspend fun tags(page: Int, size: Int): Pager<Tag>
 
     /**
      * 根据标签 ID 获取标签

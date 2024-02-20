@@ -74,6 +74,13 @@ fun Route.categoryAdminRouting() {
             get {
                 call.respondSuccess(categoryService.categories())
             }
+
+            /** 分页获取所有分类 **/
+            get("/{page}/{size}") {
+                call.receivePageAndSize { page, size ->
+                    call.respondSuccess(categoryService.categories(page, size))
+                }
+            }
         }
     }
 }

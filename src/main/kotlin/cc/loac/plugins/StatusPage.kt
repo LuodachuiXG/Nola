@@ -18,25 +18,25 @@ fun Application.configureStatusPage() {
     install(StatusPages) {
         /** 404 Not Found 状态 **/
         status(HttpStatusCode.NotFound) { call, status ->
-            "${call.request.host()} 404：${call.request.uri}".error()
+            "${call.request.host()} - ${call.request.uri}: 404".error()
             call.respondFailure("404 Not Found.", status)
         }
 
         /** 401 未授权状态 **/
         status(HttpStatusCode.Unauthorized) { call, status ->
-            "${call.request.host()} 无权访问受保护资源：${call.request.uri}".error()
+            "${call.request.host()} - ${call.request.uri}: 无权访问受保护资源".error()
             call.respondFailure("无权访问受保护资源", status)
         }
 
         /** MyException 异常 **/
         exception<MyException> { call, e ->
-            "${call.request.host()} 自定义异常：${e.message}".error()
+            "${call.request.host()} - ${call.request.uri}: 自定义异常：${e.message}".error()
             call.respondFailure(e.message ?: "Unknown Error")
         }
 
         /** 参数不匹配异常 **/
         exception<ParamMismatchException> { call, e ->
-            "${call.request.host()} 请求参数不匹配：${e.message}".error()
+            "${call.request.host()} - ${call.request.uri}: 请求参数不匹配：${e.message}".error()
             call.respondFailure("请求参数不匹配", HttpStatusCode.Conflict)
         }
 
