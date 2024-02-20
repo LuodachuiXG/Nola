@@ -1,6 +1,7 @@
 package cc.loac.routes
 
 import cc.loac.data.exceptions.MyException
+import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.services.TagService
 import cc.loac.utils.respondSuccess
 import io.ktor.server.application.*
@@ -22,10 +23,14 @@ fun Route.tagAdminRouting() {
             /** 添加标签 **/
             post {
                 val tag = call.receiveByDataClass<Tag>()
+                if (tag.displayName.isBlank() || tag.slug.isBlank()) {
+                    // 标签名或别名为空
+                    throw ParamMismatchException()
+                }
 
-                // 先判断标签是否已经存在
-                if (tagService.tag(tag.displayName) != null) {
-                    throw MyException("标签名 [${tag.displayName}] 已经存在")
+                // 先判断标签别名是否已经存在
+                if (tagService.tagBySlug(tag.slug) != null) {
+                    throw MyException("标签别名 [${tag.slug}] 已经存在")
                 }
 
                 // 添加标签
@@ -38,11 +43,24 @@ fun Route.tagAdminRouting() {
                 val ids = call.receiveByDataClass<List<Int>>()
                 // 标签 ID 列表为空
                 if (ids.isEmpty()) {
-                    call.respondSuccess(true)
+                    call.respondSuccess(false)
                 }
 
                 // 删除标签
                 call.respondSuccess(tagService.deleteTags(ids))
+            }
+
+            /** 删除标签 - 根据标签别名 **/
+            delete("/slug") {
+                // 获取别名集合
+                val slugs = call.receiveByDataClass<List<String>>()
+                // 标签别名列表为空
+                if (slugs.isEmpty()) {
+                    call.respondSuccess(false)
+                }
+
+                // 删除标签
+                call.respondSuccess(tagService.deleteTagsBySlugs(slugs))
             }
 
             /** 修改标签 **/

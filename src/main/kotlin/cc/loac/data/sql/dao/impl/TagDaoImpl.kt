@@ -18,7 +18,8 @@ class TagDaoImpl : TagDao {
     private fun resultRowToTag(row: ResultRow) = Tag(
         tagId = row[Tags.tagId],
         displayName = row[Tags.displayName],
-        slug = row[Tags.slug]
+        slug = row[Tags.slug],
+        color = row[Tags.color]
     )
 
     /**
@@ -29,6 +30,7 @@ class TagDaoImpl : TagDao {
         val insertStatement = Tags.insert {
             it[displayName] = tag.displayName
             it[slug] = tag.slug
+            it[color] = tag.color
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToTag)
     }
@@ -42,6 +44,17 @@ class TagDaoImpl : TagDao {
             tagId inList tagIds
         } > 0
     }
+
+    /**
+     * 根据别名删除标签
+     * @param slugs 标签别名集合
+     */
+    override suspend fun deleteTagsBySlugs(slugs: List<String>): Boolean = dbQuery {
+        Tags.deleteWhere {
+            slug inList slugs
+        } > 0
+    }
+
     /**
      * 修改标签
      * @param tag 标签数据类
@@ -52,6 +65,7 @@ class TagDaoImpl : TagDao {
         }) {
             it[displayName] = tag.displayName
             it[slug] = tag.slug
+            it[color] = tag.color
         } > 0
     }
 
@@ -80,6 +94,17 @@ class TagDaoImpl : TagDao {
     override suspend fun tag(displayName: String): Tag? = dbQuery {
         Tags
             .selectAll().where { Tags.displayName eq displayName }
+            .map(::resultRowToTag)
+            .singleOrNull()
+    }
+
+    /**
+     * 根据标签别名获取标签
+     * @param slug 标签别名
+     */
+    override suspend fun tagBySlug(slug: String): Tag? = dbQuery {
+        Tags
+            .selectAll().where { Tags.slug eq slug }
             .map(::resultRowToTag)
             .singleOrNull()
     }

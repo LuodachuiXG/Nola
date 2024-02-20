@@ -48,6 +48,16 @@ class CategoryDaoImpl : CategoryDao {
     }
 
     /**
+     * 根据别名删除分类
+     * @param slugs 分类别名集合
+     */
+    override suspend fun deleteCategoriesBySlugs(slugs: List<String>): Boolean = dbQuery {
+        Categories.deleteWhere {
+            slug inList slugs
+        } > 0
+    }
+
+    /**
      * 修改分类
      * @param category 分类数据类
      */
