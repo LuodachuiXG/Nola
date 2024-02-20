@@ -37,11 +37,24 @@ fun Route.categoryAdminRouting() {
                 val ids = call.receiveByDataClass<List<Int>>()
                 // 分类 ID 列表为空
                 if (ids.isEmpty()) {
-                    call.respondSuccess(true)
+                    call.respondSuccess(false)
                 }
 
                 // 删除分类
                 call.respondSuccess(categoryService.deleteCategories(ids))
+            }
+
+            /** 删除分类 - 根据分类别名 **/
+            delete("/slug") {
+                // 获取别名集合
+                val slugs = call.receiveByDataClass<List<String>>()
+                // 分类别名列表为空
+                if (slugs.isEmpty()) {
+                    call.respondSuccess(false)
+                }
+
+                // 删除分类
+                call.respondSuccess(categoryService.deleteCategoriesBySlugs(slugs))
             }
 
             /** 修改分类 **/

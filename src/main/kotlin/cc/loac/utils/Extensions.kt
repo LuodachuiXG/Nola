@@ -62,21 +62,34 @@ fun Any.toJSONString(): String {
 
 /**
  * String 扩展函数
- * 验证当前 String 字符串是否是邮箱
+ * 验证正则表达式
  */
-fun String.isEmail(): Boolean {
-    val emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-    val pattern = Pattern.compile(emailRegex)
+fun String.matches(regex: String): Boolean {
+    val pattern = Pattern.compile(regex)
     val matcher = pattern.matcher(this)
     return matcher.matches()
 }
 
 /**
  * String 扩展函数
- * 验证当前 String 字符串是否是由字母和数字组成
+ * 验证是否是邮箱
+ */
+fun String.isEmail(): Boolean {
+    return this.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$")
+}
+
+/**
+ * String 扩展函数
+ * 验证是否是由字母和数字组成
  */
 fun String.isAlphaAndNumeric(): Boolean {
-    val pattern = Pattern.compile("^[A-Za-z0-9]+$")
-    val matcher = pattern.matcher(this)
-    return matcher.matches()
+    return this.matches("^[A-Za-z0-9]+\$")
+}
+
+/**
+ * String 扩展函数
+ * 验证是否是十六进制颜色值
+ */
+fun String.isHexColor(): Boolean {
+    return this.matches("^#([0-9a-fA-F]{6})\$")
 }

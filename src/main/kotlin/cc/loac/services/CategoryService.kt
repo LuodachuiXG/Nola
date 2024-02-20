@@ -20,6 +20,12 @@ interface CategoryService {
     suspend fun deleteCategories(ids: List<Int>): Boolean
 
     /**
+     * 根据别名删除分类
+     * @param slugs 分类别名集合
+     */
+    suspend fun deleteCategoriesBySlugs(slugs: List<String>): Boolean
+
+    /**
      * 修改分类
      * @param category 分类数据类
      */

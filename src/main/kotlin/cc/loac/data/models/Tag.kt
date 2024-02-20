@@ -10,5 +10,7 @@ data class Tag(
     /** 标签名 **/
     val displayName: String,
     /** 标签别名 **/
-    val slug: String
+    val slug: String,
+    /** 标签颜色 **/
+    val color: String?
 )

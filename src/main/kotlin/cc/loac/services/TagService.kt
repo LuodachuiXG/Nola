@@ -20,6 +20,12 @@ interface TagService {
     suspend fun deleteTags(tagIds: List<Int>): Boolean
 
     /**
+     * 根据别名删除标签
+     * @param slugs 标签别名集合
+     */
+    suspend fun deleteTagsBySlugs(slugs: List<String>): Boolean
+
+    /**
      * 修改标签
      * @param tag 标签数据类
      */
@@ -41,4 +47,10 @@ interface TagService {
      * @param displayName 标签名称
      */
     suspend fun tag(displayName: String): Tag?
+
+    /**
+     * 根据标签别名获取标签
+     * @param slug 标签别名
+     */
+    suspend fun tagBySlug(slug: String): Tag?
 }
