@@ -1,8 +1,10 @@
 package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.Category
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CategoryDao
+import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Categories
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -77,6 +79,17 @@ class CategoryDaoImpl : CategoryDao {
      */
     override suspend fun categories(): List<Category> = dbQuery {
         Categories.selectAll().map(::resultRowToCategory)
+    }
+
+    /**
+     * 分页获取所有分类
+     * @param page 当前页数
+     * @param size 每页条数
+     */
+    override suspend fun categories(page: Int, size: Int): Pager<Category> {
+        return Categories.startPage(page, size, ::resultRowToCategory) {
+            selectAll()
+        }
     }
 
     /**

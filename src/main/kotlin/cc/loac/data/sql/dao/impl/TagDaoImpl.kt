@@ -1,8 +1,10 @@
 package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.Tag
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.TagDao
+import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Tags
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -75,6 +77,18 @@ class TagDaoImpl : TagDao {
     override suspend fun tags(): List<Tag> = dbQuery {
         Tags.selectAll().map(::resultRowToTag)
     }
+
+    /**
+     * 分页获取所有标签
+     * @param page 当前页
+     * @param size 每页大小
+     */
+    override suspend fun tagsByPage(page: Int, size: Int): Pager<Tag> {
+        return Tags.startPage(page, size, ::resultRowToTag) {
+            selectAll()
+        }
+    }
+
 
     /**
      * 根据标签 ID 获取标签

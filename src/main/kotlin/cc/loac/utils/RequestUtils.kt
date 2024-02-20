@@ -89,6 +89,27 @@ suspend fun ApplicationCall.receiveJSON(): JsonNode {
 }
 
 /**
+ * 接收用于分页的页数和页面条数
+ * 该方法只能接收路径传参形式，如 get("/{page}/{size}")
+ */
+suspend fun ApplicationCall.receivePageAndSize(
+    block: suspend (page: Int, size: Int) -> Unit
+) {
+    val page = this.parameters["page"]
+    val size = this.parameters["size"]
+    // page 和 size 为 null，或者为 0 或者负数
+    if (page == null ||
+        size == null ||
+        !page.isPositiveInt() ||
+        !size.isPositiveInt()
+    ) {
+        // 抛出参数不匹配异常
+        throw ParamMismatchException()
+    }
+    block(page.toInt(), size.toInt())
+}
+
+/**
  * 获取请求的 Token 的 Claim
  */
 fun ApplicationCall.getTokenClaim(name: String): String? {

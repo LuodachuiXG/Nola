@@ -1,6 +1,7 @@
 package cc.loac.services
 
 import cc.loac.data.models.Category
+import cc.loac.data.responses.Pager
 
 /**
  * 分类服务接口
@@ -35,6 +36,13 @@ interface CategoryService {
      * 获取所有分类
      */
     suspend fun categories(): List<Category>
+
+    /**
+     * 分页获取所有分类
+     * @param page 当前页数
+     * @param size 每页条数
+     */
+    suspend fun categories(page: Int, size: Int): Pager<Category>
 
     /**
      * 根据分类 ID 获取分类

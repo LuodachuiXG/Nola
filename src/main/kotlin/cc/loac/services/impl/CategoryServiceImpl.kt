@@ -1,6 +1,7 @@
 package cc.loac.services.impl
 
 import cc.loac.data.models.Category
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.services.CategoryService
 import org.koin.java.KoinJavaComponent.inject
@@ -46,6 +47,15 @@ class CategoryServiceImpl : CategoryService {
      */
     override suspend fun categories(): List<Category> {
         return categoryDao.categories()
+    }
+
+    /**
+     * 分页获取所有分类
+     * @param page 当前页数
+     * @param size 每页条数
+     */
+    override suspend fun categories(page: Int, size: Int): Pager<Category> {
+        return categoryDao.categories(page, size)
     }
 
     /**

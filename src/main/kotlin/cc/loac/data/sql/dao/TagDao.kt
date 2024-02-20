@@ -1,6 +1,7 @@
 package cc.loac.data.sql.dao
 
 import cc.loac.data.models.Tag
+import cc.loac.data.responses.Pager
 
 /**
  * 标签表操作接口
@@ -34,6 +35,13 @@ interface TagDao {
      * 获取所有标签
      */
     suspend fun tags(): List<Tag>
+
+    /**
+     * 分页获取所有标签
+     * @param page 当前页
+     * @param size 每页大小
+     */
+    suspend fun tagsByPage(page: Int, size: Int): Pager<Tag>
 
     /**
      * 根据标签 ID 获取标签

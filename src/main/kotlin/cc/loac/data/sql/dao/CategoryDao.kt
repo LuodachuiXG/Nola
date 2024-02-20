@@ -1,6 +1,7 @@
 package cc.loac.data.sql.dao
 
 import cc.loac.data.models.Category
+import cc.loac.data.responses.Pager
 
 /**
  * 分类表操作接口
@@ -34,6 +35,13 @@ interface CategoryDao {
      * 获取所有分类
      */
     suspend fun categories(): List<Category>
+
+    /**
+     * 分页获取所有分类
+     * @param page 当前页数
+     * @param size 每页条数
+     */
+    suspend fun categories(page: Int, size: Int): Pager<Category>
 
     /**
      * 根据分类 ID 获取分类

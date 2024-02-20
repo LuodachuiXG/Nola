@@ -1,6 +1,7 @@
 package cc.loac.services.impl
 
 import cc.loac.data.models.Tag
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.services.TagService
 import org.koin.java.KoinJavaComponent.inject
@@ -49,6 +50,15 @@ class TagServiceImpl : TagService {
      */
     override suspend fun tags(): List<Tag> {
         return tagDao.tags()
+    }
+
+    /**
+     * 分页获取所有标签
+     * @param page 当前页
+     * @param size 每页条数
+     */
+    override suspend fun tags(page: Int, size: Int): Pager<Tag> {
+        return tagDao.tagsByPage(page, size)
     }
 
     /**

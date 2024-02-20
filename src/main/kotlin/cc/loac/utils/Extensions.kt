@@ -93,3 +93,15 @@ fun String.isAlphaAndNumeric(): Boolean {
 fun String.isHexColor(): Boolean {
     return this.matches("^#([0-9a-fA-F]{6})\$")
 }
+
+/**
+ * String 扩展函数
+ * 验证是否是非零正整数
+ */
+fun String.isPositiveInt(): Boolean {
+    return try {
+        this.toInt() > 0
+    } catch (e: Exception) {
+        false
+    }
+}
