@@ -19,5 +19,6 @@ fun Application.configureCORS() {
         allowCredentials = true
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.AccessControlAllowOrigin)
+        allowHeader(HttpHeaders.Authorization)
     }
 }

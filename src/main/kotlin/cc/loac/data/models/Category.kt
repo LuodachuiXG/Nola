@@ -1,6 +1,5 @@
 package cc.loac.data.models
 
-import org.jetbrains.annotations.NotNull
 
 /**
  * 文章分类数据类
