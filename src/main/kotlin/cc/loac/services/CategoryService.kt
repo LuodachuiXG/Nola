@@ -47,4 +47,10 @@ interface CategoryService {
      * @param displayName 分类名称
      */
     suspend fun category(displayName: String): Category?
+
+    /**
+     * 根据分类别名获取分类
+     * @param slug 分类别名
+     */
+    suspend fun categoryBySlug(slug: String):Category?
 }

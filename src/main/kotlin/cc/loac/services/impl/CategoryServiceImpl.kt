@@ -63,4 +63,12 @@ class CategoryServiceImpl : CategoryService {
     override suspend fun category(displayName: String): Category? {
         return categoryDao.category(displayName)
     }
+
+    /**
+     * 根据分类别名获取分类
+     * @param slug 分类别名
+     */
+    override suspend fun categoryBySlug(slug: String): Category? {
+        return categoryDao.categoryBySlug(slug)
+    }
 }
