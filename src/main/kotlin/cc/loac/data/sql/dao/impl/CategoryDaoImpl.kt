@@ -100,4 +100,15 @@ class CategoryDaoImpl : CategoryDao {
             .map(::resultRowToCategory)
             .singleOrNull()
     }
+
+    /**
+     * 根据分类别名获取分类
+     * @param slug 分类别名
+     */
+    override suspend fun categoryBySlug(slug: String): Category? = dbQuery {
+        Categories
+            .selectAll().where { Categories.slug eq slug }
+            .map(::resultRowToCategory)
+            .singleOrNull()
+    }
 }
