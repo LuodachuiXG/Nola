@@ -1,5 +1,6 @@
 package cc.loac.services.impl
 
+import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Tag
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.TagDao
@@ -18,6 +19,10 @@ class TagServiceImpl : TagService {
      * @param tag 标签数据类
      */
     override suspend fun addTag(tag: Tag): Tag? {
+        // 先判断标签别名是否已经存在
+        if (isSlugExist(tag)) {
+            throw MyException("标签别名 [${tag.slug}] 已经存在")
+        }
         return tagDao.addTag(tag)
     }
 
@@ -42,6 +47,9 @@ class TagServiceImpl : TagService {
      * @param tag 标签数据类
      */
     override suspend fun updateTag(tag: Tag): Boolean {
+        if (isSlugExist(tag)) {
+            throw MyException("标签别名 [${tag.slug}] 已经存在")
+        }
         return tagDao.updateTag(tag)
     }
 
@@ -83,6 +91,16 @@ class TagServiceImpl : TagService {
      */
     override suspend fun tagBySlug(slug: String): Tag? {
         return tagDao.tagBySlug(slug)
+    }
+
+    /**
+     * 判断标签别名是否已经存在，并且不是当前标签自己
+     * @param tag 标签数据类
+     */
+    override suspend fun isSlugExist(tag: Tag): Boolean {
+        // 判断标签别名是否已经存在，并且不是当前标签
+        val t = tagBySlug(tag.slug)
+        return t != null && t.tagId != tag.tagId
     }
 
 }

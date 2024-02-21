@@ -27,12 +27,6 @@ fun Route.tagAdminRouting() {
                     // 标签名或别名为空
                     throw ParamMismatchException()
                 }
-
-                // 先判断标签别名是否已经存在
-                if (tagService.tagBySlug(tag.slug) != null) {
-                    throw MyException("标签别名 [${tag.slug}] 已经存在")
-                }
-
                 // 添加标签
                 call.respondSuccess(tagService.addTag(tag))
             }
@@ -66,13 +60,6 @@ fun Route.tagAdminRouting() {
             /** 修改标签 **/
             put {
                 val tag = call.receiveByDataClass<Tag>()
-
-                // 先判断标签别名是否已经存在，并且不是当前标签
-                val t = tagService.tagBySlug(tag.slug)
-                if (t != null && t.tagId != tag.tagId) {
-                    throw MyException("标签别名 [${tag.slug}] 已经存在")
-                }
-
                 // 修改标签
                 call.respondSuccess(tagService.updateTag(tag))
             }

@@ -21,12 +21,6 @@ fun Route.categoryAdminRouting() {
             /** 添加分类 **/
             post {
                 val category = call.receiveByDataClass<Category>()
-
-                // 先判断分类别名是否已经存在 .
-                if (categoryService.categoryBySlug(category.slug) != null) {
-                    throw MyException("分类别名 [${category.slug}] 已经存在")
-                }
-
                 // 添加分类
                 call.respondSuccess(categoryService.addCategory(category))
             }
@@ -60,12 +54,6 @@ fun Route.categoryAdminRouting() {
             /** 修改分类 **/
             put {
                 val category = call.receiveByDataClass<Category> { it.categoryId != 0 }
-
-                // 先判断分类别名是否已经存在，并且不是当前分类
-                val c = categoryService.categoryBySlug(category.slug)
-                if (c != null && c.categoryId != category.categoryId) {
-                    throw MyException("分类别名 [${category.slug}] 已经存在")
-                }
                 // 修改分类
                 call.respondSuccess(categoryService.updateCategory(category))
             }

@@ -61,4 +61,10 @@ interface TagService {
      * @param slug 标签别名
      */
     suspend fun tagBySlug(slug: String): Tag?
+
+    /**
+     * 判断标签别名是否已经存在，并且不是当前标签自己
+     * @param tag 标签数据类
+     */
+    suspend fun isSlugExist(tag: Tag): Boolean
 }
