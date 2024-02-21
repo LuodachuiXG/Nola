@@ -99,9 +99,5 @@ fun String.isHexColor(): Boolean {
  * 验证是否是非零正整数
  */
 fun String.isPositiveInt(): Boolean {
-    return try {
-        this.toInt() > 0
-    } catch (e: Exception) {
-        false
-    }
+    return this.matches("^[1-9]\\d*")
 }

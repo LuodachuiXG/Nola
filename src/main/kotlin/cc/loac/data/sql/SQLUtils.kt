@@ -27,7 +27,7 @@ suspend fun <T> FieldSet.startPage(
         this.query().limit(size, offset).map(transform)
     }
     // 查询给定的 query 检索条件下的总条数
-    val totalData = DatabaseSingleton.dbQuery { this.query().count() }
+    val totalData = dbQuery { this.query().count() }
     // 计算总页数
     val totalPage = (totalData + size - 1) / size
     return Pager(page, size, data, totalData, totalPage)

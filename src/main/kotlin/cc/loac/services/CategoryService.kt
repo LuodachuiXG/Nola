@@ -61,4 +61,9 @@ interface CategoryService {
      * @param slug 分类别名
      */
     suspend fun categoryBySlug(slug: String):Category?
+
+    /**
+     * 判断分类别名是否已经存在，并且不是当前分类
+     */
+    suspend fun isSlugExist(category: Category): Boolean
 }
