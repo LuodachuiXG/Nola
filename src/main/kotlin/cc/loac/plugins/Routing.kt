@@ -18,6 +18,8 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
+        // 静态文件
+        staticResources("/", "/static")
         /** 后台接口 **/
         route("/admin") {
             // user 用户相关路由

@@ -75,7 +75,7 @@ class TagDaoImpl : TagDao {
      * 获取所有标签
      */
     override suspend fun tags(): List<Tag> = dbQuery {
-        Tags.selectAll().map(::resultRowToTag)
+        Tags.selectAll().orderBy(Tags.tagId, SortOrder.DESC).map(::resultRowToTag)
     }
 
     /**
@@ -85,7 +85,7 @@ class TagDaoImpl : TagDao {
      */
     override suspend fun tagsByPage(page: Int, size: Int): Pager<Tag> {
         return Tags.startPage(page, size, ::resultRowToTag) {
-            selectAll()
+            selectAll().orderBy(Tags.tagId, SortOrder.DESC)
         }
     }
 
