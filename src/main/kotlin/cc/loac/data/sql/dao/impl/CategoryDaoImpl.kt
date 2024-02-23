@@ -6,6 +6,7 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Categories
+import cc.loac.data.sql.tables.Tags
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
@@ -78,7 +79,7 @@ class CategoryDaoImpl : CategoryDao {
      * 获取所有分类
      */
     override suspend fun categories(): List<Category> = dbQuery {
-        Categories.selectAll().map(::resultRowToCategory)
+        Categories.selectAll().orderBy(Categories.categoryId, SortOrder.DESC).map(::resultRowToCategory)
     }
 
     /**
@@ -88,7 +89,7 @@ class CategoryDaoImpl : CategoryDao {
      */
     override suspend fun categories(page: Int, size: Int): Pager<Category> {
         return Categories.startPage(page, size, ::resultRowToCategory) {
-            selectAll()
+            selectAll().orderBy(Categories.categoryId, SortOrder.DESC)
         }
     }
 
