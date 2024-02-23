@@ -13,5 +13,5 @@ data class Pager<T>(
     /** 总条数 **/
     val totalData: Long,
     /** 总页数 **/
-    val totalPage: Long
+    val totalPages: Long
 )
