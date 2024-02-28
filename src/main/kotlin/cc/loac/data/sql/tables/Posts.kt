@@ -10,26 +10,37 @@ import org.jetbrains.exposed.sql.Table
 object Posts : Table("post") {
     /** 文章 ID **/
     val postId = integer("postId").autoIncrement()
+
     /** 标题 **/
     val title = varchar("title", 256)
+
     /** 摘要 **/
     val excerpt = varchar("excerpt", 512)
+
     /** 别名 **/
     val slug = varchar("slug", 256)
+
     /** 封面 **/
     val cover = varchar("cover", 256).nullable()
+
     /** 是否允许评论 **/
     val allowComment = bool("allowComment")
+
     /** 是否置顶 **/
     val pinned = bool("pinned").nullable()
+
     /** 状态 **/
     val status = enumerationByName("status", 50, PostStatus::class)
+
     /** 可见性 **/
     val visible = enumerationByName("visible", 50, PostVisible::class)
+
     /** 密码 **/
     val password = varchar("password", 100).nullable()
+
     /** 创建时间 **/
     val createTime = long("createTime")
+
     /** 最后修改时间 **/
     val lastModifyTime = long("lastModifyTime").nullable()
 
