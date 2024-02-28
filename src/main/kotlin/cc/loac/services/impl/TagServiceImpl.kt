@@ -5,6 +5,8 @@ import cc.loac.data.models.Tag
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.services.TagService
+import cc.loac.utils.error
+import kotlinx.css.em
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -66,7 +68,7 @@ class TagServiceImpl : TagService {
      * @param size 每页条数
      */
     override suspend fun tags(page: Int, size: Int): Pager<Tag> {
-        return tagDao.tagsByPage(page, size)
+        return tagDao.tags(page, size)
     }
 
     /**
@@ -101,6 +103,27 @@ class TagServiceImpl : TagService {
         // 判断标签别名是否已经存在，并且不是当前标签
         val t = tagBySlug(tag.slug)
         return t != null && t.tagId != tag.tagId
+    }
+
+    /**
+     * 根据标签 ID 集合，判断标签是否都存在
+     * @param tagIds 标签 ID 集合
+     * @return 如果标签都存在返回空集合，否则返回不存在的 ID 集合
+     */
+    override suspend fun isIdsExist(tagIds: List<Int>): List<Int> {
+        val tags = tagDao.tags(tagIds)
+        // 标签都存在，返回空集合
+        if (tags.size == tagIds.size) return emptyList()
+
+        // 检查哪些标签不存在
+        val nonExistIds = mutableListOf<Int>()
+        tagIds.forEach { id ->
+            if (tags.none { it.tagId == id }) {
+                nonExistIds.add(id)
+            }
+        }
+        // 返回不存在的标签的 ID
+        return nonExistIds
     }
 
 }

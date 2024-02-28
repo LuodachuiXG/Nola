@@ -67,4 +67,11 @@ interface TagService {
      * @param tag 标签数据类
      */
     suspend fun isSlugExist(tag: Tag): Boolean
+
+    /**
+     * 根据标签 ID 集合，判断标签是否都存在
+     * @param tagIds 标签 ID 集合
+     * @return 如果标签都存在返回空集合，否则返回不存在的 ID 集合
+     */
+    suspend fun isIdsExist(tagIds: List<Int>): List<Int>
 }

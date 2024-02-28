@@ -30,6 +30,8 @@ fun Application.configureRouting(
             tagAdminRouting()
             // category 分类管理员路由
             categoryAdminRouting()
+            // post 文章管理员路由
+            postAdminRouting()
         }
 
         /** 博客接口 **/
@@ -40,6 +42,8 @@ fun Application.configureRouting(
             tagApiRouting()
             // category 分类 API 路由
             categoryApiRouting()
+            // post 文章 API 路由
+            postApiRouting()
         }
     }
 }

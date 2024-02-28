@@ -10,21 +10,22 @@ import cc.loac.data.sql.tables.Tags
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
+
+/**
+ * 将数据库检索结果转为 [Category] 分类数据类
+ */
+fun resultRowToCategory(row: ResultRow) = Category(
+    categoryId = row[Categories.categoryId],
+    displayName = row[Categories.displayName],
+    slug = row[Categories.slug],
+    cover = row[Categories.cover],
+    unifiedCover = row[Categories.unifiedCover]
+)
+
 /**
  * 分类表操作接口实现类
  */
 class CategoryDaoImpl : CategoryDao {
-
-    /**
-     * 将数据库检索结果转为 [Category] 分类数据类
-     */
-    private fun resultRowToCategory(row: ResultRow) = Category(
-        categoryId = row[Categories.categoryId],
-        displayName = row[Categories.displayName],
-        slug = row[Categories.slug],
-        cover = row[Categories.cover],
-        unifiedCover = row[Categories.unifiedCover]
-    )
 
     /**
      * 添加分类

@@ -25,12 +25,14 @@ data class Post(
     val status: PostStatus,
     /** 可见性 **/
     val visible: PostVisible,
+    /** 是否加密 **/
+    val encrypted: Boolean,
     /** 密码 **/
     val password: String?,
     /** 文章分类 **/
-    val categories: List<Category>,
+    var category: Category?,
     /** 文章标签 **/
-    val tags: List<Tag>,
+    var tags: List<Tag>,
     /** 创建时间 **/
     val createTime: Long,
     /** 最后修改时间 **/

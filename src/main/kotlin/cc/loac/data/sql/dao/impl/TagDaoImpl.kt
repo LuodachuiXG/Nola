@@ -10,19 +10,19 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
 /**
+ * 将数据库检索结果转为 [Tag] 标签数据类
+ */
+fun resultRowToTag(row: ResultRow) = Tag(
+    tagId = row[Tags.tagId],
+    displayName = row[Tags.displayName],
+    slug = row[Tags.slug],
+    color = row[Tags.color]
+)
+
+/**
  * 标签表操作接口实现类
  */
 class TagDaoImpl : TagDao {
-
-    /**
-     * 将数据库检索结果转为 [Tag] 标签数据类
-     */
-    private fun resultRowToTag(row: ResultRow) = Tag(
-        tagId = row[Tags.tagId],
-        displayName = row[Tags.displayName],
-        slug = row[Tags.slug],
-        color = row[Tags.color]
-    )
 
     /**
      * 添加标签
@@ -81,9 +81,9 @@ class TagDaoImpl : TagDao {
     /**
      * 分页获取所有标签
      * @param page 当前页
-     * @param size 每页大小
+     * @param size 每页条数
      */
-    override suspend fun tagsByPage(page: Int, size: Int): Pager<Tag> {
+    override suspend fun tags(page: Int, size: Int): Pager<Tag> {
         return Tags.startPage(page, size, ::resultRowToTag) {
             selectAll().orderBy(Tags.tagId, SortOrder.DESC)
         }
@@ -99,6 +99,16 @@ class TagDaoImpl : TagDao {
             .selectAll().where { Tags.tagId eq tagId }
             .map(::resultRowToTag)
             .singleOrNull()
+    }
+
+    /**
+     * 根据标签 ID 集合获取标签
+     * @param tagIds 标签 ID 集合
+     */
+    override suspend fun tags(tagIds: List<Int>): List<Tag> = dbQuery {
+        Tags
+            .selectAll().where { Tags.tagId inList tagIds }
+            .map(::resultRowToTag)
     }
 
     /**

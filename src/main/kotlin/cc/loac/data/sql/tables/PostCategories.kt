@@ -10,7 +10,7 @@ object PostCategories : Table("post_category") {
     val postCategoryId = integer("postCategoryId").autoIncrement()
 
     /** 文章 ID **/
-    val postId = integer("postId").references(Posts.postId)
+    val postId = integer("postId").references(Posts.postId).uniqueIndex()
 
     /** 分类 ID **/
     val categoryId = integer("categoryId").references(Categories.categoryId)
