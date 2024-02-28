@@ -18,7 +18,8 @@ object DatabaseSingleton {
      */
     fun init() {
         val driverClassName = "org.mariadb.jdbc.Driver"
-        val jdbcURL = "jdbc:mariadb://localhost:3306/nola?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8"
+        val jdbcURL =
+            "jdbc:mariadb://localhost:3306/nola?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8"
         val user = "root"
         val password = "123456"
         val database = Database.connect(jdbcURL, driverClassName, user, password)
