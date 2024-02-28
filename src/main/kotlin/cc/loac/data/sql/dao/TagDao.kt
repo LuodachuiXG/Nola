@@ -39,15 +39,21 @@ interface TagDao {
     /**
      * 分页获取所有标签
      * @param page 当前页
-     * @param size 每页大小
+     * @param size 每页条数
      */
-    suspend fun tagsByPage(page: Int, size: Int): Pager<Tag>
+    suspend fun tags(page: Int, size: Int): Pager<Tag>
 
     /**
      * 根据标签 ID 获取标签
      * @param tagId 标签 ID
      */
     suspend fun tag(tagId: Int): Tag?
+
+    /**
+     * 根据标签 ID 集合获取标签
+     * @param tagIds 标签 ID 集合
+     */
+    suspend fun tags(tagIds: List<Int>): List<Tag>
 
     /**
      * 根据标签名称获取标签

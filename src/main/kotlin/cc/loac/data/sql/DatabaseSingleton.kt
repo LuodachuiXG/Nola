@@ -36,7 +36,12 @@ object DatabaseSingleton {
             SchemaUtils.create(Tags)
             // 分类表
             SchemaUtils.create(Categories)
-
+            // 文章标签表
+            SchemaUtils.create(PostTags)
+            // 文章分类表
+            SchemaUtils.create(PostCategories)
+            // 文章内容表
+            SchemaUtils.create(PostContents)
         }
     }
 

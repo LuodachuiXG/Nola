@@ -1,6 +1,5 @@
 package cc.loac.routes
 
-import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.services.TagService
 import io.ktor.server.application.*
@@ -8,7 +7,6 @@ import io.ktor.server.routing.*
 import cc.loac.data.models.Tag
 import cc.loac.utils.*
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
 import org.koin.java.KoinJavaComponent.inject
 
 private val tagService: TagService by inject(TagService::class.java)

@@ -1,6 +1,5 @@
 package cc.loac.data.models
 
-
 /**
  * 文章分类数据类
  */
