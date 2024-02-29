@@ -1,8 +1,13 @@
 package cc.loac.utils
 
-import cc.loac.data.exceptions.MyException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.commonmark.parser.Parser
+import org.commonmark.renderer.html.HtmlRenderer
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
+import org.jsoup.safety.Safelist
+
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.regex.Pattern
@@ -100,4 +105,42 @@ fun String.isHexColor(): Boolean {
  */
 fun String.isPositiveInt(): Boolean {
     return this.matches("^[1-9]\\d*")
+}
+
+/**
+ * String 扩展函数
+ * 将 Markdown 转为 HTML
+ */
+fun String.markdownToHtml(): String {
+    val parser = Parser.builder().build()
+    val document = parser.parse(this)
+    val renderer = HtmlRenderer.builder().build()
+    return renderer.render(document)
+}
+
+/**
+ * String 扩展函数
+ * 将 HTML 转为纯文本
+ * @param ignoreWrap 忽略换行
+ */
+fun String.htmlToPlainText(ignoreWrap: Boolean = true): String {
+    if (this.isEmpty()) return ""
+    val document = Jsoup.parse(this)
+    val outputSettings = Document.OutputSettings().prettyPrint(false)
+    document.outputSettings(outputSettings)
+    val newHtml = if (ignoreWrap)
+        document.html().replace(Regex("\\s"), "")
+    else
+        document.html()
+
+    val plainText = Jsoup.clean(newHtml, "", Safelist.none(), outputSettings).trim()
+    return plainText
+}
+
+/**
+ * String 扩展函数
+ * 将 Markdown 转为纯文本
+ */
+fun String.markdownToPlainText(): String {
+    return this.markdownToHtml().htmlToPlainText()
 }

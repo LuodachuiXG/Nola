@@ -1,5 +1,6 @@
 package cc.loac.data.sql.dao.impl
 
+import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Post
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostStatus
@@ -45,10 +46,11 @@ class PostDaoImpl : PostDao {
      * @param pr 添加文章请求数据类
      */
     override suspend fun addPost(pr: AddPostRequest): Post? = dbQuery {
+        val currentTime = Date().time
         // 插入 post
         val post = Posts.insert {
             it[title] = pr.title
-            it[excerpt] = pr.excerpt
+            it[excerpt] = pr.excerpt!!
             it[slug] = pr.slug
             it[cover] = pr.cover
             it[allowComment] = pr.allowComment
@@ -56,14 +58,18 @@ class PostDaoImpl : PostDao {
             it[status] = PostStatus.PUBLISHED
             it[visible] = pr.visible
             it[password] = pr.password
-            it[createTime] = Date().time
+            it[createTime] = currentTime
             it[lastModifyTime] = null
         }.resultedValues?.firstOrNull()?.let(::resultRowToPost)
+
+        if (post == null) {
+            throw MyException("文章添加失败，请检查服务端日志")
+        }
 
         if (!pr.tagIds.isNullOrEmpty()) {
             // 插入文章标签
             PostTags.batchInsert(pr.tagIds) { tagId ->
-                this[PostTags.postId] = post!!.postId
+                this[PostTags.postId] = post.postId
                 this[PostTags.tagId] = tagId
             }
         }
@@ -71,17 +77,17 @@ class PostDaoImpl : PostDao {
         if (pr.categoryId != null) {
             // 插入文章分类
             PostCategories.insert {
-                it[postId] = post!!.postId
+                it[postId] = post.postId
                 it[categoryId] = pr.categoryId
             }
         }
 
         // 插入文章内容
         PostContents.insert {
-            it[postId] = post!!.postId
+            it[postId] = post.postId
             it[content] = pr.content
             it[status] = PostContentStatus.PUBLISHED
-            it[lastModifyTime] = Date().time
+            it[lastModifyTime] = currentTime
         }
 
         post

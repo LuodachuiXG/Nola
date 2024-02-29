@@ -5,6 +5,7 @@ import cc.loac.services.PostService
 import cc.loac.utils.receiveByDataClass
 import cc.loac.utils.respondSuccess
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -15,10 +16,12 @@ private val postService: PostService by inject(PostService::class.java)
  */
 fun Route.postAdminRouting() {
     route("/post") {
-        /** 添加文章 **/
-        post {
-            val postRequest = call.receiveByDataClass<AddPostRequest>()
-            call.respondSuccess(postService.addPost(postRequest) != null)
+        authenticate {
+            /** 添加文章 **/
+            post {
+                val postRequest = call.receiveByDataClass<AddPostRequest>()
+                call.respondSuccess(postService.addPost(postRequest) != null)
+            }
         }
     }
 }
