@@ -67,4 +67,11 @@ dependencies {
     implementation("commons-codec:commons-codec:1.16.0")
     testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.8")
 
+    // Jsoup
+    implementation("org.jsoup:jsoup:1.17.2")
+    // 将 Markdown 转 HTML
+    implementation("org.commonmark:commonmark:0.21.0")
+
+
+
 }

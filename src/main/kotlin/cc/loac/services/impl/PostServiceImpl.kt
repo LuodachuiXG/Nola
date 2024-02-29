@@ -2,6 +2,7 @@ package cc.loac.services.impl
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Post
+import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.requests.AddPostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.CategoryDao
@@ -10,6 +11,7 @@ import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.error
+import cc.loac.utils.markdownToPlainText
 import org.koin.java.KoinJavaComponent.inject
 
 private val postDao: PostDao by inject(PostDao::class.java)
@@ -37,6 +39,23 @@ class PostServiceImpl : PostService {
         // 检查传过来的分类 ID 是否存在
         if (pr.categoryId != null) {
             categoryService.category(pr.categoryId) ?: throw MyException("分类 ${pr.categoryId} 不存在")
+        }
+
+        // 检查摘要是否为空
+        if (pr.excerpt.isNullOrEmpty()) {
+            if (pr.content.isEmpty()) {
+                // 如果内容为空，摘要则也为空
+                pr.excerpt = ""
+            } else {
+                // 将内容转为纯文本，取前 100（如果有 100 个字的话）个字作为摘要
+                pr.excerpt = with(pr.content) {
+                    if (this.length >= 100) {
+                        markdownToPlainText().substring(0, 100)
+                    } else {
+                        markdownToPlainText()
+                    }
+                }
+            }
         }
 
         // 添加文章
