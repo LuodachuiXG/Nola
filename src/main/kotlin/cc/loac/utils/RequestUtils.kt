@@ -7,6 +7,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
+import kotlinx.css.pre
 
 /**
  * 根据数据类获取请求的参数
@@ -89,11 +90,11 @@ suspend fun ApplicationCall.receiveJSON(): JsonNode {
 }
 
 /**
- * 接受路径传参多个参数
- * 该方法只能接收路径传参形式，如 get("/{id}/{name}")
+ * 接收路径传参多个参数
+ * 该方法只能接收路径传参形式，如 get("/{id}/{name}?sort=DESC")
  * @param paramNames 请求参数名数组
  */
-suspend fun ApplicationCall.receivePathParams(
+fun ApplicationCall.receivePathParams(
     vararg paramNames: String
 ): Map<String, String> {
     val map = mutableMapOf<String, String>()
@@ -108,12 +109,12 @@ suspend fun ApplicationCall.receivePathParams(
 }
 
 /**
- * 接受路径传参单个参数
- * 该方法只能接收路径传参形式，如 get("/{name}")
+ * 接收路径传参单个参数
+ * 该方法只能接收路径传参形式，如 get("/{name}?sort=DESC")
  * @param paramName 请求参数名
  */
-suspend fun ApplicationCall.receivePathParam(
-    paramName: String
+fun ApplicationCall.receivePathParam(
+    paramName: String,
 ): String {
     val params = this.parameters
     val value = params[paramName]
@@ -123,9 +124,30 @@ suspend fun ApplicationCall.receivePathParam(
 }
 
 /**
- * 接受路径整数型传参
+ * 接收可为空的路径传参单个参数
+ * 该方法只能接收路径传参形式，如 get("/{name}?sort=DESC")
+ * @param paramName 请求参数名
+ * @param predicate 参数值是否满足条件
+ */
+fun ApplicationCall.receiveNullablePathParam(
+    paramName: String,
+    predicate: (String?) -> Boolean? = { true }
+): String? {
+    val params = this.parameters
+    val value = params[paramName]
+    // 如果参数不满足条件，就抛出参数不匹配异常
+    val p = predicate(value)
+    // 如果 predicate 结果为空，就直接返回空
+    p ?: return null
+    // 如果 predicate 结果为 false，就抛出参数不匹配异常
+    if (!p) throw ParamMismatchException()
+    return value
+}
+
+/**
+ * 接收路径整数型传参
  * 如果对应参数不为整数，就抛出参数不匹配异常
- * 该方法只能接收路径传参形式，如 get("/{id}")
+ * 该方法只能接收路径传参形式，如 get("/{id}?sort=DESC")
  * @param paramName 请求参数名
  */
 suspend fun ApplicationCall.receiveIntPathParam(

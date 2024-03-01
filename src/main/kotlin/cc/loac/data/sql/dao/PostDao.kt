@@ -3,6 +3,9 @@ package cc.loac.data.sql.dao
 import cc.loac.data.models.Post
 import cc.loac.data.models.PostContent
 import cc.loac.data.models.enums.PostContentStatus
+import cc.loac.data.models.enums.PostSort
+import cc.loac.data.models.enums.PostStatus
+import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 
@@ -49,10 +52,25 @@ interface PostDao {
 
     /**
      * 分页获取所有文章
-     * @param page 页数
+     * @param page 当前页数
      * @param size 每页条数
+     * @param status 文章状态
+     * @param visible 文章可见性
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     * @param sort 文章排序
      */
-    suspend fun posts(page: Int, size: Int): Pager<Post>
+    suspend fun posts(
+        page: Int,
+        size: Int,
+        status: PostStatus? = null,
+        visible: PostVisible? = null,
+        key: String? = null,
+        tag: Int? = null,
+        category: Int? = null,
+        sort: PostSort? = null
+    ): Pager<Post>
 
     /**
      * 根据文章别名获取文章

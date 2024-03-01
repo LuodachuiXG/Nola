@@ -4,7 +4,9 @@ import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Post
 import cc.loac.data.models.PostContent
 import cc.loac.data.models.enums.PostContentStatus
+import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
+import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.PostDao
@@ -12,7 +14,6 @@ import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.markdownToPlainText
-import kotlinx.css.tr
 import org.koin.java.KoinJavaComponent.inject
 
 private val postDao: PostDao by inject(PostDao::class.java)
@@ -95,8 +96,17 @@ class PostServiceImpl : PostService {
      * @param page 页数
      * @param size 每页条数
      */
-    override suspend fun posts(page: Int, size: Int): Pager<Post> {
-        return postDao.posts(page, size)
+    override suspend fun posts(
+        page: Int,
+        size: Int,
+        status: PostStatus?,
+        visible: PostVisible?,
+        key: String?,
+        tag: Int?,
+        category: Int?,
+        sort: PostSort?
+    ): Pager<Post> {
+        return postDao.posts(page, size, status, visible, key, tag, category, sort)
     }
 
     /**
