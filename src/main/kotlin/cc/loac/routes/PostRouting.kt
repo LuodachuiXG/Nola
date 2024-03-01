@@ -6,6 +6,7 @@ import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.requests.PostRequest
 import cc.loac.services.PostService
 import cc.loac.utils.receiveByDataClass
+import cc.loac.utils.receivePageAndSize
 import cc.loac.utils.respondSuccess
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -51,6 +52,18 @@ fun Route.postAdminRouting() {
                     it.postId != 0 && it.status != PostStatus.DELETED
                 }
                 call.respondSuccess(postService.updatePost(postRequest))
+            }
+
+            /** 获取所有文章 **/
+            get {
+                call.respondSuccess(postService.posts())
+            }
+
+            /** 分页获取文章 **/
+            get("/{page}/{size}") {
+                call.receivePageAndSize { page, size ->
+                    call.respondSuccess(postService.posts(page, size))
+                }
             }
         }
     }
