@@ -1,5 +1,7 @@
 package cc.loac.utils
 
+import cc.loac.security.hashing.HashingService
+import cc.loac.security.hashing.SHA256HashingService
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.commonmark.parser.Parser
@@ -7,6 +9,7 @@ import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
+import org.koin.java.KoinJavaComponent.inject
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -143,4 +146,14 @@ fun String.htmlToPlainText(ignoreWrap: Boolean = true): String {
  */
 fun String.markdownToPlainText(): String {
     return this.markdownToHtml().htmlToPlainText()
+}
+
+/**
+ * String 扩展函数
+ * 将字符串转为 SHA256 哈希
+ */
+fun String?.sha256Hex(): String {
+    this ?: return ""
+    val hashingService: HashingService by inject(HashingService::class.java)
+    return hashingService.generatedHash(this)
 }

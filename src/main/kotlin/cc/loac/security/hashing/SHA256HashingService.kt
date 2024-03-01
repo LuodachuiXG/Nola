@@ -27,6 +27,15 @@ class SHA256HashingService: HashingService {
     }
 
     /**
+     * 生成不加盐哈希
+     * @param value 待哈希的原始字符串数据
+     * @return 返回一个包含哈希值的 String 对象
+     */
+    override fun generatedHash(value: String): String {
+        return DigestUtils.sha256Hex(value)
+    }
+
+    /**
      * 验证哈希值是否匹配
      * @param value 待验证的原始字符串数据
      * @param saltedHash 包含已知哈希值与盐值的 SaltedHash 对象

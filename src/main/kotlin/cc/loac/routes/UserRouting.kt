@@ -2,6 +2,7 @@ package cc.loac.routes
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.responses.AuthResponse
+import cc.loac.security.hashing.HashingService
 import cc.loac.utils.respondSuccess
 import cc.loac.security.hashing.SHA256HashingService
 import cc.loac.security.hashing.SaltedHash
@@ -17,7 +18,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
-private val hashingService = SHA256HashingService()
+private val hashingService: HashingService by inject(HashingService::class.java)
 private val userService: UserService by inject(UserService::class.java)
 
 /**

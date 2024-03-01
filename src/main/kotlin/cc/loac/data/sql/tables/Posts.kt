@@ -27,7 +27,7 @@ object Posts : Table("post") {
     val allowComment = bool("allowComment")
 
     /** 是否置顶 **/
-    val pinned = bool("pinned").nullable()
+    val pinned = bool("pinned")
 
     /** 状态 **/
     val status = enumerationByName("status", 50, PostStatus::class)
