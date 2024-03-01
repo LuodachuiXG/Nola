@@ -38,6 +38,9 @@ object Posts : Table("post") {
     /** 密码 **/
     val password = varchar("password", 100).nullable()
 
+    /** 访问量 **/
+    val visit = integer("visit").default(0)
+
     /** 创建时间 **/
     val createTime = long("createTime")
 

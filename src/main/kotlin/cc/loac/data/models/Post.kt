@@ -29,6 +29,8 @@ data class Post(
     val encrypted: Boolean,
     /** 密码 **/
     val password: String?,
+    /** 访问量 **/
+    val visit: Int? = 0,
     /** 文章分类 **/
     var category: Category?,
     /** 文章标签 **/

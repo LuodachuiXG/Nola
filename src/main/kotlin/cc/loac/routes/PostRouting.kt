@@ -3,13 +3,14 @@ package cc.loac.routes
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.data.models.enums.PostContentStatus
+import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
+import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostRequest
 import cc.loac.services.PostService
 import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -62,7 +63,36 @@ fun Route.postAdminRouting() {
             /** 分页获取文章 **/
             get("/{page}/{size}") {
                 call.receivePageAndSize { page, size ->
-                    call.respondSuccess(postService.posts(page, size))
+                    // 可空文章状态
+                    val status = call.receiveNullablePathParam("status") {
+                        it?.isEnum<PostStatus>()
+                    }?.let { PostStatus.valueOf(it) }
+
+                    // 可空文章可见性
+                    val visible = call.receiveNullablePathParam("visible") {
+                        it?.isEnum<PostVisible>()
+                    }?.let { PostVisible.valueOf(it) }
+
+                    // 可空文章关键字
+                    val key = call.receiveNullablePathParam("key")
+
+                    // 可空文章标签
+                    val tag = call.receiveNullablePathParam("tag") {
+                        it?.isInt()
+                    }?.toInt()
+
+                    // 可空文章分类
+                    val category = call.receiveNullablePathParam("category") {
+                        it?.isInt()
+                    }?.toInt()
+
+                    // 可空文章排序
+                    val sort = call.receiveNullablePathParam("sort") {
+                        it?.isEnum<PostSort>()
+                    }?.let { PostSort.valueOf(it) }
+
+
+                    call.respondSuccess(postService.posts(page, size, status, visible, key, tag, category, sort))
                 }
             }
 
@@ -77,13 +107,6 @@ fun Route.postAdminRouting() {
                 val slug = call.receivePathParam("slug")
                 call.respondSuccess(postService.postBySlug(slug))
             }
-
-            /** 获取文章 - 根据关键字 **/
-            get("/key/{key}") {
-                val key = call.receivePathParam("key")
-                call.respondSuccess(postService.postsByKey(key))
-            }
-
 
             /** 获取文章内容 **/
             get("/content/{postId}") {

@@ -165,3 +165,11 @@ fun String?.sha256Hex(): String {
     val hashingService: HashingService by inject(HashingService::class.java)
     return hashingService.generatedHash(this)
 }
+
+/**
+ * String 扩展函数
+ * 判断当前字符是否可以转换成对应枚举类（是否是枚举类的成员）
+ */
+inline fun <reified T : Enum<T>> String.isEnum(): Boolean {
+    return this in T::class.java.enumConstants.map { it.toString() }
+}

@@ -3,7 +3,10 @@ package cc.loac.data.sql.dao.impl
 import cc.loac.data.models.Post
 import cc.loac.data.models.PostContent
 import cc.loac.data.models.enums.PostContentStatus
+import cc.loac.data.models.enums.PostSort
+import cc.loac.data.models.enums.PostSort.*
 import cc.loac.data.models.enums.PostStatus
+import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
@@ -14,6 +17,7 @@ import cc.loac.utils.sha256Hex
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import java.util.Date
 
 /**
@@ -203,13 +207,72 @@ class PostDaoImpl : PostDao {
 
     /**
      * 分页获取所有文章
-     * @param page 页数
+     * @param page 当前页数
      * @param size 每页条数
+     * @param status 文章状态
+     * @param visible 文章可见性
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     * @param sort 文章排序
      */
-    override suspend fun posts(page: Int, size: Int): Pager<Post> {
-        val pager = Posts.startPage(page, size, ::resultRowToPost) {
-            selectAll().orderBy(Posts.createTime, SortOrder.DESC)
+    override suspend fun posts(
+        page: Int,
+        size: Int,
+        status: PostStatus?,
+        visible: PostVisible?,
+        key: String?,
+        tag: Int?,
+        category: Int?,
+        sort: PostSort?
+    ): Pager<Post> {
+        // 基础查询条件
+        val query =
+            Posts.join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
+                .selectAll()
+        // 如果文章状态不为空，则添加状态查询条件
+        if (status != null) query.andWhere { Posts.status eq status }
+        // 如果文章可见性不为空，则添加可见性查询条件
+        if (visible != null) query.andWhere { Posts.visible eq visible }
+        // 如果关键字不为空，则添加关键字查询条件
+        if (key != null) query.andWhere { sqlQueryKey(key) }
+        // 如果文章标签不为空，则添加标签查询条件
+        if (tag != null) {
+            // 与当前标签匹配的的文章 ID 集合
+            val matchedPostIds = dbQuery {
+                PostTags.selectAll().where {
+                    PostTags.tagId eq tag
+                }.map { it[PostTags.postId] }
+            }
+            query.andWhere {
+                Posts.postId inList matchedPostIds
+            }
         }
+        // 如果文章分类不为空，则添加分类查询条件
+        if (category != null) {
+            // 与当前分类匹配的的文章 ID 集合
+            val matchedPostIds = dbQuery {
+                PostCategories.selectAll().where {
+                    PostCategories.categoryId eq category
+                }.map { it[PostCategories.postId] }
+            }
+            query.andWhere {
+                Posts.postId inList matchedPostIds
+            }
+        }
+
+        when(sort) {
+            CREATE_DESC -> query.orderBy(Posts.createTime, SortOrder.DESC)
+            CREATE_ASC -> query.orderBy(Posts.createTime, SortOrder.ASC)
+            MODIFY_DESC -> query.orderBy(Posts.lastModifyTime, SortOrder.DESC)
+            MODIFY_ASC -> query.orderBy(Posts.lastModifyTime, SortOrder.ASC)
+            VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
+            VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
+            null -> {}
+        }
+
+
+        val pager = Posts.startPage(page, size, ::resultRowToPost) { query }
         getPostTagAndCategory(pager.data)
         return pager
     }
@@ -236,11 +299,8 @@ class PostDaoImpl : PostDao {
             .join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
             .selectAll()
             .where {
-                (Posts.title like "%$key%" or
-                        (Posts.slug like "%$key%") or
-                        (Posts.excerpt like "%$key%") or
-                        (PostContents.content like "%$key%")) and
-                        (Posts.status eq PostStatus.PUBLISHED)
+                // 文章关键字查询 SQL 语句
+                sqlQueryKey(key)
             }
             .orderBy(Posts.createTime, SortOrder.DESC)
             .map(::resultRowToPost)
@@ -290,5 +350,18 @@ class PostDaoImpl : PostDao {
                 .map(::resultRowToCategory)
                 .singleOrNull()
         }
+    }
+
+    /**
+     * SQL 语句
+     * 文章关键字查询
+     * @param key 关键字
+     */
+    private fun sqlQueryKey(key: String): Op<Boolean> {
+        return (Posts.title like "%$key%" or
+                (Posts.slug like "%$key%") or
+                (Posts.excerpt like "%$key%") or
+                (PostContents.content like "%$key%")) and
+                (Posts.status eq PostStatus.PUBLISHED)
     }
 }
