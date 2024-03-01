@@ -7,6 +7,7 @@ import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
+import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.PostDao
@@ -14,6 +15,8 @@ import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.markdownToPlainText
+import kotlinx.coroutines.coroutineScope
+import kotlinx.css.mark
 import org.koin.java.KoinJavaComponent.inject
 
 private val postDao: PostDao by inject(PostDao::class.java)
@@ -33,7 +36,7 @@ class PostServiceImpl : PostService {
         // 检查标签和分类是否存在
         checkTagAndCategoryExist(pr)
 
-        // 检查摘要是否为 null 并自动生成摘要
+        // 检查是否需要自动生成摘要
         autoGenerateExcerpt(pr)
 
         // 添加文章
@@ -70,9 +73,18 @@ class PostServiceImpl : PostService {
         // 检查标签和分类是否存在
         checkTagAndCategoryExist(pr)
 
-        // 检查摘要是否为 null 并自动生成摘要
+        // 检查是否需要自动生成摘要
         autoGenerateExcerpt(pr, true)
         return postDao.updatePost(pr)
+    }
+
+    /**
+     * 修改文章摘要
+     * @param postId 文章 ID
+     * @param excerpt 摘要
+     */
+    override suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean {
+        return postDao.updatePostExcerpt(postId, excerpt)
     }
 
     /**
@@ -141,6 +153,34 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 修改文章内容
+     * @param postContent 文章内容请求数据类
+     */
+    override suspend fun updatePostContent(
+        postContent: PostContentRequest,
+        status: PostContentStatus,
+        draftName: String?
+    ): Boolean {
+        val result = postDao.updatePostContent(postContent, status, draftName)
+
+        // 启动线程执行耗时操作
+        coroutineScope {
+            // 如果修改的是正文内容
+            if (status == PostContentStatus.PUBLISHED) {
+                // 检测并判断是否更新文章摘要
+                posts(listOf(postContent.postId), false).firstOrNull()?.let { post ->
+                    if (post.autoGenerateExcerpt) {
+                        // 自动更新摘要
+                        val excerpt = generateExcerptByString(postContent.content)
+                        updatePostExcerpt(postContent.postId, excerpt)
+                    }
+                }
+            }
+        }
+        return result
+    }
+
+    /**
      * 检查标签和分类是否存在
      * @param pr 文章请求数据类
      */
@@ -161,12 +201,16 @@ class PostServiceImpl : PostService {
 
     /**
      * 自动生成摘要
-     * 摘要如果为 null 就自动生成摘要
+     * 如果 autoGenerateExcerpt 为 true 就自动生成摘要
      * 如果当前是修改文章，则从数据库中获取文章内容
      * @param pr 文章请求数据类
      * @param isUpdate 是否是修改文章
      */
     private suspend fun autoGenerateExcerpt(pr: PostRequest, isUpdate: Boolean = false) {
+        // 不用自动生成摘要
+        if (!pr.autoGenerateExcerpt) return
+
+
         // 如果当前是修改文章，就从数据库获取文章内容
         // 否则当前是添加文章，直接总 pr 对象中获取文章内容
         val postContent = if (isUpdate) {
@@ -175,22 +219,26 @@ class PostServiceImpl : PostService {
             pr.content
         }
 
-        // 检查摘要是否为 null
-        if (pr.excerpt == null) {
-            if (postContent.isNullOrEmpty()) {
-                // 如果内容为空，摘要则也为空
-                pr.excerpt = ""
-            } else {
-                // 将内容转为纯文本，取前 100（如果有 100 个字的话）个字作为摘要
-                pr.excerpt = with(postContent) {
-                    if (this.length >= 100) {
-                        markdownToPlainText().substring(0, 100)
-                    } else {
-                        markdownToPlainText()
-                    }
-                }
-            }
+        if (postContent.isNullOrEmpty()) {
+            // 如果内容为空，摘要则也为空
+            pr.excerpt = ""
+        } else {
+            // 生成摘要
+            pr.excerpt = generateExcerptByString(postContent)
         }
+    }
+
+    /**
+     * 根据一段 Markdown / PlainText 生成摘要
+     * @param str 内容
+     * @param length 摘要长度
+     */
+    private fun generateExcerptByString(str: String, length: Int = 100): String {
+        var excerpt = str.markdownToPlainText()
+        if (excerpt.length >= length) {
+            excerpt = excerpt.substring(0, length)
+        }
+        return excerpt
     }
 
 }

@@ -11,7 +11,9 @@ data class PostRequest(
     val postId: Int?,
     /** 标题 **/
     val title: String,
-    /** 摘要（为 null 自动根据内容生成） **/
+    /** 是否自动生成摘要 **/
+    val autoGenerateExcerpt: Boolean,
+    /** 摘要 **/
     var excerpt: String?,
     /** 别名 **/
     val slug: String,

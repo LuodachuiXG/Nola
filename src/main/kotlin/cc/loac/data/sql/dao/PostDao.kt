@@ -6,6 +6,7 @@ import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
+import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 
@@ -37,6 +38,13 @@ interface PostDao {
      * @param pr 文章请求数据类
      */
     suspend fun updatePost(pr: PostRequest): Boolean
+
+    /**
+     * 修改文章摘要
+     * @param postId 文章 ID
+     * @param excerpt 摘要
+     */
+    suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean
 
     /**
      * 获取所有文章
@@ -92,4 +100,11 @@ interface PostDao {
      * @param draftName 草稿名
      */
     suspend fun postContent(postId: Int, status: PostContentStatus, draftName: String?): PostContent?
+
+    /**
+     * 修改文章内容
+     * @param postContent 文章内容请求数据类
+     */
+    suspend fun updatePostContent(postContent: PostContentRequest, status: PostContentStatus, draftName: String?): Boolean
+
 }

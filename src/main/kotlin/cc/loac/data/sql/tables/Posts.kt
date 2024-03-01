@@ -14,6 +14,9 @@ object Posts : Table("post") {
     /** 标题 **/
     val title = varchar("title", 256)
 
+    /** 是否自动生成摘要 **/
+    val autoGenerateExcerpt = bool("autoGenerateExcerpt")
+
     /** 摘要 **/
     val excerpt = varchar("excerpt", 512)
 

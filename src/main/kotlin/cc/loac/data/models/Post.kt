@@ -11,6 +11,8 @@ data class Post(
     val postId: Int = -1,
     /** 标题 **/
     val title: String,
+    /** 是否自动生成摘要 **/
+    val autoGenerateExcerpt: Boolean,
     /** 摘要 **/
     val excerpt: String,
     /** 别名 **/
