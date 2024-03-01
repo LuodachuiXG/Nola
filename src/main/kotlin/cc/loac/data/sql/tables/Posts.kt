@@ -18,7 +18,7 @@ object Posts : Table("post") {
     val excerpt = varchar("excerpt", 512)
 
     /** 别名 **/
-    val slug = varchar("slug", 256)
+    val slug = varchar("slug", 256).uniqueIndex()
 
     /** 封面 **/
     val cover = varchar("cover", 256).nullable()

@@ -100,6 +100,23 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 根据文章别名获取文章
+     * @param slug 文章别名
+     */
+    override suspend fun postBySlug(slug: String): Post? {
+        return postDao.postBySlug(slug)
+    }
+
+    /**
+     * 根据关键字获取文章
+     * 关键字：文章标题、别名、摘要、内容
+     * @param key 关键字
+     */
+    override suspend fun postsByKey(key: String): List<Post> {
+        return postDao.postsByKey(key)
+    }
+
+    /**
      * 获取文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
