@@ -1,16 +1,18 @@
 package cc.loac.data.sql.dao.impl
 
-import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Post
+import cc.loac.data.models.PostContent
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostStatus
-import cc.loac.data.requests.AddPostRequest
+import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
+import cc.loac.utils.sha256Hex
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.Date
 
@@ -40,12 +42,24 @@ class PostDaoImpl : PostDao {
         lastModifyTime = row[Posts.lastModifyTime]
     )
 
+    /**
+     * 将数据库检索结果转为 [PostContent] 文章内容数据类
+     */
+    private fun resultRowToPostContent(row: ResultRow) = PostContent(
+        postContentId = row[PostContents.postContentId],
+        postId = row[PostContents.postId],
+        content = row[PostContents.content],
+        status = row[PostContents.status],
+        draftName = row[PostContents.draftName],
+        lastModifyTime = row[PostContents.lastModifyTime]
+    )
+
 
     /**
      * 添加文章
      * @param pr 添加文章请求数据类
      */
-    override suspend fun addPost(pr: AddPostRequest): Post? = dbQuery {
+    override suspend fun addPost(pr: PostRequest): Post? = dbQuery {
         val currentTime = Date().time
         // 插入 post
         val post = Posts.insert {
@@ -55,16 +69,14 @@ class PostDaoImpl : PostDao {
             it[cover] = pr.cover
             it[allowComment] = pr.allowComment
             it[pinned] = pr.pinned
-            it[status] = PostStatus.PUBLISHED
+            it[status] = pr.status
             it[visible] = pr.visible
-            it[password] = pr.password
+            it[password] = pr.password.sha256Hex()
             it[createTime] = currentTime
             it[lastModifyTime] = null
         }.resultedValues?.firstOrNull()?.let(::resultRowToPost)
 
-        if (post == null) {
-            throw MyException("文章添加失败，请检查服务端日志")
-        }
+        post ?: return@dbQuery null
 
         if (!pr.tagIds.isNullOrEmpty()) {
             // 插入文章标签
@@ -85,7 +97,7 @@ class PostDaoImpl : PostDao {
         // 插入文章内容
         PostContents.insert {
             it[postId] = post.postId
-            it[content] = pr.content
+            it[content] = pr.content ?: ""
             it[status] = PostContentStatus.PUBLISHED
             it[lastModifyTime] = currentTime
         }
@@ -98,27 +110,67 @@ class PostDaoImpl : PostDao {
      * @param postIds 文章 ID 集合
      */
     override suspend fun deletePosts(postIds: List<Int>): Boolean = dbQuery {
+        // 删除文章内容
+        PostContents.deleteWhere { postId inList postIds } > 0
+        // 删除文章分类
+        PostCategories.deleteWhere { postId inList postIds } > 0
+        // 删除文章标签
+        PostTags.deleteWhere { postId inList postIds } > 0
+        // 删除文章
         Posts.deleteWhere { postId inList postIds } > 0
     }
 
     /**
-     * 修改文章
-     * @param post 文章数据类
+     * 修改文章为删除状态
+     * @param postIds 文章 ID 集合
      */
-    override suspend fun updatePost(post: Post): Boolean = dbQuery {
+    override suspend fun updatePostStatusToDeleted(postIds: List<Int>): Boolean = dbQuery {
         Posts.update({
-            Posts.postId eq post.postId
+            Posts.postId inList postIds
         }) {
-            it[title] = post.title
-            it[excerpt] = post.excerpt
-            it[slug] = post.slug
-            it[cover] = post.cover
-            it[allowComment] = post.allowComment
-            it[pinned] = post.pinned
-            it[status] = post.status
-            it[visible] = post.visible
-            it[password] = post.password
-            it[lastModifyTime] = post.lastModifyTime
+            it[status] = PostStatus.DELETED
+        } > 0
+    }
+
+    /**
+     * 修改文章
+     * @param pr 文章请求数据类
+     */
+    override suspend fun updatePost(pr: PostRequest): Boolean = dbQuery {
+        // 删除文章标签
+        PostTags.deleteWhere { postId eq pr.postId!! }
+        // 删除文章分类
+        PostCategories.deleteWhere { postId eq pr.postId!! }
+
+        // 插入文章标签
+        if (!pr.tagIds.isNullOrEmpty()) {
+            PostTags.batchInsert(pr.tagIds) { tagId ->
+                this[PostTags.postId] = pr.postId!!
+                this[PostTags.tagId] = tagId
+            }
+        }
+
+        // 插入文章分类
+        if (pr.categoryId != null) {
+            PostCategories.insert {
+                it[postId] = pr.postId!!
+                it[categoryId] = pr.categoryId
+            }
+        }
+
+        // 更新文章
+        Posts.update({
+            Posts.postId eq pr.postId!!
+        }) {
+            it[title] = pr.title
+            it[excerpt] = pr.excerpt!!
+            it[slug] = pr.slug
+            it[allowComment] = pr.allowComment
+            it[status] = pr.status
+            it[visible] = pr.visible
+            it[cover] = pr.cover
+            it[pinned] = pr.pinned
+            it[password] = pr.password.sha256Hex()
         } > 0
     }
 
@@ -128,6 +180,17 @@ class PostDaoImpl : PostDao {
     override suspend fun posts(): List<Post> = dbQuery {
         val posts = Posts.selectAll().map(::resultRowToPost)
         getPostTagAndCategory(posts)
+        posts
+    }
+
+    /**
+     * 根据文章 ID 获取文章
+     * @param postIds 文章 ID 集合
+     * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
+     */
+    override suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean): List<Post> = dbQuery {
+        val posts = Posts.selectAll().where { Posts.postId inList postIds }.map(::resultRowToPost)
+        if (includeTagAndCategory) getPostTagAndCategory(posts)
         posts
     }
 
@@ -142,6 +205,30 @@ class PostDaoImpl : PostDao {
         }
         getPostTagAndCategory(pager.data)
         return pager
+    }
+
+    /**
+     * 获取文章内容
+     * @param postId 文章 ID
+     * @param status 文章内容状态
+     * @param draftName 草稿名
+     */
+    override suspend fun postContent(
+        postId: Int,
+        status: PostContentStatus,
+        draftName: String?
+    ): PostContent? = dbQuery {
+        PostContents
+            .selectAll()
+            .where {
+                PostContents.postId eq postId and
+                        if (status == PostContentStatus.DRAFT) {
+                            PostContents.status eq PostContentStatus.DRAFT and
+                                    (PostContents.draftName eq draftName)
+                        } else {
+                            PostContents.status eq PostContentStatus.PUBLISHED
+                        }
+            }.map(::resultRowToPostContent).firstOrNull()
     }
 
     /**
