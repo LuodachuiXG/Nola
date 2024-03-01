@@ -97,7 +97,7 @@ suspend fun ApplicationCall.receivePageAndSize(
 ) {
     val page = this.parameters["page"]
     val size = this.parameters["size"]
-    // page 和 size 为 null，或者为 0 或者负数
+    // page 和 size 为 null，或者不为非零正整数
     if (page == null ||
         size == null ||
         !page.isPositiveInt() ||

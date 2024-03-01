@@ -13,5 +13,5 @@ data class Category(
     /** 封面 **/
     val cover: String?,
     /** 是否统一封面（未单独设置封面的文章，使用分类的封面）**/
-    val unifiedCover: Boolean
+    val unifiedCover: Boolean = false
 )
