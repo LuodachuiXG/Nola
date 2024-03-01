@@ -6,6 +6,7 @@ import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
+import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.services.PostService
 import cc.loac.utils.*
@@ -106,6 +107,15 @@ fun Route.postAdminRouting() {
             get("/slug/{slug}") {
                 val slug = call.receivePathParam("slug")
                 call.respondSuccess(postService.postBySlug(slug))
+            }
+
+            /** 修改文章内容 **/
+            put("/content") {
+                val postContent = call.receiveByDataClass<PostContentRequest> {
+                    // 如果 postId 等于 0，证明传参 null
+                    it.postId != 0
+                }
+                call.respondSuccess(postService.updatePostContent(postContent))
             }
 
             /** 获取文章内容 **/

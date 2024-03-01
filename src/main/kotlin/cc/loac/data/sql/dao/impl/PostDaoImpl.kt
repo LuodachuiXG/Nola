@@ -7,6 +7,7 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostSort.*
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
+import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
@@ -31,6 +32,7 @@ class PostDaoImpl : PostDao {
     private fun resultRowToPost(row: ResultRow) = Post(
         postId = row[Posts.postId],
         title = row[Posts.title],
+        autoGenerateExcerpt = row[Posts.autoGenerateExcerpt],
         excerpt = row[Posts.excerpt],
         slug = row[Posts.slug],
         cover = row[Posts.cover],
@@ -68,7 +70,8 @@ class PostDaoImpl : PostDao {
         // 插入 post
         val post = Posts.insert {
             it[title] = pr.title
-            it[excerpt] = pr.excerpt!!
+            it[autoGenerateExcerpt] = pr.autoGenerateExcerpt
+            it[excerpt] = pr.excerpt ?: ""
             it[slug] = pr.slug
             it[cover] = pr.cover
             it[allowComment] = pr.allowComment
@@ -167,7 +170,8 @@ class PostDaoImpl : PostDao {
             Posts.postId eq pr.postId!!
         }) {
             it[title] = pr.title
-            it[excerpt] = pr.excerpt!!
+            it[autoGenerateExcerpt] = pr.autoGenerateExcerpt
+            it[excerpt] = pr.excerpt ?: ""
             it[slug] = pr.slug
             it[allowComment] = pr.allowComment
             it[status] = pr.status
@@ -175,6 +179,19 @@ class PostDaoImpl : PostDao {
             it[cover] = pr.cover
             it[pinned] = pr.pinned
             it[password] = pr.password.sha256Hex()
+        } > 0
+    }
+
+    /**
+     * 修改文章摘要
+     * @param postId 文章 ID
+     * @param excerpt 摘要
+     */
+    override suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean = dbQuery {
+        Posts.update({
+            Posts.postId eq postId
+        }) {
+            it[Posts.excerpt] = excerpt
         } > 0
     }
 
@@ -329,6 +346,24 @@ class PostDaoImpl : PostDao {
                             PostContents.status eq PostContentStatus.PUBLISHED
                         }
             }.map(::resultRowToPostContent).firstOrNull()
+    }
+
+    /**
+     * 修改文章内容
+     * @param postContent 文章内容请求数据类
+     */
+    override suspend fun updatePostContent(
+        postContent: PostContentRequest,
+        status: PostContentStatus,
+        draftName: String?
+    ): Boolean = dbQuery {
+        PostContents.update({
+            PostContents.postId eq postContent.postId and
+                    (PostContents.status eq status) andIfNotNull
+                    (if (status == PostContentStatus.DRAFT) PostContents.draftName eq draftName else null)
+        }) {
+            it[content] = postContent.content
+        } > 0
     }
 
     /**
