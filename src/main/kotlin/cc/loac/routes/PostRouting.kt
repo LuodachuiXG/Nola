@@ -2,14 +2,14 @@ package cc.loac.routes
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
+import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.requests.PostRequest
 import cc.loac.services.PostService
-import cc.loac.utils.receiveByDataClass
-import cc.loac.utils.receivePageAndSize
-import cc.loac.utils.respondSuccess
+import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -65,6 +65,41 @@ fun Route.postAdminRouting() {
                     call.respondSuccess(postService.posts(page, size))
                 }
             }
+
+            /** 获取文章 - 根据文章 ID **/
+            get("/{postId}") {
+                val postId = call.receiveIntPathParam("postId")
+                call.respondSuccess(postService.posts(listOf(postId), true).firstOrNull())
+            }
+
+            /** 获取文章 - 根据文章别名 **/
+            get("/slug/{slug}") {
+                val slug = call.receivePathParam("slug")
+                call.respondSuccess(postService.postBySlug(slug))
+            }
+
+            /** 获取文章 - 根据关键字 **/
+            get("/key/{key}") {
+                val key = call.receivePathParam("key")
+                call.respondSuccess(postService.postsByKey(key))
+            }
+
+
+            /** 获取文章内容 **/
+            get("/content/{postId}") {
+                val postId = call.receiveIntPathParam("postId")
+                call.respondSuccess(postService.postContent(postId))
+            }
+
+            /** 获取文章草稿 **/
+            get("/content/{postId}/draft/{draftName}") {
+                val params = call.receivePathParams("postId", "draftName")
+                // 判断文章 ID 是否为整数
+                val postId = params["postId"]?.toIntOrNull() ?: throw ParamMismatchException()
+                val draftName = params["draftName"]!!
+                call.respondSuccess(postService.postContent(postId, PostContentStatus.DRAFT, draftName))
+            }
+
         }
     }
 }

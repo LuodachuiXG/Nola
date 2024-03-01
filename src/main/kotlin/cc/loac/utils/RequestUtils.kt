@@ -89,20 +89,68 @@ suspend fun ApplicationCall.receiveJSON(): JsonNode {
 }
 
 /**
+ * 接受路径传参多个参数
+ * 该方法只能接收路径传参形式，如 get("/{id}/{name}")
+ * @param paramNames 请求参数名数组
+ */
+suspend fun ApplicationCall.receivePathParams(
+    vararg paramNames: String
+): Map<String, String> {
+    val map = mutableMapOf<String, String>()
+    val params = this.parameters
+    paramNames.forEach { paramName ->
+        val value = params[paramName]
+        // 如果参数不存在，抛出参数不匹配异常
+        value ?: throw ParamMismatchException()
+        map[paramName] = value
+    }
+    return map
+}
+
+/**
+ * 接受路径传参单个参数
+ * 该方法只能接收路径传参形式，如 get("/{name}")
+ * @param paramName 请求参数名
+ */
+suspend fun ApplicationCall.receivePathParam(
+    paramName: String
+): String {
+    val params = this.parameters
+    val value = params[paramName]
+    // 如果参数不存在，抛出参数不匹配异常
+    value ?: throw ParamMismatchException()
+    return value
+}
+
+/**
+ * 接受路径整数型传参
+ * 如果对应参数不为整数，就抛出参数不匹配异常
+ * 该方法只能接收路径传参形式，如 get("/{id}")
+ * @param paramName 请求参数名
+ */
+suspend fun ApplicationCall.receiveIntPathParam(
+    paramName: String
+): Int {
+    val value = receivePathParam(paramName)
+    // 如果不为整数，就抛出参数不匹配异常
+    if (!value.isInt()) throw ParamMismatchException()
+    return value.toInt()
+}
+
+
+/**
  * 接收用于分页的页数和页面条数
  * 该方法只能接收路径传参形式，如 get("/{page}/{size}")
  */
 suspend fun ApplicationCall.receivePageAndSize(
     block: suspend (page: Int, size: Int) -> Unit
 ) {
-    val page = this.parameters["page"]
-    val size = this.parameters["size"]
-    // page 和 size 为 null，或者不为非零正整数
-    if (page == null ||
-        size == null ||
-        !page.isPositiveInt() ||
-        !size.isPositiveInt()
-    ) {
+    // 获取路径传参
+    val map = receivePathParams("page", "size")
+    val page = map["page"]!!
+    val size = map["size"]!!
+    // page 和 size 不为非零正整数
+    if (!page.isPositiveInt() || !size.isPositiveInt()) {
         // 抛出参数不匹配异常
         throw ParamMismatchException()
     }

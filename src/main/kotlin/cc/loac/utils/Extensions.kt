@@ -112,6 +112,14 @@ fun String.isPositiveInt(): Boolean {
 
 /**
  * String 扩展函数
+ * 验证是否是整数
+ */
+fun String.isInt(): Boolean {
+    return this.matches("^\\d+")
+}
+
+/**
+ * String 扩展函数
  * 将 Markdown 转为 HTML
  */
 fun String.markdownToHtml(): String {

@@ -55,6 +55,19 @@ interface PostService {
     suspend fun posts(page: Int, size: Int): Pager<Post>
 
     /**
+     * 根据文章别名获取文章
+     * @param slug 文章别名
+     */
+    suspend fun postBySlug(slug: String): Post?
+
+    /**
+     * 根据关键字获取文章
+     * 关键字：文章标题、别名、摘要、内容
+     * @param key 关键字
+     */
+    suspend fun postsByKey(key: String): List<Post>
+
+    /**
      * 获取文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态

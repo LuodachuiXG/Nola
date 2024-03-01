@@ -178,7 +178,10 @@ class PostDaoImpl : PostDao {
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> = dbQuery {
-        val posts = Posts.selectAll().map(::resultRowToPost)
+        val posts = Posts
+            .selectAll()
+            .orderBy(Posts.createTime, SortOrder.DESC)
+            .map(::resultRowToPost)
         getPostTagAndCategory(posts)
         posts
     }
@@ -189,7 +192,11 @@ class PostDaoImpl : PostDao {
      * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
     override suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean): List<Post> = dbQuery {
-        val posts = Posts.selectAll().where { Posts.postId inList postIds }.map(::resultRowToPost)
+        val posts = Posts
+            .selectAll()
+            .where { Posts.postId inList postIds }
+            .orderBy(Posts.createTime, SortOrder.DESC)
+            .map(::resultRowToPost)
         if (includeTagAndCategory) getPostTagAndCategory(posts)
         posts
     }
@@ -208,6 +215,38 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 根据文章别名获取文章
+     * @param slug 文章别名
+     */
+    override suspend fun postBySlug(slug: String): Post? = dbQuery {
+        Posts
+            .selectAll()
+            .where { Posts.slug eq slug }
+            .map(::resultRowToPost)
+            .firstOrNull()
+    }
+
+    /**
+     * 根据关键字获取文章
+     * 关键字：文章标题、别名、摘要、内容
+     * @param key 关键字
+     */
+    override suspend fun postsByKey(key: String): List<Post> = dbQuery {
+        Posts
+            .join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
+            .selectAll()
+            .where {
+                (Posts.title like "%$key%" or
+                        (Posts.slug like "%$key%") or
+                        (Posts.excerpt like "%$key%") or
+                        (PostContents.content like "%$key%")) and
+                        (Posts.status eq PostStatus.PUBLISHED)
+            }
+            .orderBy(Posts.createTime, SortOrder.DESC)
+            .map(::resultRowToPost)
+    }
+
+    /**
      * 获取文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
@@ -223,7 +262,8 @@ class PostDaoImpl : PostDao {
             .where {
                 PostContents.postId eq postId and
                         if (status == PostContentStatus.DRAFT) {
-                            PostContents.status eq PostContentStatus.DRAFT and
+                            PostContents.status eq
+                                    (PostContentStatus.DRAFT) and
                                     (PostContents.draftName eq draftName)
                         } else {
                             PostContents.status eq PostContentStatus.PUBLISHED
