@@ -1,7 +1,9 @@
 package cc.loac.services.impl
 
 import cc.loac.data.models.Link
+import cc.loac.data.models.enums.LinkSort
 import cc.loac.data.requests.LinkRequest
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.LinkDao
 import cc.loac.services.LinkService
 import org.koin.java.KoinJavaComponent.inject
@@ -35,5 +37,23 @@ class LinkServiceImpl : LinkService {
      */
     override suspend fun updateLink(link: LinkRequest): Boolean {
         return linkDao.updateLink(link)
+    }
+
+    /**
+     * 获取所有友情链接
+     * @param sort 友情链接排序
+     */
+    override suspend fun links(sort: LinkSort?): List<Link> {
+        return linkDao.links(sort)
+    }
+
+    /**
+     * 分页获取友情链接
+     * @param page 当前页
+     * @param size 每页条数
+     * @param sort 友情链接排序
+     */
+    override suspend fun links(page: Int, size: Int, sort: LinkSort?): Pager<Link> {
+        return linkDao.links(page, size, sort)
     }
 }
