@@ -33,13 +33,13 @@ object Posts : Table("post") {
     val pinned = bool("pinned")
 
     /** 状态 **/
-    val status = enumerationByName("status", 50, PostStatus::class)
+    val status = enumerationByName("status", 64, PostStatus::class)
 
     /** 可见性 **/
-    val visible = enumerationByName("visible", 50, PostVisible::class)
+    val visible = enumerationByName("visible", 64, PostVisible::class)
 
     /** 密码 **/
-    val password = varchar("password", 100).nullable()
+    val password = varchar("password", 128).nullable()
 
     /** 访问量 **/
     val visit = integer("visit").default(0)

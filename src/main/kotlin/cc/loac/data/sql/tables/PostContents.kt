@@ -17,7 +17,7 @@ object PostContents : Table("post_content") {
     val content = text("content")
 
     /** 状态 **/
-    val status = enumerationByName("status", 20, PostContentStatus::class)
+    val status = enumerationByName("status", 24, PostContentStatus::class)
 
     /** 草稿名 **/
     val draftName = varchar("draftName", 256).nullable()

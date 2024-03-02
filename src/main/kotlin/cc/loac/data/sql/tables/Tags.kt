@@ -16,7 +16,7 @@ object Tags : Table("tag") {
     val slug = varchar("slug", 256).uniqueIndex()
 
     /** 标签颜色 **/
-    val color = varchar("color", 20).nullable()
+    val color = varchar("color", 24).nullable()
 
     override val primaryKey = PrimaryKey(tagId)
 }
