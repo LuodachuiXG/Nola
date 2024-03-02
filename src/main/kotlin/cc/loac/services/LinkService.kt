@@ -33,7 +33,7 @@ interface LinkService {
      * 获取所有友情链接
      * @param sort 友情链接排序
      */
-    suspend fun links(sort: LinkSort?): List<Link>
+    suspend fun links(sort: LinkSort? = null): List<Link>
 
     /**
      * 分页获取友情链接
@@ -41,5 +41,5 @@ interface LinkService {
      * @param size 每页条数
      * @param sort 友情链接排序
      */
-    suspend fun links(page: Int, size: Int, sort: LinkSort?): Pager<Link>
+    suspend fun links(page: Int, size: Int, sort: LinkSort? = null): Pager<Link>
 }
