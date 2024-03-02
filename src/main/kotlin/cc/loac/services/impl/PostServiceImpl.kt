@@ -88,6 +88,27 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 尝试通过文章正文修改文章摘要
+     * @param postId 文章 ID
+     */
+    override suspend fun tryUpdatePostExcerptByPostContent(postId: Int): Boolean {
+        // 获取到文章
+        posts(listOf(postId), false).firstOrNull()?.let { post ->
+            // 判断是否需要自动生成摘要
+            if (post.autoGenerateExcerpt) {
+                // 当前文章需要自动生成摘要
+                // 获取到文章正文内容
+                val postContent = postContent(postId)
+                // 根据文章正文内容生成摘要
+                val e = generateExcerptByString(postContent?.content)
+                // 更新文章摘要
+                return updatePostExcerpt(postId, e)
+            }
+        }
+        return false
+    }
+
+    /**
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> {
@@ -165,16 +186,13 @@ class PostServiceImpl : PostService {
 
         // 启动线程执行耗时操作
         coroutineScope {
+            // 如果修改文章没有任何操作，就不执行下面的剩余操作
+            if (!result) return@coroutineScope
+
             // 如果修改的是正文内容
             if (status == PostContentStatus.PUBLISHED) {
-                // 检测并判断是否更新文章摘要
-                posts(listOf(postContent.postId), false).firstOrNull()?.let { post ->
-                    if (post.autoGenerateExcerpt) {
-                        // 自动更新摘要
-                        val excerpt = generateExcerptByString(postContent.content)
-                        updatePostExcerpt(postContent.postId, excerpt)
-                    }
-                }
+                // 尝试通过文章正文更新文章摘要
+                tryUpdatePostExcerptByPostContent(postContent.postId)
             }
         }
         return result
@@ -233,7 +251,8 @@ class PostServiceImpl : PostService {
      * @param str 内容
      * @param length 摘要长度
      */
-    private fun generateExcerptByString(str: String, length: Int = 100): String {
+    private fun generateExcerptByString(str: String?, length: Int = 100): String {
+        if (str.isNullOrEmpty()) return ""
         var excerpt = str.markdownToPlainText()
         if (excerpt.length >= length) {
             excerpt = excerpt.substring(0, length)

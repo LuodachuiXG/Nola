@@ -15,6 +15,7 @@ import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
 import cc.loac.utils.sha256Hex
+import kotlinx.coroutines.coroutineScope
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -196,6 +197,19 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 修改文章最后修改时间
+     * @param postId 文章 ID
+     * @param time 最后修改时间
+     */
+    override suspend fun updatePostLastModifyTime(postId: Int, time: Long?): Boolean = dbQuery {
+        Posts.update({
+            Posts.postId eq postId
+        }) {
+            it[lastModifyTime] = time ?: Date().time
+        } > 0
+    }
+
+    /**
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> = dbQuery {
@@ -357,13 +371,24 @@ class PostDaoImpl : PostDao {
         status: PostContentStatus,
         draftName: String?
     ): Boolean = dbQuery {
-        PostContents.update({
+        val currentTime = Date().time
+        val result = PostContents.update({
             PostContents.postId eq postContent.postId and
                     (PostContents.status eq status) andIfNotNull
                     (if (status == PostContentStatus.DRAFT) PostContents.draftName eq draftName else null)
         }) {
             it[content] = postContent.content
+            it[lastModifyTime] = currentTime
         } > 0
+
+        if (result && status == PostContentStatus.PUBLISHED) {
+            // 文章内容修改成功，并且修改的是正文内容
+            coroutineScope {
+                // 修改文章最后修改时间
+                updatePostLastModifyTime(postContent.postId, currentTime)
+            }
+        }
+        result
     }
 
     /**

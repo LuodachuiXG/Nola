@@ -47,6 +47,13 @@ interface PostDao {
     suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean
 
     /**
+     * 修改文章最后修改时间
+     * @param postId 文章 ID
+     * @param time 最后修改时间
+     */
+    suspend fun updatePostLastModifyTime(postId: Int, time: Long?): Boolean
+
+    /**
      * 获取所有文章
      */
     suspend fun posts(): List<Post>
