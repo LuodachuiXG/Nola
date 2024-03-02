@@ -24,14 +24,14 @@ import io.ktor.server.application.*
 import kotlinx.css.th
 import org.koin.java.KoinJavaComponent.inject
 
-private val postDao: PostDao by inject(PostDao::class.java)
-private val tagService: TagService by inject(TagService::class.java)
-private val categoryService: CategoryService by inject(CategoryService::class.java)
-
 /**
  * 文章服务接口实现类
  */
 class PostServiceImpl : PostService {
+
+    private val postDao: PostDao by inject(PostDao::class.java)
+    private val tagService: TagService by inject(TagService::class.java)
+    private val categoryService: CategoryService by inject(CategoryService::class.java)
 
     /**
      * 添加文章
