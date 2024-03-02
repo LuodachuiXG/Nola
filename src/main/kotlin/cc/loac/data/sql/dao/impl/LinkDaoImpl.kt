@@ -1,15 +1,15 @@
 package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.Link
+import cc.loac.data.models.enums.LinkSort
 import cc.loac.data.requests.LinkRequest
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.LinkDao
+import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Links
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.update
 import java.util.*
 
 /**
@@ -72,5 +72,45 @@ class LinkDaoImpl : LinkDao {
             it[priority] = link.priority
             it[lastModifyTime] = Date().time
         } > 0
+    }
+
+    /**
+     * 获取所有友情链接
+     * @param sort 友情链接排序
+     */
+    override suspend fun links(sort: LinkSort?): List<Link> = dbQuery {
+        sqlQueryLinks(sort).map(::resultRowToLink)
+    }
+
+    /**
+     * 分页获取友情链接
+     * @param page 当前页
+     * @param size 每页条数
+     * @param sort 友情链接排序
+     */
+    override suspend fun links(page: Int, size: Int, sort: LinkSort?): Pager<Link> {
+        return Links.startPage(page, size, ::resultRowToLink) {
+            sqlQueryLinks(sort)
+        }
+    }
+
+    /**
+     * SQL 语句
+     * 查询友情链接
+     * @param sort 友情链接排序
+     */
+    private fun sqlQueryLinks(sort: LinkSort?): Query {
+        val query = Links.selectAll()
+        when(sort) {
+            LinkSort.PRIORITY_DESC -> query.orderBy(Links.priority, SortOrder.DESC)
+            LinkSort.PRIORITY_ASC -> query.orderBy(Links.priority, SortOrder.ASC)
+            LinkSort.CREATE_TIME_DESC -> query.orderBy(Links.createTime, SortOrder.DESC)
+            LinkSort.CREATE_TIME_ASC -> query.orderBy(Links.createTime, SortOrder.ASC)
+            LinkSort.MODIFY_TIME_DESC -> query.orderBy(Links.lastModifyTime, SortOrder.DESC)
+            LinkSort.MODIFY_TIME_ASC -> query.orderBy(Links.lastModifyTime, SortOrder.ASC)
+            // 默认优先级降序排列
+            else -> query.orderBy(Links.priority, SortOrder.DESC)
+        }
+        return query
     }
 }
