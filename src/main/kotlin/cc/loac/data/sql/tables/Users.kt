@@ -12,22 +12,22 @@ object Users : Table("user") {
     val userId = integer("userId").autoIncrement()
 
     /** 用户名 **/
-    val username = varchar("username", 50)
+    val username = varchar("username", 64)
 
     /** 电子邮箱 **/
-    val email = varchar("email", 50)
+    val email = varchar("email", 64)
 
     /** 显示名称 **/
-    val displayName = varchar("display_name", 100)
+    val displayName = varchar("display_name", 128)
 
     /** 密码 **/
-    val password = varchar("password", 100)
+    val password = varchar("password", 128)
 
     /** 盐值，用于加密密码 **/
-    val salt = varchar("salt", 100)
+    val salt = varchar("salt", 128)
 
     /** 描述 **/
-    val description = varchar("description", 1000).nullable()
+    val description = varchar("description", 1024).nullable()
 
     /** 注册日期 **/
     val createDate = long("create_date")
@@ -36,7 +36,7 @@ object Users : Table("user") {
     val lastLoginDate = long("last_login_time").nullable()
 
     /** 头像地址 URL **/
-    val avatar = varchar("avatar", 100).nullable()
+    val avatar = varchar("avatar", 256).nullable()
 
 
     override val primaryKey = PrimaryKey(userId)

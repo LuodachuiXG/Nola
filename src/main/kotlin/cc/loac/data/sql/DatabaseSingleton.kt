@@ -42,6 +42,8 @@ object DatabaseSingleton {
             SchemaUtils.create(PostCategories)
             // 文章内容表
             SchemaUtils.create(PostContents)
+            // 友情链接表
+            SchemaUtils.create(Links)
         }
     }
 

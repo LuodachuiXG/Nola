@@ -12,7 +12,7 @@ object Configs : Table("config") {
     val configId = integer("configId").autoIncrement()
 
     /** 配置键 **/
-    val key = enumerationByName<ConfigKey>("key", 50).uniqueIndex()
+    val key = enumerationByName<ConfigKey>("key", 64).uniqueIndex()
 
     /** 配置数据 **/
     val value = text("value");
