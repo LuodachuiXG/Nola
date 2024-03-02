@@ -7,6 +7,7 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
+import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 
@@ -62,7 +63,7 @@ interface PostService {
      * @param postIds 文章 ID 集合
      * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean): List<Post>
+    suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean = false): List<Post>
 
     /**
      * 分页获取所有文章
@@ -112,6 +113,14 @@ interface PostService {
     ): PostContent?
 
     /**
+     * 添加文章草稿
+     * @param postId 文章 ID
+     * @param content 文章内容
+     * @param draftName 草稿名
+     */
+    suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent?
+
+    /**
      * 删除文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
@@ -140,4 +149,18 @@ interface PostService {
      * @param newName 新草稿名
      */
     suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean
+
+    /**
+     * 将文章草稿转换为文章正文
+     * @param postId 文章 ID
+     * @param draftName 草稿名
+     * @param deleteContent 是否删除原来的正文
+     * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
+     */
+    suspend fun updatePostDraft2Content(
+        postId: Int,
+        draftName: String,
+        deleteContent: Boolean,
+        contentName: String?
+    ): Boolean
 }

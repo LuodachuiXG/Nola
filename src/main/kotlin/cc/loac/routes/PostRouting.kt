@@ -1,15 +1,13 @@
 package cc.loac.routes
 
+import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
-import cc.loac.data.requests.PostContentRequest
-import cc.loac.data.requests.PostDraftNameRequest
-import cc.loac.data.requests.PostDraftRequest
-import cc.loac.data.requests.PostRequest
+import cc.loac.data.requests.*
 import cc.loac.services.PostService
 import cc.loac.utils.*
 import io.ktor.server.application.*
@@ -32,9 +30,12 @@ fun Route.postAdminRouting() {
                     it.status != PostStatus.DELETED
                 }
 
-                val post = postService.addPost(postRequest) ?: throw MyException("文章添加失败，请检查服务端日志")
+                val post = postService.addPost(postRequest) ?: throw AddFailedException()
                 // 返回文章
-                call.respondSuccess(postService.posts(listOf(post.postId), true))
+                call.respondSuccess(
+                    postService.posts(listOf(post.postId), true)
+                        .firstOrNull() ?: throw AddFailedException()
+                )
             }
 
             /** 回收文章 - 根据文章 ID **/
@@ -126,6 +127,23 @@ fun Route.postAdminRouting() {
                 call.respondSuccess(postService.postContent(postId))
             }
 
+            /** 添加文章草稿 **/
+            post("/content/draft") {
+                val postDraft = call.receiveByDataClass<PostDraftRequest> {
+                    // 如果 postId 等于 0，证明传参 null
+                    it.postId != 0
+                }
+                call.respondSuccess(
+                    postService.addPostDraft(
+                        postDraft.postId,
+                        postDraft.content, postDraft.draftName
+                    )?.copy(
+                        // 返回数据时把 content 置空
+                        content = ""
+                    ) ?: throw AddFailedException()
+                )
+            }
+
             /** 删除文章草稿 **/
             delete("/content/{postId}/draft") {
                 val postId = call.receiveIntPathParam("postId")
@@ -140,7 +158,13 @@ fun Route.postAdminRouting() {
                     it.postId != 0
                 }
                 val postContent = PostContentRequest(postDraft.postId, postDraft.content)
-                call.respondSuccess(postService.updatePostContent(postContent, PostContentStatus.DRAFT, postDraft.draftName))
+                call.respondSuccess(
+                    postService.updatePostContent(
+                        postContent,
+                        PostContentStatus.DRAFT,
+                        postDraft.draftName
+                    )
+                )
             }
 
             /** 修改文章草稿名 **/
@@ -150,6 +174,22 @@ fun Route.postAdminRouting() {
                 }
 
                 call.respondSuccess(postService.updatePostDraftName(params.postId, params.oldName, params.newName))
+            }
+
+            /** 将文章草稿转换为文章正文 **/
+            put("/content/draft/publish") {
+                val params = call.receiveByDataClass<PostDraft2ContentRequest> {
+                    it.postId != 0
+                }
+
+                call.respondSuccess(
+                    postService.updatePostDraft2Content(
+                        params.postId,
+                        params.draftName,
+                        params.deleteContent,
+                        params.contentName
+                    )
+                )
             }
 
             /** 获取文章草稿 **/

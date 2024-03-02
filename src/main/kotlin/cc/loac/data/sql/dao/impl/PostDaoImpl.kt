@@ -14,9 +14,9 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
+import cc.loac.utils.error
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.sha256Hex
-import kotlinx.css.em
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -364,6 +364,22 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 添加文章草稿
+     * @param postId 文章 ID
+     * @param content 文章内容
+     * @param draftName 草稿名
+     */
+    override suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent? = dbQuery {
+        PostContents.insert {
+            it[PostContents.postId] = postId
+            it[PostContents.content] = content
+            it[PostContents.draftName] = draftName
+            it[status] = PostContentStatus.DRAFT
+            it[lastModifyTime] = Date().time
+        }.resultedValues?.firstOrNull()?.let(::resultRowToPostContent)
+    }
+
+    /**
      * 删除文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
@@ -422,6 +438,62 @@ class PostDaoImpl : PostDao {
             PostContents.postId eq postId and (PostContents.draftName eq oldName)
         }) {
             it[draftName] = newName
+        } > 0
+    }
+
+    /**
+     * 将文章草稿转换为文章正文
+     * @param postId 文章 ID
+     * @param draftName 草稿名
+     * @param deleteContent 是否删除原来的正文
+     * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
+     */
+    override suspend fun updatePostDraft2Content(
+        postId: Int,
+        draftName: String,
+        deleteContent: Boolean,
+        contentName: String?
+    ): Boolean = dbQuery {
+        // 获取原来的文章正文内容 ID
+        val postContentId = PostContents
+            .select(PostContents.postContentId)
+            .where {
+                (PostContents.postId eq postId) and
+                        (PostContents.status eq PostContentStatus.PUBLISHED)
+            }.map {
+                it[PostContents.postContentId]
+            }.firstOrNull() ?: return@dbQuery false
+        // 获取要转换的草稿的内容 ID
+        val postContentDraftId = PostContents
+            .select(PostContents.postContentId)
+            .where {
+                (PostContents.postId eq postId) and
+                        (PostContents.status eq PostContentStatus.DRAFT) and
+                        (PostContents.draftName eq draftName)
+            }.map { it[PostContents.postContentId] }.firstOrNull() ?: return@dbQuery false
+
+        if (deleteContent) {
+            // 删除原来的正文
+            PostContents.deleteWhere {
+                PostContents.postContentId eq postContentId
+            }
+        } else {
+            // 不删除原来的正文
+            // 修改原来的正文为草稿，并修改草稿名
+            val r = PostContents.update({
+                PostContents.postContentId eq postContentId
+            }) {
+                it[status] = PostContentStatus.DRAFT
+                it[PostContents.draftName] = contentName ?: draftName
+            }
+        }
+
+        // 将指定的草稿转为正文
+        PostContents.update({
+            PostContents.postContentId eq postContentDraftId
+        }) {
+            it[status] = PostContentStatus.PUBLISHED
+            it[PostContents.draftName] = ""
         } > 0
     }
 
