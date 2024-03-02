@@ -50,6 +50,7 @@ fun Route.postAdminRouting() {
             /** 删除文章 - 根据文章 ID **/
             delete {
                 val postIds = call.receiveByDataClass<List<Int>>()
+                if (postIds.isEmpty()) call.respondSuccess(false)
                 call.respondSuccess(postService.deletePosts(postIds))
             }
 
@@ -157,6 +158,7 @@ fun Route.postAdminRouting() {
             delete("/content/{postId}/draft") {
                 val postId = call.receiveIntPathParam("postId")
                 val draftNames = call.receiveByDataClass<List<String>>()
+                if (draftNames.isEmpty()) call.respondSuccess(false)
                 call.respondSuccess(postService.deletePostContent(postId, PostContentStatus.DRAFT, draftNames))
             }
 

@@ -35,10 +35,7 @@ fun Route.tagAdminRouting() {
                 // 获取 ID 集合
                 val ids = call.receiveByDataClass<List<Int>>()
                 // 标签 ID 列表为空
-                if (ids.isEmpty()) {
-                    call.respondSuccess(false)
-                }
-
+                if (ids.isEmpty()) call.respondSuccess(false)
                 // 删除标签
                 call.respondSuccess(tagService.deleteTags(ids))
             }
@@ -48,9 +45,7 @@ fun Route.tagAdminRouting() {
                 // 获取别名集合
                 val slugs = call.receiveByDataClass<List<String>>()
                 // 标签别名列表为空
-                if (slugs.isEmpty()) {
-                    call.respondSuccess(false)
-                }
+                if (slugs.isEmpty()) call.respondSuccess(false)
 
                 // 删除标签
                 call.respondSuccess(tagService.deleteTagsBySlugs(slugs))

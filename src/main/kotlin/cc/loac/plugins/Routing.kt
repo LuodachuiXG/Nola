@@ -29,6 +29,8 @@ fun Application.configureRouting(
             categoryAdminRouting()
             // post 文章管理员路由
             postAdminRouting()
+            // link 友情链接管理员路由
+            linkAdminRouting()
         }
 
         /** 博客接口 **/
@@ -41,6 +43,8 @@ fun Application.configureRouting(
             categoryApiRouting()
             // post 文章 API 路由
             postApiRouting()
+            // link 友情链接 API 路由
+            linkApiRouting()
         }
     }
 }

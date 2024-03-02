@@ -31,10 +31,7 @@ fun Route.categoryAdminRouting() {
                 // 获取 ID 集合
                 val ids = call.receiveByDataClass<List<Int>>()
                 // 分类 ID 列表为空
-                if (ids.isEmpty()) {
-                    call.respondSuccess(false)
-                }
-
+                if (ids.isEmpty()) call.respondSuccess(false)
                 // 删除分类
                 call.respondSuccess(categoryService.deleteCategories(ids))
             }
@@ -44,10 +41,7 @@ fun Route.categoryAdminRouting() {
                 // 获取别名集合
                 val slugs = call.receiveByDataClass<List<String>>()
                 // 分类别名列表为空
-                if (slugs.isEmpty()) {
-                    call.respondSuccess(false)
-                }
-
+                if (slugs.isEmpty()) call.respondSuccess(false)
                 // 删除分类
                 call.respondSuccess(categoryService.deleteCategoriesBySlugs(slugs))
             }

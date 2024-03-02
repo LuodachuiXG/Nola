@@ -41,4 +41,7 @@ val appModule = module {
     single<PostService> { PostServiceImpl() }
     single<PostDao> { PostDaoImpl() }
 
+    single<LinkService> { LinkServiceImpl() }
+    single<LinkDao> { LinkDaoImpl() }
+
 }
