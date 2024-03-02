@@ -14,9 +14,8 @@ import cc.loac.data.sql.dao.PostDao
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
+import cc.loac.utils.launchCoroutine
 import cc.loac.utils.markdownToPlainText
-import kotlinx.coroutines.coroutineScope
-import kotlinx.css.mark
 import org.koin.java.KoinJavaComponent.inject
 
 private val postDao: PostDao by inject(PostDao::class.java)
@@ -174,6 +173,16 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 删除文章内容
+     * @param postId 文章 ID
+     * @param status 文章内容状态
+     * @param draftNames 草稿名集合
+     */
+    override suspend fun deletePostContent(postId: Int, status: PostContentStatus, draftNames: List<String>?): Boolean {
+        return postDao.deletePostContent(postId, status, draftNames)
+    }
+
+    /**
      * 修改文章内容
      * @param postContent 文章内容请求数据类
      */
@@ -185,9 +194,9 @@ class PostServiceImpl : PostService {
         val result = postDao.updatePostContent(postContent, status, draftName)
 
         // 启动线程执行耗时操作
-        coroutineScope {
+        launchCoroutine {
             // 如果修改文章没有任何操作，就不执行下面的剩余操作
-            if (!result) return@coroutineScope
+            if (!result) return@launchCoroutine
 
             // 如果修改的是正文内容
             if (status == PostContentStatus.PUBLISHED) {
@@ -196,6 +205,19 @@ class PostServiceImpl : PostService {
             }
         }
         return result
+    }
+
+    /**
+     * 修改文章草稿名
+     * @param postId 文章 ID
+     * @param oldName 老草稿名
+     * @param newName 新草稿名
+     */
+    override suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean {
+        // 先判断新的草稿名是否已经存在
+        val postContent = postContent(postId, PostContentStatus.DRAFT, newName)
+        if (postContent != null) throw MyException("草稿名 [$newName] 已存在")
+        return postDao.updatePostDraftName(postId, oldName, newName)
     }
 
     /**

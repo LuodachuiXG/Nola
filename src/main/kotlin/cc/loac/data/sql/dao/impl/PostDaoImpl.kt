@@ -14,8 +14,9 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
+import cc.loac.utils.launchCoroutine
 import cc.loac.utils.sha256Hex
-import kotlinx.coroutines.coroutineScope
+import kotlinx.css.em
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -292,7 +293,7 @@ class PostDaoImpl : PostDao {
             }
         }
 
-        when(sort) {
+        when (sort) {
             CREATE_DESC -> query.orderBy(Posts.createTime, SortOrder.DESC)
             CREATE_ASC -> query.orderBy(Posts.createTime, SortOrder.ASC)
             MODIFY_DESC -> query.orderBy(Posts.lastModifyTime, SortOrder.DESC)
@@ -363,6 +364,25 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 删除文章内容
+     * @param postId 文章 ID
+     * @param status 文章内容状态
+     * @param draftNames 草稿名集合
+     */
+    override suspend fun deletePostContent(
+        postId: Int,
+        status: PostContentStatus,
+        draftNames: List<String>?
+    ): Boolean = dbQuery {
+        PostContents.deleteWhere {
+            PostContents.postId eq postId and
+                    (PostContents.status eq status) andIfNotNull
+                    (if (status == PostContentStatus.DRAFT && draftNames != null)
+                        draftName inList draftNames else null)
+        } > 0
+    }
+
+    /**
      * 修改文章内容
      * @param postContent 文章内容请求数据类
      */
@@ -383,12 +403,26 @@ class PostDaoImpl : PostDao {
 
         if (result && status == PostContentStatus.PUBLISHED) {
             // 文章内容修改成功，并且修改的是正文内容
-            coroutineScope {
+            launchCoroutine {
                 // 修改文章最后修改时间
                 updatePostLastModifyTime(postContent.postId, currentTime)
             }
         }
         result
+    }
+
+    /**
+     * 修改文章草稿名
+     * @param postId 文章 ID
+     * @param oldName 老草稿名
+     * @param newName 新草稿名
+     */
+    override suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean = dbQuery {
+        PostContents.update({
+            PostContents.postId eq postId and (PostContents.draftName eq oldName)
+        }) {
+            it[draftName] = newName
+        } > 0
     }
 
     /**

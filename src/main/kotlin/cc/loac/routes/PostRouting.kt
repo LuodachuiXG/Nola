@@ -7,6 +7,7 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
+import cc.loac.data.requests.PostDraftNameRequest
 import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.services.PostService
@@ -125,6 +126,13 @@ fun Route.postAdminRouting() {
                 call.respondSuccess(postService.postContent(postId))
             }
 
+            /** 删除文章草稿 **/
+            delete("/content/{postId}/draft") {
+                val postId = call.receiveIntPathParam("postId")
+                val draftNames = call.receiveByDataClass<List<String>>()
+                call.respondSuccess(postService.deletePostContent(postId, PostContentStatus.DRAFT, draftNames))
+            }
+
             /** 修改文章草稿 **/
             put("/content/draft") {
                 val postDraft = call.receiveByDataClass<PostDraftRequest> {
@@ -133,6 +141,15 @@ fun Route.postAdminRouting() {
                 }
                 val postContent = PostContentRequest(postDraft.postId, postDraft.content)
                 call.respondSuccess(postService.updatePostContent(postContent, PostContentStatus.DRAFT, postDraft.draftName))
+            }
+
+            /** 修改文章草稿名 **/
+            put("/content/draft/name") {
+                val params = call.receiveByDataClass<PostDraftNameRequest> {
+                    it.postId != 0
+                }
+
+                call.respondSuccess(postService.updatePostDraftName(params.postId, params.oldName, params.newName))
             }
 
             /** 获取文章草稿 **/
