@@ -58,7 +58,7 @@ fun Route.postAdminRouting() {
             put {
                 val postRequest = call.receiveByDataClass<PostRequest> {
                     // 如果 postId 等于 0 证明没传参，并且文章状态不能设置为已删除
-                    it.postId != 0 && it.status != PostStatus.DELETED
+                    it.postId != null && it.postId > 0 && it.status != PostStatus.DELETED
                 }
                 call.respondSuccess(postService.updatePost(postRequest))
             }
@@ -126,7 +126,7 @@ fun Route.postAdminRouting() {
             put("/publish") {
                 val postContent = call.receiveByDataClass<PostContentRequest> {
                     // 如果 postId 等于 0，证明传参 null
-                    it.postId != 0
+                    it.postId > 0
                 }
                 call.respondSuccess(postService.updatePostContent(postContent))
             }
@@ -141,7 +141,7 @@ fun Route.postAdminRouting() {
             post("/content/draft") {
                 val postDraft = call.receiveByDataClass<PostDraftRequest> {
                     // 如果 postId 等于 0，证明传参 null
-                    it.postId != 0
+                    it.postId > 0
                 }
                 call.respondSuccess(
                     postService.addPostDraft(
@@ -166,7 +166,7 @@ fun Route.postAdminRouting() {
             put("/content/draft") {
                 val postDraft = call.receiveByDataClass<PostDraftRequest> {
                     // 如果 postId 等于 0，证明传参 null
-                    it.postId != 0
+                    it.postId > 0
                 }
                 val postContent = PostContentRequest(postDraft.postId, postDraft.content)
                 call.respondSuccess(
@@ -181,7 +181,7 @@ fun Route.postAdminRouting() {
             /** 修改文章草稿名 **/
             put("/content/draft/name") {
                 val params = call.receiveByDataClass<PostDraftNameRequest> {
-                    it.postId != 0
+                    it.postId > 0
                 }
 
                 call.respondSuccess(postService.updatePostDraftName(params.postId, params.oldName, params.newName))
@@ -190,7 +190,7 @@ fun Route.postAdminRouting() {
             /** 将文章草稿转换为文章正文 **/
             put("/content/draft/publish") {
                 val params = call.receiveByDataClass<PostDraft2ContentRequest> {
-                    it.postId != 0
+                    it.postId > 0
                 }
 
                 call.respondSuccess(

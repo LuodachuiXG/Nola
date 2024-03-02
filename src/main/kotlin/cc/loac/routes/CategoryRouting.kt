@@ -48,7 +48,7 @@ fun Route.categoryAdminRouting() {
 
             /** 修改分类 **/
             put {
-                val category = call.receiveByDataClass<Category> { it.categoryId != 0 }
+                val category = call.receiveByDataClass<Category> { it.categoryId > 0 }
                 // 修改分类
                 call.respondSuccess(categoryService.updateCategory(category))
             }

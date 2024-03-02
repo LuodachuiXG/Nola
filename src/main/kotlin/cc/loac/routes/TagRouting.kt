@@ -53,7 +53,9 @@ fun Route.tagAdminRouting() {
 
             /** 修改标签 **/
             put {
-                val tag = call.receiveByDataClass<Tag>()
+                val tag = call.receiveByDataClass<Tag> {
+                    it.tagId > 0
+                }
                 // 修改标签
                 call.respondSuccess(tagService.updateTag(tag))
             }

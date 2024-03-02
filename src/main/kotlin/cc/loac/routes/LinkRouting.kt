@@ -18,7 +18,10 @@ fun Route.linkAdminRouting() {
     route("link") {
         /** 添加友情链接 **/
         post {
-            val link = call.receiveByDataClass<LinkRequest>()
+            val link = call.receiveByDataClass<LinkRequest> {
+                // 优先级范围 0 - 10
+                it.priority in (0..10)
+            }
             call.respondSuccess(linkService.addLink(link) ?: throw AddFailedException())
         }
 
@@ -27,6 +30,15 @@ fun Route.linkAdminRouting() {
             val ids = call.receiveByDataClass<List<Int>>()
             if (ids.isEmpty()) call.respondSuccess(false)
             call.respondSuccess(linkService.deleteLinks(ids))
+        }
+
+        /** 修改友情链接 **/
+        put {
+            val link = call.receiveByDataClass<LinkRequest> {
+                // 优先级范围 0 - 10
+                it.linkId > 0 && it.priority in (0..10)
+            }
+            call.respondSuccess(linkService.updateLink(link))
         }
     }
 }
