@@ -100,6 +100,12 @@ fun Route.postAdminRouting() {
                 }
             }
 
+            /** 获取文章所有内容，包括正文和所有草稿 **/
+            get("content/{postId}") {
+                val postId = call.receiveIntPathParam("postId")
+                call.respondSuccess(postService.postContents(postId))
+            }
+
             /** 获取文章 - 根据文章 ID **/
             get("/{postId}") {
                 val postId = call.receiveIntPathParam("postId")
@@ -112,8 +118,8 @@ fun Route.postAdminRouting() {
                 call.respondSuccess(postService.postBySlug(slug))
             }
 
-            /** 修改文章内容 **/
-            put("/content") {
+            /** 修改文章正文 **/
+            put("/publish") {
                 val postContent = call.receiveByDataClass<PostContentRequest> {
                     // 如果 postId 等于 0，证明传参 null
                     it.postId != 0
@@ -121,8 +127,8 @@ fun Route.postAdminRouting() {
                 call.respondSuccess(postService.updatePostContent(postContent))
             }
 
-            /** 获取文章内容 **/
-            get("/content/{postId}") {
+            /** 获取文章正文 **/
+            get("/publish/{postId}") {
                 val postId = call.receiveIntPathParam("postId")
                 call.respondSuccess(postService.postContent(postId))
             }

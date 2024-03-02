@@ -9,6 +9,7 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
+import cc.loac.data.responses.PostContentResponse
 
 /**
  * 文章操作接口
@@ -99,6 +100,13 @@ interface PostDao {
      * @param key 关键字
      */
     suspend fun postsByKey(key: String): List<Post>
+
+    /**
+     * 获取文章所有内容
+     * 包括文章正文和文章所有草稿
+     * @param postId 文章 ID
+     */
+    suspend fun postContents(postId: Int): List<PostContentResponse>
 
     /**
      * 获取文章内容

@@ -11,12 +11,14 @@ import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
+import cc.loac.data.responses.PostContentResponse
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.markdownToPlainText
+import kotlinx.css.th
 import org.koin.java.KoinJavaComponent.inject
 
 private val postDao: PostDao by inject(PostDao::class.java)
@@ -157,6 +159,17 @@ class PostServiceImpl : PostService {
      */
     override suspend fun postsByKey(key: String): List<Post> {
         return postDao.postsByKey(key)
+    }
+
+    /**
+     * 获取文章所有内容
+     * 包括文章正文和文章所有草稿
+     * @param postId 文章 ID
+     */
+    override suspend fun postContents(postId: Int): List<PostContentResponse> {
+        // 判断文章是否存在
+        if (!isPostExist(postId)) throw MyException("文章 [$postId] 不存在")
+        return postDao.postContents(postId)
     }
 
     /**
