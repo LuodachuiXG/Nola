@@ -10,6 +10,7 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
+import cc.loac.data.responses.PostContentResponse
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.startPage
@@ -57,6 +58,16 @@ class PostDaoImpl : PostDao {
         postContentId = row[PostContents.postContentId],
         postId = row[PostContents.postId],
         content = row[PostContents.content],
+        status = row[PostContents.status],
+        draftName = row[PostContents.draftName],
+        lastModifyTime = row[PostContents.lastModifyTime]
+    )
+
+    /**
+     * 将数据库检索结果转为 [PostContentResponse] 文章内容响应数据类
+     */
+    private fun resultRowToPostContentResponse(row: ResultRow) = PostContentResponse(
+        postId = row[PostContents.postId],
         status = row[PostContents.status],
         draftName = row[PostContents.draftName],
         lastModifyTime = row[PostContents.lastModifyTime]
@@ -339,6 +350,22 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 获取文章所有内容
+     * 包括文章正文和文章所有草稿
+     * @param postId 文章 ID
+     */
+    override suspend fun postContents(postId: Int): List<PostContentResponse> = dbQuery {
+        PostContents
+            .select(
+                PostContents.postId, PostContents.status,
+                PostContents.draftName, PostContents.lastModifyTime
+            )
+            .where {
+                PostContents.postId eq postId
+            }.map(::resultRowToPostContentResponse)
+    }
+
+    /**
      * 获取文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
@@ -493,7 +520,7 @@ class PostDaoImpl : PostDao {
             PostContents.postContentId eq postContentDraftId
         }) {
             it[status] = PostContentStatus.PUBLISHED
-            it[PostContents.draftName] = ""
+            it[PostContents.draftName] = null
         } > 0
     }
 
