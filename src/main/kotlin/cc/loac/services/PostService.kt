@@ -47,6 +47,12 @@ interface PostService {
     suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean
 
     /**
+     * 尝试通过文章正文修改文章摘要
+     * @param postId 文章 ID
+     */
+    suspend fun tryUpdatePostExcerptByPostContent(postId: Int): Boolean
+
+    /**
      * 获取所有文章
      */
     suspend fun posts(): List<Post>

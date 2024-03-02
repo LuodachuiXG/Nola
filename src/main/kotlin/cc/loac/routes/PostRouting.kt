@@ -7,6 +7,7 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
+import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.services.PostService
 import cc.loac.utils.*
@@ -122,6 +123,16 @@ fun Route.postAdminRouting() {
             get("/content/{postId}") {
                 val postId = call.receiveIntPathParam("postId")
                 call.respondSuccess(postService.postContent(postId))
+            }
+
+            /** 修改文章草稿 **/
+            put("/content/draft") {
+                val postDraft = call.receiveByDataClass<PostDraftRequest> {
+                    // 如果 postId 等于 0，证明传参 null
+                    it.postId != 0
+                }
+                val postContent = PostContentRequest(postDraft.postId, postDraft.content)
+                call.respondSuccess(postService.updatePostContent(postContent, PostContentStatus.DRAFT, postDraft.draftName))
             }
 
             /** 获取文章草稿 **/
