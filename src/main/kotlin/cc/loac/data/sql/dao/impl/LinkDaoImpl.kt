@@ -27,6 +27,7 @@ class LinkDaoImpl : LinkDao {
         logo = row[Links.logo],
         description = row[Links.description],
         priority = row[Links.priority],
+        remark = row[Links.remark],
         createTime = row[Links.createTime],
         lastModifyTime = row[Links.lastModifyTime]
     )
@@ -43,6 +44,7 @@ class LinkDaoImpl : LinkDao {
             it[logo] = link.logo
             it[description] = link.description
             it[priority] = link.priority
+            it[remark] = link.remark
             it[createTime] = Date().time
         }.resultedValues?.singleOrNull()?.let(::resultRowToLink)
     }
@@ -70,6 +72,7 @@ class LinkDaoImpl : LinkDao {
             it[logo] = link.logo
             it[description] = link.description
             it[priority] = link.priority
+            it[remark] = link.remark
             it[lastModifyTime] = Date().time
         } > 0
     }
