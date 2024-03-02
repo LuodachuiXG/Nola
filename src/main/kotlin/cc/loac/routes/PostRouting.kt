@@ -8,11 +8,14 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.*
+import cc.loac.data.responses.ApiPostResponse
+import cc.loac.data.responses.Pager
 import cc.loac.services.PostService
 import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.sql.shortLiteral
 import org.koin.java.KoinJavaComponent.inject
 
 private val postService: PostService by inject(PostService::class.java)
@@ -206,7 +209,6 @@ fun Route.postAdminRouting() {
                 val draftName = params["draftName"]!!
                 call.respondSuccess(postService.postContent(postId, PostContentStatus.DRAFT, draftName))
             }
-
         }
     }
 }
@@ -215,5 +217,25 @@ fun Route.postAdminRouting() {
  * 文章，API 路由
  */
 fun Route.postApiRouting() {
+    route("post") {
+        /** 分页获取文章 **/
+        get("/{page}/{size}") {
+            call.receivePageAndSize { page, size ->
+                // 可空文章关键字
+                val key = call.receiveNullablePathParam("key")
 
+                // 可空文章标签
+                val tag = call.receiveNullablePathParam("tag") {
+                    it?.isInt()
+                }?.toInt()
+
+                // 可空文章分类
+                val category = call.receiveNullablePathParam("category") {
+                    it?.isInt()
+                }?.toInt()
+
+                call.respondSuccess(postService.apiPosts(page, size, key, tag, category))
+            }
+        }
+    }
 }

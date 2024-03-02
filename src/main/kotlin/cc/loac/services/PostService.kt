@@ -9,8 +9,10 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
+import com.google.protobuf.Api
 
 /**
  * 文章服务接口
@@ -100,6 +102,22 @@ interface PostService {
      * @param key 关键字
      */
     suspend fun postsByKey(key: String): List<Post>
+
+    /**
+     * 获取文章 API 接口
+     * @param page 当前页数
+     * @param size 每页条数
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     */
+    suspend fun apiPosts(
+        page: Int,
+        size: Int,
+        key: String?,
+        tag: Int?,
+        category: Int?
+    ): Pager<ApiPostResponse>
 
     /**
      * 获取文章所有内容

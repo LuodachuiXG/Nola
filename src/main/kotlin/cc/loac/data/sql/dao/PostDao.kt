@@ -1,13 +1,16 @@
 package cc.loac.data.sql.dao
 
+import cc.loac.data.models.Category
 import cc.loac.data.models.Post
 import cc.loac.data.models.PostContent
+import cc.loac.data.models.Tag
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
 
@@ -55,6 +58,18 @@ interface PostDao {
     suspend fun updatePostLastModifyTime(postId: Int, time: Long? = null): Boolean
 
     /**
+     * 根据文章 ID 获取文章分类
+     * @param postId 文章 ID
+     */
+    suspend fun categoryByPostId(postId: Int): Category?
+
+    /**
+     * 根据文章 ID 获取文章标签
+     * @param postId 文章 ID
+     */
+    suspend fun tagsByPostId(postId: Int): List<Tag>
+
+    /**
      * 获取所有文章
      */
     suspend fun posts(): List<Post>
@@ -100,6 +115,20 @@ interface PostDao {
      * @param key 关键字
      */
     suspend fun postsByKey(key: String): List<Post>
+
+    /**
+     * 获取文章 API 接口
+     * @param page 当前页数
+     * @param size 每页条数
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     */
+    suspend fun apiPosts(
+        page: Int,
+        size: Int,
+        key: String?, tag: Int?, category: Int?
+    ): Pager<ApiPostResponse>
 
     /**
      * 获取文章所有内容
@@ -163,4 +192,6 @@ interface PostDao {
         deleteContent: Boolean,
         contentName: String?
     ): Boolean
+
+
 }

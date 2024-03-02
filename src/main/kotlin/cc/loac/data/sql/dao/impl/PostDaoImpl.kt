@@ -1,7 +1,9 @@
 package cc.loac.data.sql.dao.impl
 
+import cc.loac.data.models.Category
 import cc.loac.data.models.Post
 import cc.loac.data.models.PostContent
+import cc.loac.data.models.Tag
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostSort.*
@@ -9,13 +11,13 @@ import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
-import cc.loac.utils.error
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.sha256Hex
 import org.jetbrains.exposed.sql.*
@@ -43,12 +45,34 @@ class PostDaoImpl : PostDao {
         pinned = row[Posts.pinned],
         status = row[Posts.status],
         visible = row[Posts.visible],
-        encrypted = row[Posts.password] != null,
+        encrypted = !row[Posts.password].isNullOrEmpty(),
         password = null,
+        visit = row[Posts.visit],
         category = null,
         tags = emptyList(),
         createTime = row[Posts.createTime],
         lastModifyTime = row[Posts.lastModifyTime]
+    )
+
+    /**
+     * 将数据库检索结果转为 [ApiPostResponse] 文章 API 响应类
+     */
+    private fun resultRowToApiPostResponse(row: ResultRow) = ApiPostResponse(
+        postId = row[Posts.postId],
+        title = row[Posts.title],
+        // 如果文章加密，则不返回摘要
+        excerpt = if (!row[Posts.password].isNullOrEmpty()) null else row[Posts.excerpt],
+        slug = row[Posts.slug],
+        cover = row[Posts.cover],
+        allowComment = row[Posts.allowComment],
+        pinned = row[Posts.pinned],
+        encrypted = !row[Posts.password].isNullOrEmpty(),
+        visit = row[Posts.visit],
+        category = null,
+        tags = emptyList(),
+        createTime = row[Posts.createTime],
+        // 如果文章加密，则不返回最后修改时间
+        lastModifyTime = if (!row[Posts.password].isNullOrEmpty()) null else row[Posts.lastModifyTime],
     )
 
     /**
@@ -222,6 +246,30 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 根据文章 ID 获取文章分类
+     * @param postId 文章 ID
+     */
+    override suspend fun categoryByPostId(postId: Int): Category? = dbQuery {
+        Categories.join(
+            PostCategories,
+            JoinType.LEFT,
+            additionalConstraint = { Categories.categoryId eq PostCategories.categoryId })
+            .selectAll().where { PostCategories.postId eq postId }
+            .map(::resultRowToCategory)
+            .singleOrNull()
+    }
+
+    /**
+     * 根据文章 ID 获取文章标签
+     * @param postId 文章 ID
+     */
+    override suspend fun tagsByPostId(postId: Int): List<Tag> = dbQuery {
+        Tags.join(PostTags, JoinType.LEFT, additionalConstraint = { Tags.tagId eq PostTags.tagId })
+            .selectAll().where { PostTags.postId eq postId }
+            .map(::resultRowToTag)
+    }
+
+    /**
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> = dbQuery {
@@ -269,51 +317,18 @@ class PostDaoImpl : PostDao {
         category: Int?,
         sort: PostSort?
     ): Pager<Post> {
-        // 基础查询条件
-        val query =
+        // 构造查询语句
+        val query = sqlQueryPosts(
+            status = status,
+            visible = visible,
+            key = key,
+            tag = tag,
+            category = category,
+            sort = sort
+        ) {
             Posts.join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
                 .selectAll()
-        // 如果文章状态不为空，则添加状态查询条件
-        if (status != null) query.andWhere { Posts.status eq status }
-        // 如果文章可见性不为空，则添加可见性查询条件
-        if (visible != null) query.andWhere { Posts.visible eq visible }
-        // 如果关键字不为空，则添加关键字查询条件
-        if (key != null) query.andWhere { sqlQueryKey(key) }
-        // 如果文章标签不为空，则添加标签查询条件
-        if (tag != null) {
-            // 与当前标签匹配的的文章 ID 集合
-            val matchedPostIds = dbQuery {
-                PostTags.selectAll().where {
-                    PostTags.tagId eq tag
-                }.map { it[PostTags.postId] }
-            }
-            query.andWhere {
-                Posts.postId inList matchedPostIds
-            }
         }
-        // 如果文章分类不为空，则添加分类查询条件
-        if (category != null) {
-            // 与当前分类匹配的的文章 ID 集合
-            val matchedPostIds = dbQuery {
-                PostCategories.selectAll().where {
-                    PostCategories.categoryId eq category
-                }.map { it[PostCategories.postId] }
-            }
-            query.andWhere {
-                Posts.postId inList matchedPostIds
-            }
-        }
-
-        when (sort) {
-            CREATE_DESC -> query.orderBy(Posts.createTime, SortOrder.DESC)
-            CREATE_ASC -> query.orderBy(Posts.createTime, SortOrder.ASC)
-            MODIFY_DESC -> query.orderBy(Posts.lastModifyTime, SortOrder.DESC)
-            MODIFY_ASC -> query.orderBy(Posts.lastModifyTime, SortOrder.ASC)
-            VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
-            VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
-            null -> {}
-        }
-
 
         val pager = Posts.startPage(page, size, ::resultRowToPost) { query }
         getPostTagAndCategory(pager.data)
@@ -347,6 +362,40 @@ class PostDaoImpl : PostDao {
             }
             .orderBy(Posts.createTime, SortOrder.DESC)
             .map(::resultRowToPost)
+    }
+
+    /**
+     * 获取文章 API 接口
+     * @param page 当前页数
+     * @param size 每页条数
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     */
+    override suspend fun apiPosts(
+        page: Int,
+        size: Int,
+        key: String?,
+        tag: Int?,
+        category: Int?
+    ): Pager<ApiPostResponse> {
+        // 构造查询语句
+        val query = sqlQueryPosts(
+            status = PostStatus.PUBLISHED,
+            visible = PostVisible.VISIBLE,
+            key = key,
+            tag = tag,
+            category = category,
+            sort = PINNED
+        ) {
+            // 基础查询条件
+            Posts.join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
+                .selectAll()
+        }
+
+        val pager = Posts.startPage(page, size, ::resultRowToApiPostResponse) { query }
+        getApiPostTagAndCategory(pager.data)
+        return pager
     }
 
     /**
@@ -507,7 +556,7 @@ class PostDaoImpl : PostDao {
         } else {
             // 不删除原来的正文
             // 修改原来的正文为草稿，并修改草稿名
-            val r = PostContents.update({
+            PostContents.update({
                 PostContents.postContentId eq postContentId
             }) {
                 it[status] = PostContentStatus.DRAFT
@@ -531,17 +580,28 @@ class PostDaoImpl : PostDao {
     private suspend fun getPostTagAndCategory(posts: List<Post>) = dbQuery {
         posts.forEach { post ->
             // 获取文章标签
-            post.tags = Tags.join(PostTags, JoinType.LEFT, additionalConstraint = { Tags.tagId eq PostTags.tagId })
-                .selectAll().where { PostTags.postId eq post.postId }
-                .map(::resultRowToTag)
+            post.tags = tagsByPostId(post.postId)
             // 获取文章分类
-            post.category = Categories.join(
-                PostCategories,
-                JoinType.LEFT,
-                additionalConstraint = { Categories.categoryId eq PostCategories.categoryId })
-                .selectAll().where { PostCategories.postId eq post.postId }
-                .map(::resultRowToCategory)
-                .singleOrNull()
+            post.category = categoryByPostId(post.postId)
+        }
+    }
+
+    /**
+     * 给列表中的博客前端 API 响应文章填充分类和标签
+     * @param posts 文章列表
+     */
+    private suspend fun getApiPostTagAndCategory(posts: List<ApiPostResponse>) = dbQuery {
+        posts.forEach { post ->
+            // 如果当前是 API 请求，同时文章是加密状态的话就跳过当前文章的标签和分类检索
+            if (post.encrypted) {
+                post.category = null
+                post.tags = emptyList()
+            } else {
+                // 获取文章标签
+                post.tags = tagsByPostId(post.postId)
+                // 获取文章分类
+                post.category = categoryByPostId(post.postId)
+            }
         }
     }
 
@@ -556,5 +616,71 @@ class PostDaoImpl : PostDao {
                 (Posts.excerpt like "%$key%") or
                 (PostContents.content like "%$key%")) and
                 (Posts.status eq PostStatus.PUBLISHED)
+    }
+
+
+    /**
+     * SQL 语句
+     * 文章查询
+     * @param status 文章状态
+     * @param visible 文章可见性
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     * @param sort 文章排序排序
+     * @param baseQuery 基础查询
+     */
+    private suspend fun sqlQueryPosts(
+        status: PostStatus?,
+        visible: PostVisible?,
+        key: String?,
+        tag: Int?,
+        category: Int?,
+        sort: PostSort?,
+        baseQuery: () -> Query
+    ): Query {
+        val query = baseQuery()
+        // 如果文章状态不为空，则添加状态查询条件
+        if (status != null) query.andWhere { Posts.status eq status }
+        // 如果文章可见性不为空，则添加可见性查询条件
+        if (visible != null) query.andWhere { Posts.visible eq visible }
+        // 如果关键字不为空，则添加关键字查询条件
+        if (key != null) query.andWhere { sqlQueryKey(key) }
+        // 如果文章标签不为空，则添加标签查询条件
+        if (tag != null) {
+            // 与当前标签匹配的的文章 ID 集合
+            val matchedPostIds = dbQuery {
+                PostTags.selectAll().where {
+                    PostTags.tagId eq tag
+                }.map { it[PostTags.postId] }
+            }
+            query.andWhere {
+                Posts.postId inList matchedPostIds
+            }
+        }
+        // 如果文章分类不为空，则添加分类查询条件
+        if (category != null) {
+            // 与当前分类匹配的的文章 ID 集合
+            val matchedPostIds = dbQuery {
+                PostCategories.selectAll().where {
+                    PostCategories.categoryId eq category
+                }.map { it[PostCategories.postId] }
+            }
+            query.andWhere {
+                Posts.postId inList matchedPostIds
+            }
+        }
+
+        when (sort) {
+            CREATE_DESC -> query.orderBy(Posts.createTime, SortOrder.DESC)
+            CREATE_ASC -> query.orderBy(Posts.createTime, SortOrder.ASC)
+            MODIFY_DESC -> query.orderBy(Posts.lastModifyTime, SortOrder.DESC)
+            MODIFY_ASC -> query.orderBy(Posts.lastModifyTime, SortOrder.ASC)
+            VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
+            VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
+            PINNED -> query.orderBy(Posts.pinned, SortOrder.DESC)
+            null -> {}
+        }
+        return query
     }
 }

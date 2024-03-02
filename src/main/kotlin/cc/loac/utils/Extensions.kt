@@ -160,8 +160,8 @@ fun String.markdownToPlainText(): String {
  * String 扩展函数
  * 将字符串转为 SHA256 哈希
  */
-fun String?.sha256Hex(): String {
-    this ?: return ""
+fun String?.sha256Hex(): String? {
+    this ?: return null
     val hashingService: HashingService by inject(HashingService::class.java)
     return hashingService.generatedHash(this)
 }
