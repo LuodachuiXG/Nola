@@ -112,6 +112,18 @@ interface PostService {
     ): PostContent?
 
     /**
+     * 删除文章内容
+     * @param postId 文章 ID
+     * @param status 文章内容状态
+     * @param draftNames 草稿名集合
+     */
+    suspend fun deletePostContent(
+        postId: Int,
+        status: PostContentStatus = PostContentStatus.PUBLISHED,
+        draftNames: List<String>? = null
+    ): Boolean
+
+    /**
      * 修改文章内容
      * @param postContent 文章内容请求数据类
      */
@@ -120,4 +132,12 @@ interface PostService {
         status: PostContentStatus = PostContentStatus.PUBLISHED,
         draftName: String? = null
     ): Boolean
+
+    /**
+     * 修改文章草稿名
+     * @param postId 文章 ID
+     * @param oldName 老草稿名
+     * @param newName 新草稿名
+     */
+    suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean
 }
