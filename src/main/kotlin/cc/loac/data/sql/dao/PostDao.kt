@@ -51,7 +51,7 @@ interface PostDao {
      * @param postId 文章 ID
      * @param time 最后修改时间
      */
-    suspend fun updatePostLastModifyTime(postId: Int, time: Long?): Boolean
+    suspend fun updatePostLastModifyTime(postId: Int, time: Long? = null): Boolean
 
     /**
      * 获取所有文章
@@ -109,6 +109,14 @@ interface PostDao {
     suspend fun postContent(postId: Int, status: PostContentStatus, draftName: String?): PostContent?
 
     /**
+     * 添加文章草稿
+     * @param postId 文章 ID
+     * @param content 文章内容
+     * @param draftName 草稿名
+     */
+    suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent?
+
+    /**
      * 删除文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
@@ -120,7 +128,11 @@ interface PostDao {
      * 修改文章内容
      * @param postContent 文章内容请求数据类
      */
-    suspend fun updatePostContent(postContent: PostContentRequest, status: PostContentStatus, draftName: String?): Boolean
+    suspend fun updatePostContent(
+        postContent: PostContentRequest,
+        status: PostContentStatus,
+        draftName: String?
+    ): Boolean
 
     /**
      * 修改文章草稿名
@@ -130,6 +142,17 @@ interface PostDao {
      */
     suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean
 
-
-
+    /**
+     * 将文章草稿转换为文章正文
+     * @param postId 文章 ID
+     * @param draftName 草稿名
+     * @param deleteContent 是否删除原来的正文
+     * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
+     */
+    suspend fun updatePostDraft2Content(
+        postId: Int,
+        draftName: String,
+        deleteContent: Boolean,
+        contentName: String?
+    ): Boolean
 }

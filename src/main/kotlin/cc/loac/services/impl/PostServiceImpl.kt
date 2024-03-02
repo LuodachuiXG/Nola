@@ -8,6 +8,7 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
+import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.PostDao
@@ -173,6 +174,20 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 添加文章草稿
+     * @param postId 文章 ID
+     * @param content 文章内容
+     * @param draftName 草稿名
+     */
+    override suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent? {
+        // 先判断文章是否存在
+        if (!isPostExist(postId)) throw MyException("文章 [$postId] 不存在")
+        // 判断草稿名是否已经存在
+        if (isPostDraftNameExist(postId, draftName)) throw MyException("草稿名 [$draftName] 已经存在")
+        return postDao.addPostDraft(postId, content, draftName)
+    }
+
+    /**
      * 删除文章内容
      * @param postId 文章 ID
      * @param status 文章内容状态
@@ -215,9 +230,39 @@ class PostServiceImpl : PostService {
      */
     override suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean {
         // 先判断新的草稿名是否已经存在
-        val postContent = postContent(postId, PostContentStatus.DRAFT, newName)
-        if (postContent != null) throw MyException("草稿名 [$newName] 已存在")
+        if (isPostDraftNameExist(postId, newName)) throw MyException("草稿名 [$newName] 已存在")
         return postDao.updatePostDraftName(postId, oldName, newName)
+    }
+
+    /**
+     * 将文章草稿转换为文章正文
+     * @param postId 文章 ID
+     * @param draftName 草稿名
+     * @param deleteContent 是否删除原来的正文
+     * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
+     */
+    override suspend fun updatePostDraft2Content(
+        postId: Int,
+        draftName: String,
+        deleteContent: Boolean,
+        contentName: String?
+    ): Boolean {
+        // 先判断文章是否存在
+        if (!isPostExist(postId)) throw MyException("文章 [$postId] 不存在")
+        // 判断草稿名是否存在
+        if (!isPostDraftNameExist(postId, draftName)) throw MyException("草稿名 [$draftName] 不存在")
+        val result = postDao.updatePostDraft2Content(postId, draftName, deleteContent, contentName)
+        // 是否修改成功
+        if (result) {
+            // 启动线程执行耗时操作
+            launchCoroutine {
+                // 尝试根据新的文章正文更新文章摘要
+                tryUpdatePostExcerptByPostContent(postId)
+                // 修改文章最后修改时间
+                postDao.updatePostLastModifyTime(postId)
+            }
+        }
+        return result
     }
 
     /**
@@ -280,6 +325,23 @@ class PostServiceImpl : PostService {
             excerpt = excerpt.substring(0, length)
         }
         return excerpt
+    }
+
+    /**
+     * 判断文章是否存在
+     * @param postId 文章 ID
+     */
+    private suspend fun isPostExist(postId: Int): Boolean {
+        return posts(listOf(postId)).firstOrNull() != null
+    }
+
+    /**
+     * 判断草稿名是否存在
+     * @param postId 文章 ID
+     * @param draftName 草稿名
+     */
+    private suspend fun isPostDraftNameExist(postId: Int, draftName: String): Boolean {
+        return postContent(postId, PostContentStatus.DRAFT, draftName) != null
     }
 
 }

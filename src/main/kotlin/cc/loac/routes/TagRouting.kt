@@ -1,5 +1,6 @@
 package cc.loac.routes
 
+import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.services.TagService
 import io.ktor.server.application.*
@@ -26,7 +27,7 @@ fun Route.tagAdminRouting() {
                     throw ParamMismatchException()
                 }
                 // 添加标签
-                call.respondSuccess(tagService.addTag(tag))
+                call.respondSuccess(tagService.addTag(tag) ?: throw AddFailedException())
             }
 
             /** 删除标签 - 根据标签 ID **/

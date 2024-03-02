@@ -1,5 +1,6 @@
 package cc.loac.routes
 
+import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Category
 import cc.loac.services.CategoryService
@@ -22,7 +23,7 @@ fun Route.categoryAdminRouting() {
             post {
                 val category = call.receiveByDataClass<Category>()
                 // 添加分类
-                call.respondSuccess(categoryService.addCategory(category))
+                call.respondSuccess(categoryService.addCategory(category) ?: throw AddFailedException())
             }
 
             /** 删除分类 - 根据分类 ID **/
