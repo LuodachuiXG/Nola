@@ -10,6 +10,7 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
 import cc.loac.data.sql.dao.PostDao
@@ -18,6 +19,8 @@ import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.markdownToPlainText
+import cc.loac.utils.respondSuccess
+import io.ktor.server.application.*
 import kotlinx.css.th
 import org.koin.java.KoinJavaComponent.inject
 
@@ -159,6 +162,24 @@ class PostServiceImpl : PostService {
      */
     override suspend fun postsByKey(key: String): List<Post> {
         return postDao.postsByKey(key)
+    }
+
+    /**
+     * 获取文章 API 接口
+     * @param page 当前页数
+     * @param size 每页条数
+     * @param key 关键字
+     * @param tag 文章标签
+     * @param category 文章分类
+     */
+    override suspend fun apiPosts(
+        page: Int,
+        size: Int,
+        key: String?,
+        tag: Int?,
+        category: Int?
+    ): Pager<ApiPostResponse> {
+        return postDao.apiPosts(page, size, key, tag, category)
     }
 
     /**

@@ -87,5 +87,12 @@ fun Route.tagApiRouting() {
         get {
             call.respondSuccess(tagService.tags())
         }
+
+        /** 分页获取所有标签 **/
+        get("/{page}/{size}") {
+            call.receivePageAndSize { page, size ->
+                call.respondSuccess(tagService.tags(page, size))
+            }
+        }
     }
 }
