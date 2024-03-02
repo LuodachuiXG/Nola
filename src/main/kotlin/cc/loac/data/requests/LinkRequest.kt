@@ -15,5 +15,7 @@ data class LinkRequest(
     /** 描述 **/
     val description: String?,
     /** 优先级（0默认，1 - 10） **/
-    val priority: Int
+    val priority: Int,
+    /** 备注 **/
+    val remark: String?
 )

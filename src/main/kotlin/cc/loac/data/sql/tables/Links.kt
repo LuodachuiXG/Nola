@@ -18,6 +18,8 @@ object Links : Table("link") {
     val description = varchar("description", 512).nullable()
     /** 优先级（0默认，1 - 10） **/
     val priority = integer("priority").default(0)
+    /** 备注 **/
+    val remark = varchar("remark", 256).nullable()
     /** 创建时间戳 **/
     val createTime = long("createTime")
     /** 最后修改时间戳 **/

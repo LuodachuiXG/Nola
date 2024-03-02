@@ -17,6 +17,8 @@ data class Link(
     val description: String?,
     /** 优先级（0默认，1 - 10） **/
     val priority: Int = 0,
+    /** 备注 **/
+    val remark: String?,
     /** 创建时间戳 **/
     val createTime: Long,
     /** 最后修改时间戳 **/
