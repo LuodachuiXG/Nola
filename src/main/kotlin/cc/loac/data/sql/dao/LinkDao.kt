@@ -20,4 +20,10 @@ interface LinkDao {
      */
     suspend fun deleteLinks(ids: List<Int>): Boolean
 
+    /**
+     * 修改友情链接
+     * @param link 友情链接请求数据类
+     */
+    suspend fun updateLink(link: LinkRequest): Boolean
+
 }

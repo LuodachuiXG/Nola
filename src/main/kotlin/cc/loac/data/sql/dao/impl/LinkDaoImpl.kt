@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.update
 import java.util.*
 
 /**
@@ -26,7 +27,8 @@ class LinkDaoImpl : LinkDao {
         logo = row[Links.logo],
         description = row[Links.description],
         priority = row[Links.priority],
-        createTime = row[Links.createTime]
+        createTime = row[Links.createTime],
+        lastModifyTime = row[Links.lastModifyTime]
     )
 
 
@@ -52,6 +54,23 @@ class LinkDaoImpl : LinkDao {
     override suspend fun deleteLinks(ids: List<Int>): Boolean = dbQuery {
         Links.deleteWhere {
             linkId inList  ids
+        } > 0
+    }
+
+    /**
+     * 修改友情链接
+     * @param link 友情链接请求数据类
+     */
+    override suspend fun updateLink(link: LinkRequest): Boolean = dbQuery {
+        Links.update({
+            Links.linkId eq link.linkId
+        }) {
+            it[displayName] = link.displayName
+            it[url] = link.url
+            it[logo] = link.logo
+            it[description] = link.description
+            it[priority] = link.priority
+            it[lastModifyTime] = Date().time
         } > 0
     }
 }

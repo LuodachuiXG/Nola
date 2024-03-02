@@ -20,6 +20,8 @@ object Links : Table("link") {
     val priority = integer("priority").default(0)
     /** 创建时间戳 **/
     val createTime = long("createTime")
+    /** 最后修改时间戳 **/
+    val lastModifyTime = long("lastModifyTime").nullable()
 
     override val primaryKey = PrimaryKey(linkId)
 }

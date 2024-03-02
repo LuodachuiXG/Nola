@@ -18,5 +18,7 @@ data class Link(
     /** 优先级（0默认，1 - 10） **/
     val priority: Int = 0,
     /** 创建时间戳 **/
-    val createTime: Long
+    val createTime: Long,
+    /** 最后修改时间戳 **/
+    val lastModifyTime: Long?
 )
