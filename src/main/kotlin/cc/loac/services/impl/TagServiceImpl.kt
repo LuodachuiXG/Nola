@@ -5,8 +5,6 @@ import cc.loac.data.models.Tag
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.services.TagService
-import cc.loac.utils.error
-import kotlinx.css.em
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -71,7 +69,7 @@ class TagServiceImpl : TagService {
         if (page == 0) {
             // 获取所有标签
             val tags = tags()
-            return Pager(page, size, tags, tags.size.toLong(), tags.size.toLong())
+            return Pager(0, 0, tags, tags.size.toLong(), tags.size.toLong())
         }
         return tagDao.tags(page, size)
     }

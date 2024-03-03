@@ -67,7 +67,7 @@ class CategoryServiceImpl : CategoryService {
         if (page == 0) {
             // 获取所有分类
             val categories = categories()
-            return Pager(page, size, categories, categories.size.toLong(), 1)
+            return Pager(0, 0, categories, categories.size.toLong(), 1)
         }
         return categoryDao.categories(page, size)
     }
