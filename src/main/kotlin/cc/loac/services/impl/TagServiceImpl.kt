@@ -68,16 +68,10 @@ class TagServiceImpl : TagService {
      * @param size 每页条数
      */
     override suspend fun tags(page: Int, size: Int): Pager<Tag> {
-        if (page == 0 && size == 0) {
+        if (page == 0) {
             // 获取所有标签
             val tags = tags()
-            return Pager(
-                page = 0,
-                size = 0,
-                data = tags,
-                totalData = tags.size.toLong(),
-                totalPages = 1
-            )
+            return Pager(page, size, tags, tags.size.toLong(), tags.size.toLong())
         }
         return tagDao.tags(page, size)
     }

@@ -64,6 +64,11 @@ class CategoryServiceImpl : CategoryService {
      * @param size 每页条数
      */
     override suspend fun categories(page: Int, size: Int): Pager<Category> {
+        if (page == 0) {
+            // 获取所有分类
+            val categories = categories()
+            return Pager(page, size, categories, categories.size.toLong(), 1)
+        }
         return categoryDao.categories(page, size)
     }
 
