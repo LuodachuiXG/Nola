@@ -46,17 +46,8 @@ fun Route.linkAdminRouting() {
                 call.respondSuccess(linkService.updateLink(link))
             }
 
-            /** 获取所有友情链接 **/
+            /** 获取友情链接 **/
             get {
-                // 可空的链接排序
-                val sort = call.receiveNullablePathParam("sort") {
-                    it?.isEnum<LinkSort>()
-                }?.let { LinkSort.valueOf(it) }
-                call.respondSuccess(linkService.links(sort))
-            }
-
-            /** 分页获取友情链接 **/
-            get("/{page}/{size}") {
                 call.receivePageAndSize { page, size ->
                     // 可空的链接排序
                     val sort = call.receiveNullablePathParam("sort") {
@@ -74,19 +65,12 @@ fun Route.linkAdminRouting() {
  */
 fun Route.linkApiRouting() {
     route("link") {
-        /** 获取所有友情链接 **/
+        /** 获取友情链接 **/
         get {
-            // 将 Link 转为 ApiLinkResponse 数据类，抹去敏感数据
-            val links = transformLinkToApiForm(linkService.links())
-            call.respondSuccess(links)
-        }
-
-        /** 分页获取友情链接 **/
-        get("/{page}/{size}") {
             call.receivePageAndSize { page, size ->
                 // 将 Link 转为 ApiLinkResponse 数据类，抹去敏感数据
                 val linksPager = linkService.links(page, size)
-                val resultPager = Pager (
+                val resultPager = Pager(
                     page = linksPager.page,
                     size = linksPager.size,
                     data = transformLinkToApiForm(linksPager.data),
