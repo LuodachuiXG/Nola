@@ -129,7 +129,8 @@ fun Route.postAdminRouting() {
             /** 获取文章正文 **/
             get("/publish/{postId}") {
                 val postId = call.receiveIntPathParam("postId")
-                call.respondSuccess(postService.postContent(postId))
+                call.respondSuccess(postService.postContent(postId)
+                    ?: throw MyException("文章 [$postId] 不存在"))
             }
 
             /** 添加文章草稿 **/
@@ -204,7 +205,10 @@ fun Route.postAdminRouting() {
                 // 判断文章 ID 是否为整数
                 val postId = params["postId"]?.toIntOrNull() ?: throw ParamMismatchException()
                 val draftName = params["draftName"]!!
-                call.respondSuccess(postService.postContent(postId, PostContentStatus.DRAFT, draftName))
+                call.respondSuccess(
+                    postService.postContent(postId, PostContentStatus.DRAFT, draftName) ?:
+                    throw MyException("草稿 [$draftName] 不存在")
+                )
             }
         }
     }
