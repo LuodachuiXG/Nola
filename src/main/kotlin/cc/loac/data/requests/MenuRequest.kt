@@ -5,7 +5,7 @@ package cc.loac.data.requests
  */
 data class MenuRequest(
     /** 菜单 ID **/
-    val menuId: Int,
+    val menuId: Int?,
     /** 菜单名 **/
     val displayName: String,
     /** 是否是主菜单 **/

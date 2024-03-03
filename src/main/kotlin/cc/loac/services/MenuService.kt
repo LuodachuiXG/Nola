@@ -1,6 +1,8 @@
 package cc.loac.services
 
 import cc.loac.data.models.Menu
+import cc.loac.data.models.MenuItem
+import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.tables.Menus
@@ -51,4 +53,16 @@ interface MenuService {
      * @param size 每页条数
      */
     suspend fun menus(page: Int, size: Int): Pager<Menu>
+
+    /**
+     * 添加菜单项
+     * @param menuItem 菜单项请求数据类
+     */
+    suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem?
+
+    /**
+     * 获取菜单项
+     * @param menuItemId 菜单项 ID
+     */
+    suspend fun menuItem(menuItemId: Int): MenuItem?
 }

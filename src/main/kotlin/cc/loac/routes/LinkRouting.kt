@@ -41,7 +41,7 @@ fun Route.linkAdminRouting() {
             put {
                 val link = call.receiveByDataClass<LinkRequest> {
                     // 优先级范围 0 - 100
-                    it.linkId > 0 && it.priority in (0..100)
+                    it.priority in (0..100) && it.linkId != null
                 }
                 call.respondSuccess(linkService.updateLink(link))
             }

@@ -65,7 +65,7 @@ class LinkDaoImpl : LinkDao {
      */
     override suspend fun updateLink(link: LinkRequest): Boolean = dbQuery {
         Links.update({
-            Links.linkId eq link.linkId
+            Links.linkId eq link.linkId!!
         }) {
             it[displayName] = link.displayName
             it[url] = link.url

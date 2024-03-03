@@ -1,11 +1,16 @@
 package cc.loac.data.sql.dao.impl
 
+import cc.loac.data.models.Config
 import cc.loac.data.models.Menu
+import cc.loac.data.models.MenuItem
+import cc.loac.data.models.enums.MenuItemTarget
+import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.MenuDao
 import cc.loac.data.sql.startPage
+import cc.loac.data.sql.tables.MenuItems
 import cc.loac.data.sql.tables.Menus
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -16,11 +21,27 @@ import java.util.*
  */
 class MenuDaoImpl : MenuDao {
 
+    /**
+     * 将数据库检索结果转为 [Menu] 菜单数据类
+     */
     private fun resultToMenu(row: ResultRow) = Menu(
         menuId = row[Menus.menuId],
         isMain = row[Menus.isMain],
         displayName = row[Menus.displayName],
         createTime = row[Menus.createTime]
+    )
+
+    /**
+     * 将数据库检索结果转为 [MenuItem] 菜单项数据类
+     */
+    private fun resultToMenuItem(row: ResultRow) = MenuItem(
+        menuItemId = row[MenuItems.menuItemId],
+        displayName = row[MenuItems.displayName],
+        href = row[MenuItems.href],
+        target = row[MenuItems.target],
+        parentMenuId = row[MenuItems.parentMenuId],
+        parentMenuItemId = row[MenuItems.parentMenuItemId],
+        createTime = row[MenuItems.createTime]
     )
 
 
@@ -50,7 +71,7 @@ class MenuDaoImpl : MenuDao {
      */
     override suspend fun updateMenu(menuRequest: MenuRequest): Boolean = dbQuery {
         Menus.update({
-            Menus.menuId eq menuRequest.menuId
+            Menus.menuId eq menuRequest.menuId!!
         }) {
             it[displayName] = menuRequest.displayName
             it[isMain] = menuRequest.isMain
@@ -100,5 +121,33 @@ class MenuDaoImpl : MenuDao {
         return Menus.startPage(page, size, ::resultToMenu) {
             selectAll().orderBy(Menus.createTime, SortOrder.DESC)
         }
+    }
+
+    /**
+     * 添加菜单项
+     * @param menuItem 菜单项请求数据类
+     */
+    override suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem? = dbQuery {
+        val insertStatement = MenuItems.insert {
+            it[displayName] = menuItem.displayName
+            it[href] = menuItem.href
+            it[target] = menuItem.target ?: MenuItemTarget.BLANK
+            it[parentMenuId] = menuItem.parentMenuId
+            it[parentMenuItemId] = menuItem.parentMenuItemId
+            it[createTime] = Date().time
+        }
+        insertStatement.resultedValues?.singleOrNull()?.let(::resultToMenuItem)
+    }
+
+    /**
+     * 获取菜单项
+     * @param menuItemId 菜单项 ID
+     */
+    override suspend fun menuItem(menuItemId: Int): MenuItem? = dbQuery {
+        MenuItems
+            .selectAll()
+            .where { MenuItems.menuItemId eq menuItemId }
+            .map(::resultToMenuItem)
+            .singleOrNull()
     }
 }
