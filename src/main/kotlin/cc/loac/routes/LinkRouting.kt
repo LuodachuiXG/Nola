@@ -24,8 +24,8 @@ fun Route.linkAdminRouting() {
             /** 添加友情链接 **/
             post {
                 val link = call.receiveByDataClass<LinkRequest> {
-                    // 优先级范围 0 - 10
-                    it.priority in (0..10)
+                    // 优先级范围 0 - 100
+                    it.priority in (0..100)
                 }
                 call.respondSuccess(linkService.addLink(link) ?: throw AddFailedException())
             }
@@ -40,8 +40,8 @@ fun Route.linkAdminRouting() {
             /** 修改友情链接 **/
             put {
                 val link = call.receiveByDataClass<LinkRequest> {
-                    // 优先级范围 0 - 10
-                    it.linkId > 0 && it.priority in (0..10)
+                    // 优先级范围 0 - 100
+                    it.linkId > 0 && it.priority in (0..100)
                 }
                 call.respondSuccess(linkService.updateLink(link))
             }

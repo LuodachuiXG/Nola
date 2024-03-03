@@ -36,7 +36,7 @@ object Users : Table("user") {
     val lastLoginDate = long("last_login_time").nullable()
 
     /** 头像地址 URL **/
-    val avatar = varchar("avatar", 256).nullable()
+    val avatar = varchar("avatar", 512).nullable()
 
 
     override val primaryKey = PrimaryKey(userId)

@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
+import kotlinx.css.map
 import kotlinx.css.pre
 
 /**
@@ -163,17 +164,19 @@ suspend fun ApplicationCall.receiveIntPathParam(
 
 /**
  * 接收用于分页的页数和页面条数
- * 该方法只能接收路径传参形式，如 get("/{page}/{size}")
+ * 该方法只能接收这两种传参形式：get("/{page}/{size}?sort=DESC")
+ * 如果 page 为空或 0，page 和 size 都回调 0
  */
 suspend fun ApplicationCall.receivePageAndSize(
     block: suspend (page: Int, size: Int) -> Unit
 ) {
     // 获取路径传参
-    val map = receivePathParams("page", "size")
-    val page = map["page"]!!
-    val size = map["size"]!!
-    // page 和 size 不为非零正整数
-    if (!page.isPositiveInt() || !size.isPositiveInt()) {
+    var page = receiveNullablePathParam("page")
+    if (page == null) page = "0"
+    // 如果 page 为 0，size 也为 0
+    val size = if (page == "0") "0" else receivePathParam("size")
+    // page 和 size 是否为负数
+    if (!page.isPositiveInt(true) || !size.isPositiveInt(true)) {
         // 抛出参数不匹配异常
         throw ParamMismatchException()
     }
