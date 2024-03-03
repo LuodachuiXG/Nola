@@ -1,6 +1,7 @@
 package cc.loac.routes
 
 import cc.loac.data.exceptions.AddFailedException
+import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.services.MenuService
 import cc.loac.utils.receiveByDataClass
@@ -34,7 +35,7 @@ fun Route.menuAdminRouting() {
             /** 修改菜单 **/
             put {
                 val menu = call.receiveByDataClass<MenuRequest> {
-                    it.menuId > 0
+                    it.menuId != null
                 }
                 call.respondSuccess(menuService.updateMenu(menu))
             }
@@ -44,6 +45,13 @@ fun Route.menuAdminRouting() {
                 call.receivePageAndSize { page, size ->
                     call.respondSuccess(menuService.menus(page, size))
                 }
+            }
+
+            /** 添加菜单项 **/
+            post("/item") {
+                val menuItem = call.receiveByDataClass<MenuItemRequest>()
+                call.respondSuccess(menuService.addMenuItem(menuItem)
+                    ?: throw AddFailedException())
             }
         }
     }

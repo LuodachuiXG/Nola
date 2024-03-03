@@ -29,12 +29,11 @@ class TagDaoImpl : TagDao {
      * @param tag 标签数据类
      */
     override suspend fun addTag(tag: Tag): Tag? = dbQuery {
-        val insertStatement = Tags.insert {
+        Tags.insert {
             it[displayName] = tag.displayName
             it[slug] = tag.slug
             it[color] = tag.color
-        }
-        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToTag)
+        }.resultedValues?.singleOrNull()?.let(::resultRowToTag)
     }
 
     /**

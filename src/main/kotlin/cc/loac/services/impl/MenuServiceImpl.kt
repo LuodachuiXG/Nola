@@ -2,6 +2,8 @@ package cc.loac.services.impl
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Menu
+import cc.loac.data.models.MenuItem
+import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.MenuDao
@@ -81,5 +83,28 @@ class MenuServiceImpl : MenuService {
             return Pager(0, 0, menus, menus.size.toLong(), 1)
         }
         return menuDao.menus(page, size)
+    }
+
+    /**
+     * 添加菜单项
+     * @param menuItem 菜单项请求数据类
+     */
+    override suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem? {
+        // 添加前先检查父菜单是否存在
+        menu(menuItem.parentMenuId) ?: throw MyException("父菜单 [${menuItem.parentMenuId}] 不存在")
+        // 如果父菜单项不为空，再检查一下父菜单项是否存在
+        if (menuItem.parentMenuItemId != null) {
+            menuItem(menuItem.parentMenuItemId) ?:
+            throw MyException("父菜单项 [${menuItem.parentMenuItemId}] 不存在")
+        }
+        return menuDao.addMenuItem(menuItem)
+    }
+
+    /**
+     * 获取菜单项
+     * @param menuItemId 菜单项 ID
+     */
+    override suspend fun menuItem(menuItemId: Int): MenuItem? {
+        return menuDao.menuItem(menuItemId)
     }
 }
