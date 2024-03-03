@@ -31,6 +31,8 @@ fun Application.configureRouting(
             postAdminRouting()
             // link 友情链接管理员路由
             linkAdminRouting()
+            // menu 菜单管理员路由
+            menuAdminRouting()
         }
 
         /** 博客接口 **/
@@ -45,6 +47,8 @@ fun Application.configureRouting(
             postApiRouting()
             // link 友情链接 API 路由
             linkApiRouting()
+            // menu 菜单 API 路由
+            menuApiRouting()
         }
     }
 }
