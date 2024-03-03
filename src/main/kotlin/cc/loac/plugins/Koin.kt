@@ -44,4 +44,7 @@ val appModule = module {
     single<LinkService> { LinkServiceImpl() }
     single<LinkDao> { LinkDaoImpl() }
 
+    single<MenuService> { MenuServiceImpl() }
+    single<MenuDao> { MenuDaoImpl() }
+
 }
