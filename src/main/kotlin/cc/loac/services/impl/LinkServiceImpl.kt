@@ -54,6 +54,11 @@ class LinkServiceImpl : LinkService {
      * @param sort 友情链接排序
      */
     override suspend fun links(page: Int, size: Int, sort: LinkSort?): Pager<Link> {
+        if (page == 0) {
+            // 获取所有友情链接
+            val links = links(sort)
+            return Pager(0, 0, links, links.size.toLong(), 1)
+        }
         return linkDao.links(page, size, sort)
     }
 }

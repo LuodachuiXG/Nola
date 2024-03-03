@@ -172,7 +172,7 @@ suspend fun ApplicationCall.receivePageAndSize(
 ) {
     // 获取路径传参
     var page = receiveNullablePathParam("page")
-    if (page == null) page = "0"
+    if (page.isNullOrEmpty()) page = "0"
     // 如果 page 为 0，size 也为 0
     val size = if (page == "0") "0" else receivePathParam("size")
     // page 和 size 是否为负数

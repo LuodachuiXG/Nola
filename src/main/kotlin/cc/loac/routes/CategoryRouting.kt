@@ -70,6 +70,7 @@ fun Route.categoryApiRouting() {
         /** 获取分类 **/
         get {
             call.receivePageAndSize { page, size ->
+                page.toString().error()
                 call.respondSuccess(categoryService.categories(page, size))
             }
         }
