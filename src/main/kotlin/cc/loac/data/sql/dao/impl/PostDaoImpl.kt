@@ -330,6 +330,12 @@ class PostDaoImpl : PostDao {
                 .selectAll()
         }
 
+        if (page == 0) {
+            // 获取所有文章
+            val posts = dbQuery { query.map(::resultRowToPost) }
+            getPostTagAndCategory(posts)
+            return Pager(0, 0, posts, posts.size.toLong(), 1)
+        }
         val pager = Posts.startPage(page, size, ::resultRowToPost) { query }
         getPostTagAndCategory(pager.data)
         return pager
@@ -391,6 +397,13 @@ class PostDaoImpl : PostDao {
             // 基础查询条件
             Posts.join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
                 .selectAll()
+        }
+
+        if (page == 0) {
+            // 获取所有文章
+            val posts = dbQuery { query.map(::resultRowToApiPostResponse) }
+            getApiPostTagAndCategory(posts)
+            return Pager(0, 0, posts, posts.size.toLong(), 1)
         }
 
         val pager = Posts.startPage(page, size, ::resultRowToApiPostResponse) { query }

@@ -63,13 +63,8 @@ fun Route.postAdminRouting() {
                 call.respondSuccess(postService.updatePost(postRequest))
             }
 
-            /** 获取所有文章 **/
+            /** 获取文章 **/
             get {
-                call.respondSuccess(postService.posts())
-            }
-
-            /** 分页获取文章 **/
-            get("/{page}/{size}") {
                 call.receivePageAndSize { page, size ->
                     // 可空文章状态
                     val status = call.receiveNullablePathParam("status") {
@@ -220,8 +215,8 @@ fun Route.postAdminRouting() {
  */
 fun Route.postApiRouting() {
     route("post") {
-        /** 分页获取文章 **/
-        get("/{page}/{size}") {
+        /** 获取文章 **/
+        get {
             call.receivePageAndSize { page, size ->
                 // 可空文章关键字
                 val key = call.receiveNullablePathParam("key")
