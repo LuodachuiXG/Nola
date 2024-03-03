@@ -60,13 +60,8 @@ fun Route.tagAdminRouting() {
                 call.respondSuccess(tagService.updateTag(tag))
             }
 
-            /** 获取所有标签 **/
+            /** 获取标签 **/
             get {
-                call.respondSuccess(tagService.tags())
-            }
-
-            /** 分页获取所有标签 **/
-            get("/{page}/{size}") {
                 call.receivePageAndSize { page, size ->
                     call.respondSuccess(tagService.tags(page, size))
                 }
@@ -80,13 +75,9 @@ fun Route.tagAdminRouting() {
  */
 fun Route.tagApiRouting() {
     route("/tag") {
-        /** 获取所有标签 **/
-        get {
-            call.respondSuccess(tagService.tags())
-        }
 
-        /** 分页获取所有标签 **/
-        get("/{page}/{size}") {
+        /** 获取标签 **/
+        get {
             call.receivePageAndSize { page, size ->
                 call.respondSuccess(tagService.tags(page, size))
             }

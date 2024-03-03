@@ -105,8 +105,10 @@ fun String.isHexColor(): Boolean {
 /**
  * String 扩展函数
  * 验证是否是非零正整数
+ * @param includeZero 是否包含零
  */
-fun String.isPositiveInt(): Boolean {
+fun String.isPositiveInt(includeZero: Boolean = false): Boolean {
+    if (includeZero) return this.matches("^[0-9]\\d*")
     return this.matches("^[1-9]\\d*")
 }
 

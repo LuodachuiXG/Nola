@@ -44,6 +44,10 @@ object DatabaseSingleton {
             SchemaUtils.create(PostContents)
             // 友情链接表
             SchemaUtils.create(Links)
+            // 菜单表
+            SchemaUtils.create(Menus)
+            // 菜单项表
+            SchemaUtils.create(MenuItems)
         }
     }
 
