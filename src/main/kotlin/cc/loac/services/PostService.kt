@@ -9,6 +9,7 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.responses.ApiPostContentResponse
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
@@ -55,6 +56,12 @@ interface PostService {
      * @param postId 文章 ID
      */
     suspend fun tryUpdatePostExcerptByPostContent(postId: Int): Boolean
+
+    /**
+     * 增加文章访问量
+     * @param postId 文章 ID
+     */
+    suspend fun addPostVisit(postId: Int): Boolean
 
     /**
      * 获取所有文章
@@ -139,6 +146,15 @@ interface PostService {
     ): PostContent?
 
     /**
+     * 获取文章博客 API 接口
+     * ID 和别名至少存在一个
+     * @param postId 文章 ID
+     * @param slug 文章别名
+     * @param password 密码
+     */
+    suspend fun apiPostContent(postId: Int?, slug: String?, password: String?): ApiPostContentResponse?
+
+    /**
      * 添加文章草稿
      * @param postId 文章 ID
      * @param content 文章内容
@@ -189,4 +205,11 @@ interface PostService {
         deleteContent: Boolean,
         contentName: String?
     ): Boolean
+
+    /**
+     * 验证文章密码是否正确
+     * @param postId 文章 ID
+     * @param password 密码
+     */
+    suspend fun isPostPasswordValid(postId: Int, password: String): Boolean
 }

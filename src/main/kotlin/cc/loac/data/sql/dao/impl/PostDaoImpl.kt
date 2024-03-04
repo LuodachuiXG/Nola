@@ -24,6 +24,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import java.util.Date
 
 /**
@@ -270,6 +271,18 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 增加文章访问量
+     * @param postId 文章 ID
+     */
+    override suspend fun addPostVisit(postId: Int): Boolean = dbQuery {
+        Posts.update({
+            Posts.postId eq postId
+        }) {
+            it[visit] = visit + 1
+        } > 0
+    }
+
+    /**
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> = dbQuery {
@@ -346,11 +359,13 @@ class PostDaoImpl : PostDao {
      * @param slug 文章别名
      */
     override suspend fun postBySlug(slug: String): Post? = dbQuery {
-        Posts
+        val post = Posts
             .selectAll()
             .where { Posts.slug eq slug }
             .map(::resultRowToPost)
-            .firstOrNull()
+            .firstOrNull() ?: return@dbQuery null
+        getPostTagAndCategory(listOf(post))
+        post
     }
 
     /**
@@ -584,6 +599,21 @@ class PostDaoImpl : PostDao {
             it[status] = PostContentStatus.PUBLISHED
             it[PostContents.draftName] = null
         } > 0
+    }
+
+    /**
+     * 验证文章密码是否正确
+     * @param postId 文章 ID
+     * @param password 密码
+     */
+    override suspend fun isPostPasswordValid(postId: Int, password: String): Boolean = dbQuery {
+        Posts
+            .selectAll()
+            .where {
+                Posts.postId eq postId and (Posts.password eq password.sha256Hex())
+            }
+            .map { it[Posts.postId] }
+            .firstOrNull() != null
     }
 
     /**
