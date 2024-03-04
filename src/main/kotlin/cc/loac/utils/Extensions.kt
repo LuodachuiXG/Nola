@@ -122,6 +122,14 @@ fun String.isInt(): Boolean {
 
 /**
  * String 扩展函数
+ * 验证是否是布尔值
+ */
+fun String.isBoolean(): Boolean {
+    return this.matches("^(true|false)$")
+}
+
+/**
+ * String 扩展函数
  * 将 Markdown 转为 HTML
  */
 fun String.markdownToHtml(): String {

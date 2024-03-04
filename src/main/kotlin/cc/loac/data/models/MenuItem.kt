@@ -19,5 +19,7 @@ data class MenuItem(
     /** 父菜单项 ID */
     val parentMenuItemId: Int?,
     /** 创建时间 */
-    val createTime: Long
+    val createTime: Long,
+    /** 最后修改时间 **/
+    val lastModifyTime: Long?
 )

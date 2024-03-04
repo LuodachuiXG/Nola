@@ -1,6 +1,7 @@
 package cc.loac.data.sql.tables
 
 import cc.loac.data.models.enums.MenuItemTarget
+import cc.loac.data.sql.tables.Menus.nullable
 import org.jetbrains.exposed.sql.Table
 
 /**
@@ -23,10 +24,13 @@ object MenuItems : Table("menu_item") {
     val parentMenuId = integer("parentMenuId").references(Menus.menuId)
 
     /** 父菜单项 ID **/
-    val parentMenuItemId = integer("parentMenuItemId").references(menuItemId).nullable()
+    val parentMenuItemId = integer("parentMenuItemId").nullable()
 
     /** 创建时间 **/
     val createTime = long("createTime")
+
+    /** 最后修改时间 **/
+    val lastModifyTime = long("lastModifyTime").nullable()
 
     override val primaryKey = PrimaryKey(menuItemId)
 }

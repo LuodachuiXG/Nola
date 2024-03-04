@@ -9,5 +9,5 @@ data class MenuRequest(
     /** 菜单名 **/
     val displayName: String,
     /** 是否是主菜单 **/
-    val isMain: Boolean
+    var isMain: Boolean
 )
