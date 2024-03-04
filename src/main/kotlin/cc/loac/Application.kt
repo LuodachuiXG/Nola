@@ -23,6 +23,8 @@ fun Application.module() {
 
     // 初始化数据库
     DatabaseSingleton.init()
+    // 接口访问速率限制配置
+    configureRateLimit()
     // 跨域配置
     configureCORS()
     // Koin 依赖注入配置

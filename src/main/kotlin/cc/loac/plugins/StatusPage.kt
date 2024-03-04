@@ -22,6 +22,12 @@ fun Application.configureStatusPage() {
             call.respondFailure("404 Not Found.", status)
         }
 
+        /** 429 TooManyRequests 请求太频繁状态 **/
+        status(HttpStatusCode.TooManyRequests) { call, status ->
+            "${call.request.host()} - ${call.request.uri}: 429".error()
+            call.respondFailure("请求频繁，请稍后再试", status)
+        }
+
         /** 401 未授权状态 **/
         status(HttpStatusCode.Unauthorized) { call, status ->
             "${call.request.host()} - ${call.request.uri}: 无权访问受保护资源".error()
