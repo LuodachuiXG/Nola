@@ -12,8 +12,10 @@ import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.services.PostService
 import cc.loac.utils.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.shortLiteral
 import org.koin.java.KoinJavaComponent.inject
@@ -129,8 +131,10 @@ fun Route.postAdminRouting() {
             /** 获取文章正文 **/
             get("/publish/{postId}") {
                 val postId = call.receiveIntPathParam("postId")
-                call.respondSuccess(postService.postContent(postId)
-                    ?: throw MyException("文章 [$postId] 不存在"))
+                call.respondSuccess(
+                    postService.postContent(postId)
+                        ?: throw MyException("文章 [$postId] 不存在")
+                )
             }
 
             /** 添加文章草稿 **/
@@ -206,8 +210,8 @@ fun Route.postAdminRouting() {
                 val postId = params["postId"]?.toIntOrNull() ?: throw ParamMismatchException()
                 val draftName = params["draftName"]!!
                 call.respondSuccess(
-                    postService.postContent(postId, PostContentStatus.DRAFT, draftName) ?:
-                    throw MyException("草稿 [$draftName] 不存在")
+                    postService.postContent(postId, PostContentStatus.DRAFT, draftName)
+                        ?: throw MyException("草稿 [$draftName] 不存在")
                 )
             }
         }
@@ -237,6 +241,28 @@ fun Route.postApiRouting() {
 
                 call.respondSuccess(postService.apiPosts(page, size, key, tag, category))
             }
+        }
+
+        /** 获取文章内容 **/
+        get("/content") {
+            // 可空参数，文章 ID
+            val postId = call.receiveNullablePathParam("postId") {
+                it?.isInt()
+            }?.toInt()
+
+            // 可空参数，文章别名
+            val slug = call.receiveNullablePathParam("slug")
+
+            // 可空参数，文章密码
+            val password = call.receiveNullablePathParam("password")
+
+            // 如果文章 ID 和别名都为空，返回 404
+            if (postId == null && slug == null) return@get call.respond(HttpStatusCode.NotFound)
+
+            // 如果文章返回空，也返回 404
+            val postContent = postService.apiPostContent(postId, slug, password)
+                ?: return@get call.respond(HttpStatusCode.NotFound)
+            call.respondSuccess(postContent)
         }
     }
 }

@@ -8,8 +8,8 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
-import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.responses.ApiPostContentResponse
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
@@ -19,9 +19,7 @@ import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.markdownToPlainText
-import cc.loac.utils.respondSuccess
-import io.ktor.server.application.*
-import kotlinx.css.th
+import kotlinx.css.tr
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -111,6 +109,14 @@ class PostServiceImpl : PostService {
             }
         }
         return false
+    }
+
+    /**
+     * 增加文章访问量
+     * @param postId 文章 ID
+     */
+    override suspend fun addPostVisit(postId: Int): Boolean {
+        return postDao.addPostVisit(postId)
     }
 
     /**
@@ -208,6 +214,62 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 获取文章博客 API 接口
+     * ID 和别名至少存在一个
+     * @param postId 文章 ID
+     * @param slug 文章别名
+     * @param password 密码
+     */
+    override suspend fun apiPostContent(postId: Int?, slug: String?, password: String?): ApiPostContentResponse? {
+        if (postId == null && slug == null) return null
+        // 如果文章 ID 不为空，通过文章 ID 获取文章
+        val post = if (postId != null) {
+            posts(listOf(postId), true).firstOrNull() ?: return null
+        } else {
+            // 通过文章别名获取文章
+            postBySlug(slug!!) ?: return null
+        }
+
+        // 判断文章是否有密码，以及密码是否正确
+        if (post.encrypted) {
+            // 文章有密码，但是接口提供的密码为空
+            password ?: return null
+            // 密码不正确
+            if (!isPostPasswordValid(post.postId, password)) {
+                throw MyException("文章密码不正确")
+            }
+        }
+
+        // 获取文章正文
+        val postContent = postContent(post.postId, PostContentStatus.PUBLISHED) ?: return null
+
+        launchCoroutine {
+            // 文章浏览量加一
+            addPostVisit(post.postId)
+        }
+
+        // 封装博客 API 文章内容响应类
+        return ApiPostContentResponse(
+            post = ApiPostResponse(
+                postId = post.postId,
+                title = post.title,
+                excerpt = post.excerpt,
+                slug = post.slug,
+                cover = post.cover,
+                allowComment = post.allowComment,
+                pinned = post.pinned,
+                encrypted = post.encrypted,
+                visit = post.visit,
+                category = post.category,
+                tags = post.tags,
+                createTime = post.createTime,
+                lastModifyTime = post.lastModifyTime
+            ),
+            content = postContent.content
+        )
+    }
+
+    /**
      * 添加文章草稿
      * @param postId 文章 ID
      * @param content 文章内容
@@ -297,6 +359,15 @@ class PostServiceImpl : PostService {
             }
         }
         return result
+    }
+
+    /**
+     * 验证文章密码是否正确
+     * @param postId 文章 ID
+     * @param password 密码
+     */
+    override suspend fun isPostPasswordValid(postId: Int, password: String): Boolean {
+        return postDao.isPostPasswordValid(postId, password)
     }
 
     /**

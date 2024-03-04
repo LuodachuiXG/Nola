@@ -70,6 +70,12 @@ interface PostDao {
     suspend fun tagsByPostId(postId: Int): List<Tag>
 
     /**
+     * 增加文章访问量
+     * @param postId 文章 ID
+     */
+    suspend fun addPostVisit(postId: Int): Boolean
+
+    /**
      * 获取所有文章
      */
     suspend fun posts(): List<Post>
@@ -192,6 +198,13 @@ interface PostDao {
         deleteContent: Boolean,
         contentName: String?
     ): Boolean
+
+    /**
+     * 验证文章密码是否正确
+     * @param postId 文章 ID
+     * @param password 密码
+     */
+    suspend fun isPostPasswordValid(postId: Int, password: String): Boolean
 
 
 }
