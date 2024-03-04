@@ -11,5 +11,7 @@ data class Menu(
     /** 菜单名 **/
     val displayName: String,
     /** 创建时间 **/
-    val createTime: Long
+    val createTime: Long,
+    /** 最后修改时间 **/
+    val lastModifyTime: Long?
 )

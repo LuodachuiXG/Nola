@@ -1,23 +1,20 @@
 package cc.loac.utils
 
 import cc.loac.data.exceptions.ParamMismatchException
-import cc.loac.data.models.enums.PostSort
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
-import kotlinx.css.map
-import kotlinx.css.pre
 
 /**
  * 根据数据类获取请求的参数
  * 如果参数不匹配或条件不满足，就抛出参数不匹配异常
- * @param check 附加条件，如果不满足条件就抛出参数不匹配异常
+ * @param predicate 断言，如果不满足条件就抛出参数不匹配异常
  */
 suspend inline fun <reified T> ApplicationCall.receiveByDataClass(
-    check: (T) -> Boolean = { true }
+    predicate: (T) -> Boolean = { true }
 ): T {
     val request = runCatching {
         this.receiveNullable<T>()
@@ -25,7 +22,7 @@ suspend inline fun <reified T> ApplicationCall.receiveByDataClass(
         throw ParamMismatchException()
     }
     // 如果不满足条件，也抛出参数不匹配异常
-    if (!check(request)) throw ParamMismatchException()
+    if (!predicate(request)) throw ParamMismatchException()
     return request
 }
 
@@ -144,6 +141,27 @@ fun ApplicationCall.receiveNullablePathParam(
     // 如果 predicate 结果为 false，就抛出参数不匹配异常
     if (!p) throw ParamMismatchException()
     return value
+}
+
+/**
+ * 接收路径布尔型传参
+ * 如果对应参数不为空，并且不为布尔型，就抛出参数不匹配异常
+ * 该方法只能接收路径传参形式，如 get("/{id}?sort=DESC")
+ * @param paramName 请求参数名
+ * @param defaultValue 默认值
+ */
+fun ApplicationCall.receiveNullableBooleanPathParam(
+    paramName: String,
+    defaultValue: Boolean = false
+): Boolean {
+    val params = receiveNullablePathParam(paramName)
+    // 如果参数为空，直接返回默认值
+    if (params.isNullOrEmpty()) {
+        return defaultValue
+    }
+    // 参数不为空，并且不为布尔值，返回参数不匹配异常
+    if (!params.isBoolean()) throw ParamMismatchException()
+    return params.toBoolean()
 }
 
 /**

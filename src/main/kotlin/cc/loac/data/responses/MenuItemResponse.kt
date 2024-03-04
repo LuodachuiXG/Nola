@@ -1,23 +1,25 @@
-package cc.loac.data.models
+package cc.loac.data.responses
 
 import cc.loac.data.models.enums.MenuItemTarget
 
 /**
- * 菜单项数据类
+ * 菜单项响应数据类
  */
-data class MenuItem(
+data class MenuItemResponse(
     /** 菜单项 ID */
     val menuItemId: Int,
-    /** 菜单名称 */
+    /** 菜单 ID */
+    val menuId: Int,
+    /** 菜单项名称 */
     val displayName: String,
     /** 菜单地址 */
     val href: String?,
     /** 打开方式 */
     val target: MenuItemTarget,
-    /** 父菜单 ID */
-    val parentMenuId: Int,
     /** 父菜单项 ID */
     val parentMenuItemId: Int?,
+    /** 子菜单 */
+    val children: List<MenuItemResponse> = emptyList(),
     /** 创建时间 */
     val createTime: Long,
     /** 最后修改时间 **/

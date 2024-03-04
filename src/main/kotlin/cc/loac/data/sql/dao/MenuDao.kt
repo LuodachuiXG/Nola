@@ -60,8 +60,41 @@ interface MenuDao {
     suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem?
 
     /**
+     * 删除菜单项
+     * @param menuItemIds 菜单项 ID 集合
+     */
+    suspend fun deleteMenuItems(menuItemIds: List<Int>): Boolean
+
+    /**
+     * 修改菜单项
+     * @param menuItem 菜单项请求数据类
+     */
+    suspend fun updateMenuItem(menuItem: MenuItemRequest): Boolean
+
+    /**
      * 获取菜单项
      * @param menuItemId 菜单项 ID
      */
     suspend fun menuItem(menuItemId: Int): MenuItem?
+
+    /**
+     * 获取所有菜单项
+     * @param menuId 菜单 ID
+     */
+    suspend fun menuItems(menuId: Int): List<MenuItem>
+
+    /**
+     * 获取所有菜单项
+     */
+    suspend fun menuItems(): List<MenuItem>
+
+    /**
+     * 获取主菜单菜单项
+     */
+    suspend fun mainMenuItems(): List<MenuItem>
+
+    /**
+     * 获取菜单项数量
+     */
+    suspend fun menuCount(): Long
 }

@@ -4,12 +4,11 @@ import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.services.MenuService
-import cc.loac.utils.receiveByDataClass
-import cc.loac.utils.receivePageAndSize
-import cc.loac.utils.respondSuccess
+import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
+import kotlinx.css.tr
 import org.koin.java.KoinJavaComponent.inject
 
 private val menuService: MenuService by inject(MenuService::class.java)
@@ -49,9 +48,37 @@ fun Route.menuAdminRouting() {
 
             /** 添加菜单项 **/
             post("/item") {
-                val menuItem = call.receiveByDataClass<MenuItemRequest>()
-                call.respondSuccess(menuService.addMenuItem(menuItem)
-                    ?: throw AddFailedException())
+                val menuItem = call.receiveByDataClass<MenuItemRequest> {
+                    it.parentMenuId > 0
+                }
+                call.respondSuccess(
+                    menuService.addMenuItem(menuItem)
+                        ?: throw AddFailedException()
+                )
+            }
+
+            /** 删除菜单项 **/
+            delete("/item") {
+                val menuItemIds = call.receiveByDataClass<List<Int>>()
+                call.respondSuccess(menuService.deleteMenus(menuItemIds))
+            }
+
+            /** 修改菜单项 **/
+            put("/item") {
+                val menuItem = call.receiveByDataClass<MenuItemRequest> {
+                    it.menuItemId != null && it.parentMenuId > 0
+                }
+                call.respondSuccess(menuService.updateMenuItem(menuItem))
+            }
+
+            /** 获取菜单项 **/
+            get("/item/{menuId}") {
+                // 获取菜单 ID
+                val menuId = call.receiveIntPathParam("menuId")
+                // 是否构建树，默认为 true，构建菜单项树
+                val isBuildTree =
+                    call.receiveNullableBooleanPathParam("tree", true)
+                call.respondSuccess(menuService.menuItems(menuId, isBuildTree))
             }
         }
     }
@@ -62,6 +89,11 @@ fun Route.menuAdminRouting() {
  */
 fun Route.menuApiRouting() {
     route("menu") {
-
+        /** 获取主菜单 **/
+        get {
+            // 是否构建树，默认为 true，构建菜单项树
+            val isBuildTree = call.receiveNullableBooleanPathParam("tree", true)
+            call.respondSuccess(menuService.mainMenu(isBuildTree))
+        }
     }
 }

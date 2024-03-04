@@ -4,8 +4,10 @@ import cc.loac.data.models.Menu
 import cc.loac.data.models.MenuItem
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
+import cc.loac.data.responses.MenuItemResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.tables.Menus
+import kotlinx.css.tr
 
 /**
  * 菜单服务接口
@@ -61,8 +63,33 @@ interface MenuService {
     suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem?
 
     /**
+     * 删除菜单项
+     * @param menuItemIds 菜单项 ID 集合
+     */
+    suspend fun deleteMenus(menuItemIds: List<Int>): Boolean
+
+    /**
+     * 修改菜单项
+     * @param menuItem 菜单项请求数据类
+     */
+    suspend fun updateMenuItem(menuItem: MenuItemRequest): Boolean
+
+    /**
      * 获取菜单项
      * @param menuItemId 菜单项 ID
      */
     suspend fun menuItem(menuItemId: Int): MenuItem?
+
+    /**
+     * 获取菜单项（平铺，不构建菜单项树）
+     * @param menuId 菜单 ID
+     * @param buildTree 是否构建菜单项树
+     */
+    suspend fun menuItems(menuId: Int, buildTree: Boolean = true): List<MenuItemResponse>
+
+    /**
+     * 获取主菜单的菜单项
+     * @param buildTree 是否构建菜单项树
+     */
+    suspend fun mainMenu(buildTree: Boolean): List<MenuItemResponse>
 }
