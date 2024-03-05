@@ -6,7 +6,7 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Categories
-import cc.loac.data.sql.tables.Tags
+import cc.loac.data.sql.tables.PostCategories
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
@@ -46,6 +46,11 @@ class CategoryDaoImpl : CategoryDao {
      * @param ids 分类 ID 集合
      */
     override suspend fun deleteCategories(ids: List<Int>): Boolean = dbQuery {
+        // 先删除与分类对应的文章关联
+        PostCategories.deleteWhere {
+            categoryId inList ids
+        }
+
         Categories.deleteWhere {
             categoryId inList ids
         } > 0
