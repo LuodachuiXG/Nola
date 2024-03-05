@@ -5,6 +5,7 @@ import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.startPage
+import cc.loac.data.sql.tables.PostTags
 import cc.loac.data.sql.tables.Tags
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -41,6 +42,11 @@ class TagDaoImpl : TagDao {
      * @param tagIds 标签 ID 集合
      */
     override suspend fun deleteTags(tagIds: List<Int>): Boolean = dbQuery {
+        // 先删除与标签对应的文章关联
+        PostTags.deleteWhere {
+            tagId inList tagIds
+        }
+
         Tags.deleteWhere {
             tagId inList tagIds
         } > 0
