@@ -321,8 +321,10 @@ class PostDaoImpl : PostDao {
             category = category,
             sort = sort
         ) {
-            Posts.join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
-                .selectAll()
+            Posts.leftJoin(PostContents, additionalConstraint = {
+                Posts.postId eq PostContents.postId and
+                        (PostContents.status eq PostContentStatus.PUBLISHED)
+            }).selectAll()
         }
 
         if (page == 0) {
@@ -392,8 +394,10 @@ class PostDaoImpl : PostDao {
             sort = PINNED
         ) {
             // 基础查询条件
-            Posts.join(PostContents, JoinType.LEFT, additionalConstraint = { Posts.postId eq PostContents.postId })
-                .selectAll()
+            Posts.leftJoin(PostContents, additionalConstraint = {
+                Posts.postId eq PostContents.postId and
+                        (PostContents.status eq PostContentStatus.PUBLISHED)
+            }).selectAll()
         }
 
         if (page == 0) {
@@ -639,8 +643,8 @@ class PostDaoImpl : PostDao {
         return (Posts.title like "%$key%" or
                 (Posts.slug like "%$key%") or
                 (Posts.excerpt like "%$key%") or
-                (PostContents.content like "%$key%")) and
-                (Posts.status eq PostStatus.PUBLISHED)
+                ((PostContents.content like "%$key%") and
+                        (PostContents.status eq PostContentStatus.PUBLISHED)))
     }
 
 
@@ -704,8 +708,10 @@ class PostDaoImpl : PostDao {
             VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
             VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
             PINNED -> query.orderBy(Posts.pinned, SortOrder.DESC)
-            null -> {}
+            null -> query.orderBy(Posts.createTime, SortOrder.DESC)
         }
+        // 默认都有按照创建时间降序
+        query.orderBy(Posts.createTime, SortOrder.DESC)
         return query
     }
 }
