@@ -8,16 +8,19 @@ import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.PostTags
 import cc.loac.data.sql.tables.Tags
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
 /**
  * 将数据库检索结果转为 [Tag] 标签数据类
+ * @param includePostCount 是否包含文章数量
  */
-fun resultRowToTag(row: ResultRow) = Tag(
+fun resultRowToTag(row: ResultRow, includePostCount: Boolean = true) = Tag(
     tagId = row[Tags.tagId],
     displayName = row[Tags.displayName],
     slug = row[Tags.slug],
-    color = row[Tags.color]
+    color = row[Tags.color],
+    postCount = if (includePostCount) row[PostTags.postTagId.count()] else 0
 )
 
 /**
@@ -34,7 +37,9 @@ class TagDaoImpl : TagDao {
             it[displayName] = tag.displayName
             it[slug] = tag.slug
             it[color] = tag.color
-        }.resultedValues?.singleOrNull()?.let(::resultRowToTag)
+        }.resultedValues?.singleOrNull()?.let { resultRow ->
+            resultRowToTag(resultRow, false)
+        }
     }
 
     /**
@@ -80,7 +85,7 @@ class TagDaoImpl : TagDao {
      * 获取所有标签
      */
     override suspend fun tags(): List<Tag> = dbQuery {
-        Tags.selectAll().orderBy(Tags.tagId, SortOrder.DESC).map(::resultRowToTag)
+        sqlSelectTag().map(::resultRowToTag)
     }
 
     /**
@@ -90,7 +95,8 @@ class TagDaoImpl : TagDao {
      */
     override suspend fun tags(page: Int, size: Int): Pager<Tag> {
         return Tags.startPage(page, size, ::resultRowToTag) {
-            selectAll().orderBy(Tags.tagId, SortOrder.DESC)
+            // 获取标签和对应的文章数量
+            sqlSelectTag()
         }
     }
 
@@ -100,8 +106,8 @@ class TagDaoImpl : TagDao {
      * @param tagId 标签 ID
      */
     override suspend fun tag(tagId: Int): Tag? = dbQuery {
-        Tags
-            .selectAll().where { Tags.tagId eq tagId }
+        sqlSelectTag()
+            .where { Tags.tagId eq tagId }
             .map(::resultRowToTag)
             .singleOrNull()
     }
@@ -111,8 +117,8 @@ class TagDaoImpl : TagDao {
      * @param tagIds 标签 ID 集合
      */
     override suspend fun tags(tagIds: List<Int>): List<Tag> = dbQuery {
-        Tags
-            .selectAll().where { Tags.tagId inList tagIds }
+        sqlSelectTag()
+            .where { Tags.tagId inList tagIds }
             .map(::resultRowToTag)
     }
 
@@ -121,8 +127,8 @@ class TagDaoImpl : TagDao {
      * @param displayName 标签名称
      */
     override suspend fun tag(displayName: String): Tag? = dbQuery {
-        Tags
-            .selectAll().where { Tags.displayName eq displayName }
+        sqlSelectTag()
+            .where { Tags.displayName eq displayName }
             .map(::resultRowToTag)
             .singleOrNull()
     }
@@ -132,9 +138,23 @@ class TagDaoImpl : TagDao {
      * @param slug 标签别名
      */
     override suspend fun tagBySlug(slug: String): Tag? = dbQuery {
-        Tags
-            .selectAll().where { Tags.slug eq slug }
+        sqlSelectTag()
+            .where { Tags.slug eq slug }
             .map(::resultRowToTag)
             .singleOrNull()
+    }
+
+    /**
+     * SQL 语句
+     * 获取标签和对应的文章数量
+     */
+    private fun sqlSelectTag(): Query {
+        return Tags.leftJoin(PostTags, additionalConstraint = { Tags.tagId eq PostTags.tagId })
+            .select(
+                Tags.tagId, Tags.displayName,
+                Tags.slug, Tags.color, PostTags.postTagId.count()
+            )
+            .groupBy(Tags.tagId)
+            .orderBy(Tags.tagId, SortOrder.DESC)
     }
 }
