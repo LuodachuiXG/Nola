@@ -12,5 +12,7 @@ data class Tag(
     /** 标签别名 **/
     val slug: String,
     /** 标签颜色 **/
-    val color: String?
+    val color: String?,
+    /** 文章数量 **/
+    val postCount: Long? = null
 )
