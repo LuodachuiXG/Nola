@@ -260,12 +260,12 @@ fun Route.postApiRouting() {
                 // 可空参数，文章密码
                 val password = call.receiveNullablePathParam("password")
 
-                // 如果文章 ID 和别名都为空，返回 404
-                if (postId == null && slug == null) return@get call.respond(HttpStatusCode.NotFound)
+                // 如果文章 ID 和别名都为空
+                if (postId == null && slug == null) throw MyException("文章不存在或不可见")
 
-                // 如果文章返回空，也返回 404
+                // 如果文章返回空
                 val postContent = postService.apiPostContent(postId, slug, password)
-                    ?: return@get call.respond(HttpStatusCode.NotFound)
+                    ?: throw MyException("文章不存在或不可见")
                 call.respondSuccess(postContent)
             }
         }
