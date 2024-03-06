@@ -7,25 +7,30 @@ import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Categories
 import cc.loac.data.sql.tables.PostCategories
+import cc.loac.data.sql.tables.PostTags
+import cc.loac.data.sql.tables.Tags
+import kotlinx.css.tr
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-
-
-/**
- * 将数据库检索结果转为 [Category] 分类数据类
- */
-fun resultRowToCategory(row: ResultRow) = Category(
-    categoryId = row[Categories.categoryId],
-    displayName = row[Categories.displayName],
-    slug = row[Categories.slug],
-    cover = row[Categories.cover],
-    unifiedCover = row[Categories.unifiedCover]
-)
 
 /**
  * 分类表操作接口实现类
  */
 class CategoryDaoImpl : CategoryDao {
+
+    /**
+     * 将数据库检索结果转为 [Category] 分类数据类
+     * @param includePostCount 是否包含文章数量
+     */
+    private fun resultRowToCategory(row: ResultRow, includePostCount: Boolean = true) = Category(
+        categoryId = row[Categories.categoryId],
+        displayName = row[Categories.displayName],
+        slug = row[Categories.slug],
+        cover = row[Categories.cover],
+        unifiedCover = row[Categories.unifiedCover],
+        postCount = if (includePostCount) row[PostCategories.categoryId.count()] else 0
+    )
 
     /**
      * 添加分类
@@ -38,7 +43,9 @@ class CategoryDaoImpl : CategoryDao {
             it[cover] = category.cover
             it[unifiedCover] = category.unifiedCover
         }
-        insertStatement.resultedValues?.singleOrNull()?.let(::resultRowToCategory)
+        insertStatement.resultedValues?.singleOrNull()?.let { resultRow ->
+            resultRowToCategory(resultRow, false)
+        }
     }
 
     /**
@@ -85,7 +92,7 @@ class CategoryDaoImpl : CategoryDao {
      * 获取所有分类
      */
     override suspend fun categories(): List<Category> = dbQuery {
-        Categories.selectAll().orderBy(Categories.categoryId, SortOrder.DESC).map(::resultRowToCategory)
+        sqlSelectCategory().map(::resultRowToCategory)
     }
 
     /**
@@ -95,8 +102,19 @@ class CategoryDaoImpl : CategoryDao {
      */
     override suspend fun categories(page: Int, size: Int): Pager<Category> {
         return Categories.startPage(page, size, ::resultRowToCategory) {
-            selectAll().orderBy(Categories.categoryId, SortOrder.DESC)
+            sqlSelectCategory()
         }
+    }
+
+    /**
+     * 根据文章 ID 获取文章分类
+     * @param postId 文章 ID
+     */
+    override suspend fun categoryByPostId(postId: Int): Category? = dbQuery {
+        sqlSelectCategory()
+            .where { PostCategories.postId eq postId }
+            .map(::resultRowToCategory)
+            .singleOrNull()
     }
 
     /**
@@ -104,8 +122,8 @@ class CategoryDaoImpl : CategoryDao {
      * @param id 分类 ID
      */
     override suspend fun category(id: Int): Category? = dbQuery {
-        Categories
-            .selectAll().where { Categories.categoryId eq id }
+        sqlSelectCategory()
+            .where { Categories.categoryId eq id }
             .map(::resultRowToCategory)
             .singleOrNull()
     }
@@ -115,8 +133,8 @@ class CategoryDaoImpl : CategoryDao {
      * @param displayName 分类名称
      */
     override suspend fun category(displayName: String): Category? = dbQuery {
-        Categories
-            .selectAll().where { Categories.displayName eq displayName }
+        sqlSelectCategory()
+            .where { Categories.displayName eq displayName }
             .map(::resultRowToCategory)
             .singleOrNull()
     }
@@ -126,9 +144,26 @@ class CategoryDaoImpl : CategoryDao {
      * @param slug 分类别名
      */
     override suspend fun categoryBySlug(slug: String): Category? = dbQuery {
-        Categories
-            .selectAll().where { Categories.slug eq slug }
+        sqlSelectCategory()
+            .where { Categories.slug eq slug }
             .map(::resultRowToCategory)
             .singleOrNull()
+    }
+
+    /**
+     * SQL 语句
+     * 获取分类和对应的文章数量
+     */
+    private fun sqlSelectCategory(): Query {
+        return Categories.leftJoin(
+            PostCategories,
+            additionalConstraint = { Categories.categoryId eq PostCategories.categoryId }
+        )
+            .select(
+                Categories.categoryId, Categories.displayName, Categories.slug,
+                Categories.cover, Categories.unifiedCover, PostCategories.categoryId.count()
+            )
+            .groupBy(Categories.categoryId)
+            .orderBy(Categories.categoryId, SortOrder.DESC)
     }
 }

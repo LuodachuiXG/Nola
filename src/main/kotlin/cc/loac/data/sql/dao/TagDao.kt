@@ -50,6 +50,11 @@ interface TagDao {
     suspend fun tag(tagId: Int): Tag?
 
     /**
+     * 根据文章 ID 获取标签
+     */
+    suspend fun tags(postId: Int): List<Tag>
+
+    /**
      * 根据标签 ID 集合获取标签
      * @param tagIds 标签 ID 集合
      */
