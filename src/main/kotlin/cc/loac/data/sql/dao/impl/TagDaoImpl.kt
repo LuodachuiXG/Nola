@@ -12,21 +12,21 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
 /**
- * 将数据库检索结果转为 [Tag] 标签数据类
- * @param includePostCount 是否包含文章数量
- */
-fun resultRowToTag(row: ResultRow, includePostCount: Boolean = true) = Tag(
-    tagId = row[Tags.tagId],
-    displayName = row[Tags.displayName],
-    slug = row[Tags.slug],
-    color = row[Tags.color],
-    postCount = if (includePostCount) row[PostTags.postTagId.count()] else 0
-)
-
-/**
  * 标签表操作接口实现类
  */
 class TagDaoImpl : TagDao {
+
+    /**
+     * 将数据库检索结果转为 [Tag] 标签数据类
+     * @param includePostCount 是否包含文章数量
+     */
+    private fun resultRowToTag(row: ResultRow, includePostCount: Boolean = true) = Tag(
+        tagId = row[Tags.tagId],
+        displayName = row[Tags.displayName],
+        slug = row[Tags.slug],
+        color = row[Tags.color],
+        postCount = if (includePostCount) row[PostTags.postTagId.count()] else 0
+    )
 
     /**
      * 添加标签
@@ -98,6 +98,15 @@ class TagDaoImpl : TagDao {
             // 获取标签和对应的文章数量
             sqlSelectTag()
         }
+    }
+
+    /**
+     * 根据文章 ID 获取标签
+     */
+    override suspend fun tags(postId: Int): List<Tag> = dbQuery {
+        sqlSelectTag()
+            .where { PostTags.postId eq postId }
+            .map(::resultRowToTag)
     }
 
 

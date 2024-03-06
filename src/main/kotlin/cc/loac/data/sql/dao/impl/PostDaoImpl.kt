@@ -15,7 +15,9 @@ import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
+import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.data.sql.dao.PostDao
+import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
 import cc.loac.utils.launchCoroutine
@@ -25,12 +27,16 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
+import org.koin.java.KoinJavaComponent.inject
 import java.util.Date
 
 /**
  * 文章操作接口实现类
  */
 class PostDaoImpl : PostDao {
+
+    private val tagDao: TagDao by inject(TagDao::class.java)
+    private val categoryDao: CategoryDao by inject(CategoryDao::class.java)
 
     /**
      * 将数据库检索结果转为 [Post] 文章数据类
@@ -244,30 +250,6 @@ class PostDaoImpl : PostDao {
         }) {
             it[lastModifyTime] = time ?: Date().time
         } > 0
-    }
-
-    /**
-     * 根据文章 ID 获取文章分类
-     * @param postId 文章 ID
-     */
-    override suspend fun categoryByPostId(postId: Int): Category? = dbQuery {
-        Categories.join(
-            PostCategories,
-            JoinType.LEFT,
-            additionalConstraint = { Categories.categoryId eq PostCategories.categoryId })
-            .selectAll().where { PostCategories.postId eq postId }
-            .map(::resultRowToCategory)
-            .singleOrNull()
-    }
-
-    /**
-     * 根据文章 ID 获取文章标签
-     * @param postId 文章 ID
-     */
-    override suspend fun tagsByPostId(postId: Int): List<Tag> = dbQuery {
-        Tags.join(PostTags, JoinType.LEFT, additionalConstraint = { Tags.tagId eq PostTags.tagId })
-            .selectAll().where { PostTags.postId eq postId }
-            .map(::resultRowToTag)
     }
 
     /**
@@ -623,9 +605,9 @@ class PostDaoImpl : PostDao {
     private suspend fun getPostTagAndCategory(posts: List<Post>) = dbQuery {
         posts.forEach { post ->
             // 获取文章标签
-            post.tags = tagsByPostId(post.postId)
+            post.tags = tagDao.tags(post.postId)
             // 获取文章分类
-            post.category = categoryByPostId(post.postId)
+            post.category = categoryDao.categoryByPostId(post.postId)
         }
     }
 
@@ -641,9 +623,9 @@ class PostDaoImpl : PostDao {
                 post.tags = emptyList()
             } else {
                 // 获取文章标签
-                post.tags = tagsByPostId(post.postId)
+                post.tags = tagDao.tags(post.postId)
                 // 获取文章分类
-                post.category = categoryByPostId(post.postId)
+                post.category = categoryDao.categoryByPostId(post.postId)
             }
         }
     }

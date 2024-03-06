@@ -37,6 +37,12 @@ interface CategoryDao {
     suspend fun categories(): List<Category>
 
     /**
+     * 根据文章 ID 获取文章分类
+     * @param postId 文章 ID
+     */
+    suspend fun categoryByPostId(postId: Int): Category?
+
+    /**
      * 分页获取所有分类
      * @param page 当前页数
      * @param size 每页条数
