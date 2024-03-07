@@ -672,7 +672,12 @@ class PostDaoImpl : PostDao {
     ): Query {
         val query = baseQuery()
         // 如果文章状态不为空，则添加状态查询条件
-        if (status != null) query.andWhere { Posts.status eq status }
+        if (status != null) {
+            query.andWhere { Posts.status eq status }
+        } else {
+            // 默认不获取删除状态的文章
+            query.andWhere { Posts.status neq PostStatus.DELETED }
+        }
         // 如果文章可见性不为空，则添加可见性查询条件
         if (visible != null) query.andWhere { Posts.visible eq visible }
         // 如果关键字不为空，则添加关键字查询条件
