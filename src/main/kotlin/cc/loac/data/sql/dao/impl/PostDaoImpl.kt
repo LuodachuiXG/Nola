@@ -98,6 +98,7 @@ class PostDaoImpl : PostDao {
      * 将数据库检索结果转为 [PostContentResponse] 文章内容响应数据类
      */
     private fun resultRowToPostContentResponse(row: ResultRow) = PostContentResponse(
+        postContentId = row[PostContents.postContentId],
         postId = row[PostContents.postId],
         status = row[PostContents.status],
         draftName = row[PostContents.draftName],
@@ -420,6 +421,7 @@ class PostDaoImpl : PostDao {
     override suspend fun postContents(postId: Int): List<PostContentResponse> = dbQuery {
         PostContents
             .select(
+                PostContents.postContentId,
                 PostContents.postId, PostContents.status,
                 PostContents.draftName, PostContents.lastModifyTime
             )
