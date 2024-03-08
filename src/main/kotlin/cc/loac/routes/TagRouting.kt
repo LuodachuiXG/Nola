@@ -60,6 +60,12 @@ fun Route.tagAdminRouting() {
                 call.respondSuccess(tagService.updateTag(tag))
             }
 
+            /** 获取标签 - 根据标签 ID **/
+            get("/{tagId}") {
+                val tagId = call.receiveIntPathParam("tagId");
+                call.respondSuccess(tagService.tag(tagId))
+            }
+
             /** 获取标签 **/
             get {
                 call.receivePageAndSize { page, size ->

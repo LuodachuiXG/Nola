@@ -2,7 +2,6 @@ package cc.loac.plugins
 
 import io.ktor.server.application.*
 import io.ktor.server.plugins.ratelimit.*
-import org.koin.core.context.startKoin
 import kotlin.time.Duration.Companion.seconds
 
 /** 管理员登录速率限制器 */
