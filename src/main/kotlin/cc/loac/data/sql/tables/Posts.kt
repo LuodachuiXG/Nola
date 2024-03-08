@@ -12,16 +12,16 @@ object Posts : Table("post") {
     val postId = integer("postId").autoIncrement()
 
     /** 标题 **/
-    val title = varchar("title", 256)
+    val title = varchar("title", 512)
 
     /** 是否自动生成摘要 **/
     val autoGenerateExcerpt = bool("autoGenerateExcerpt")
 
     /** 摘要 **/
-    val excerpt = varchar("excerpt", 512)
+    val excerpt = varchar("excerpt", 1024)
 
     /** 别名 **/
-    val slug = varchar("slug", 256).uniqueIndex()
+    val slug = varchar("slug", 512).uniqueIndex()
 
     /** 封面 **/
     val cover = varchar("cover", 256).nullable()

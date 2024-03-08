@@ -109,7 +109,6 @@ fun ApplicationCall.receivePathParams(
 
 /**
  * 接收路径传参单个参数
- * 该方法只能接收路径传参形式，如 get("/{name}?sort=DESC")
  * @param paramName 请求参数名
  */
 fun ApplicationCall.receivePathParam(
@@ -124,7 +123,6 @@ fun ApplicationCall.receivePathParam(
 
 /**
  * 接收可为空的路径传参单个参数
- * 该方法只能接收路径传参形式，如 get("/{name}?sort=DESC")
  * @param paramName 请求参数名
  * @param predicate 参数值是否满足条件
  */
@@ -146,7 +144,6 @@ fun ApplicationCall.receiveNullablePathParam(
 /**
  * 接收路径布尔型传参
  * 如果对应参数不为空，并且不为布尔型，就抛出参数不匹配异常
- * 该方法只能接收路径传参形式，如 get("/{id}?sort=DESC")
  * @param paramName 请求参数名
  * @param defaultValue 默认值
  */
@@ -167,7 +164,6 @@ fun ApplicationCall.receiveNullableBooleanPathParam(
 /**
  * 接收路径整数型传参
  * 如果对应参数不为整数，就抛出参数不匹配异常
- * 该方法只能接收路径传参形式，如 get("/{id}?sort=DESC")
  * @param paramName 请求参数名
  */
 suspend fun ApplicationCall.receiveIntPathParam(
@@ -182,7 +178,6 @@ suspend fun ApplicationCall.receiveIntPathParam(
 
 /**
  * 接收用于分页的页数和页面条数
- * 该方法只能接收这两种传参形式：get("/{page}/{size}?sort=DESC")
  * 如果 page 为空或 0，page 和 size 都回调 0
  */
 suspend fun ApplicationCall.receivePageAndSize(

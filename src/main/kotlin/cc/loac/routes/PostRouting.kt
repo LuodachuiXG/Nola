@@ -64,7 +64,19 @@ fun Route.postAdminRouting() {
                     // 如果 postId 等于 0 证明没传参，并且文章状态不能设置为已删除
                     it.postId != null && it.postId > 0 && it.status != PostStatus.DELETED
                 }
+                // 文章设为加密，但是没有提供密码
+                if (postRequest.encrypted == true && postRequest.password.isNullOrEmpty()) {
+                    throw MyException("文章设为加密需要提供密码")
+                }
                 call.respondSuccess(postService.updatePost(postRequest))
+            }
+
+            /** 修改文章状态，如：文章状态、可见性、置顶 **/
+            put("/status") {
+                val postStatusRequest = call.receiveByDataClass<PostStatusRequest> {
+                    it.postId != 0 && it.status != PostStatus.DELETED
+                }
+                call.respondSuccess(postService.updatePostStatus(postStatusRequest))
             }
 
             /** 获取文章 **/

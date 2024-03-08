@@ -10,6 +10,7 @@ import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.requests.PostStatusRequest
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
@@ -42,6 +43,13 @@ interface PostDao {
      * @param pr 文章请求数据类
      */
     suspend fun updatePost(pr: PostRequest): Boolean
+
+    /**
+     * 修改文章状态
+     * 文章状态、可见性、置顶
+     * @param postStatusRequest 文章状态请求数据类
+     */
+    suspend fun updatePostStatus(postStatusRequest: PostStatusRequest): Boolean
 
     /**
      * 修改文章摘要
@@ -193,6 +201,5 @@ interface PostDao {
      * @param password 密码
      */
     suspend fun isPostPasswordValid(postId: Int, password: String): Boolean
-
 
 }
