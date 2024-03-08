@@ -33,6 +33,8 @@ data class PostRequest(
     val cover: String?,
     /** 是否置顶 **/
     val pinned: Boolean = false,
+    /** 文章是否加密 （为 true 时需提供 password，为 null 保持不变，为 false 删除密码）**/
+    val encrypted: Boolean?,
     /** 密码 **/
     val password: String?
 )

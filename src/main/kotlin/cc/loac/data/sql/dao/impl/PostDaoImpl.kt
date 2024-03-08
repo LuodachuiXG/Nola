@@ -11,6 +11,7 @@ import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.requests.PostStatusRequest
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
@@ -27,6 +28,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
+import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.koin.java.KoinJavaComponent.inject
 import java.util.Date
 
@@ -223,7 +225,32 @@ class PostDaoImpl : PostDao {
             it[visible] = pr.visible
             it[cover] = pr.cover
             it[pinned] = pr.pinned
-            it[password] = pr.password.sha256Hex()
+            if (pr.encrypted != null && pr.encrypted == true) {
+                it[password] = pr.password.sha256Hex()
+            } else if (pr.encrypted == false) {
+                it[password] = ""
+            }
+        } > 0
+    }
+
+    /**
+     * 修改文章状态
+     * 文章状态、可见性、置顶
+     * @param postStatusRequest 文章状态请求数据类
+     */
+    override suspend fun updatePostStatus(postStatusRequest: PostStatusRequest): Boolean = dbQuery {
+        Posts.update({
+            Posts.postId eq postStatusRequest.postId
+        }) {
+            if (postStatusRequest.status != null) {
+                it[status] = postStatusRequest.status
+            }
+            if (postStatusRequest.visible != null) {
+                it[visible] = postStatusRequest.visible
+            }
+            if (postStatusRequest.pinned != null) {
+                it[pinned] = postStatusRequest.pinned
+            }
         } > 0
     }
 

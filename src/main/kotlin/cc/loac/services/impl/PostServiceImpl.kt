@@ -9,6 +9,7 @@ import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
+import cc.loac.data.requests.PostStatusRequest
 import cc.loac.data.responses.ApiPostContentResponse
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
@@ -79,6 +80,20 @@ class PostServiceImpl : PostService {
         // 检查是否需要自动生成摘要
         autoGenerateExcerpt(pr, true)
         return postDao.updatePost(pr)
+    }
+
+    /**
+     * 修改文章状态
+     * 文章状态、可见性、置顶
+     * @param postStatusRequest 文章状态请求数据类
+     */
+    override suspend fun updatePostStatus(postStatusRequest: PostStatusRequest): Boolean {
+        if (postStatusRequest.status == null &&
+            postStatusRequest.visible == null &&
+            postStatusRequest.pinned == null) {
+            return false
+        }
+        return postDao.updatePostStatus(postStatusRequest)
     }
 
     /**
