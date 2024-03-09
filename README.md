@@ -16,3 +16,5 @@
 ![nola_console_2](./img/nola_console_2.png)
 ![nola_console_3](./img/nola_console_3.png)
 ![nola_console_4](./img/nola_console_4.png)
+![nola_console_4](./img/nola_console_5.png)
+![nola_console_4](./img/nola_console_6.png)
