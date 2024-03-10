@@ -1,6 +1,9 @@
 package cc.loac.data.sql
 
 import cc.loac.data.sql.tables.*
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import io.ktor.server.config.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -16,13 +19,14 @@ object DatabaseSingleton {
     /**
      * 初始化数据库
      */
-    fun init() {
-        val driverClassName = "org.mariadb.jdbc.Driver"
-        val jdbcURL =
-            "jdbc:mariadb://localhost:3306/nola?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8"
-        val user = "root"
-        val password = "123456"
-        val database = Database.connect(jdbcURL, driverClassName, user, password)
+    fun init(config: ApplicationConfig) {
+        val driverClassName = config.property("ktor.storage.driverClassName").getString()
+        val jdbcURL = config.property("ktor.storage.jdbcURL").getString()
+        val username = config.property("ktor.storage.username").getString()
+        val password = config.property("ktor.storage.password").getString()
+        val database = Database.connect(
+            createHikariDataSource(jdbcURL, driverClassName, username, password)
+        )
 
         // 开启事物，要么全部成功，要么回滚
         transaction(database) {
@@ -50,6 +54,27 @@ object DatabaseSingleton {
             SchemaUtils.create(MenuItems)
         }
     }
+
+    /**
+     * 创建 Hikari 数据源
+     */
+    private fun createHikariDataSource(
+        url: String,
+        driver: String,
+        username: String,
+        password: String
+    ) = HikariDataSource(HikariConfig().apply {
+        driverClassName = driver
+        jdbcUrl = url
+        setUsername(username)
+        setPassword(password)
+        // 连接池最大大小
+        maximumPoolSize = 3
+        // 与 Exposed 默认设置同步
+        isAutoCommit = false
+        transactionIsolation = "TRANSACTION_REPEATABLE_READ"
+        validate()
+    })
 
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
