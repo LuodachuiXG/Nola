@@ -90,7 +90,8 @@ class PostServiceImpl : PostService {
     override suspend fun updatePostStatus(postStatusRequest: PostStatusRequest): Boolean {
         if (postStatusRequest.status == null &&
             postStatusRequest.visible == null &&
-            postStatusRequest.pinned == null) {
+            postStatusRequest.pinned == null
+        ) {
             return false
         }
         return postDao.updatePostStatus(postStatusRequest)
@@ -340,6 +341,7 @@ class PostServiceImpl : PostService {
      * @param newName 新草稿名
      */
     override suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean {
+        if (oldName == newName) return false
         // 先判断新的草稿名是否已经存在
         if (isPostDraftNameExist(postId, newName)) throw MyException("草稿名 [$newName] 已存在")
         return postDao.updatePostDraftName(postId, oldName, newName)
