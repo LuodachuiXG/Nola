@@ -152,7 +152,7 @@ fun Route.postAdminRouting() {
             }
 
             /** 添加文章草稿 **/
-            post("/content/draft") {
+            post("/draft") {
                 val postDraft = call.receiveByDataClass<PostDraftRequest> {
                     // 如果 postId 等于 0，证明传参 null
                     it.postId > 0
@@ -169,7 +169,7 @@ fun Route.postAdminRouting() {
             }
 
             /** 删除文章草稿 **/
-            delete("/content/{postId}/draft") {
+            delete("/draft/{postId}") {
                 val postId = call.receiveIntPathParam("postId")
                 val draftNames = call.receiveByDataClass<List<String>>()
                 if (draftNames.isEmpty()) call.respondSuccess(false)
@@ -177,7 +177,7 @@ fun Route.postAdminRouting() {
             }
 
             /** 修改文章草稿 **/
-            put("/content/draft") {
+            put("/draft") {
                 val postDraft = call.receiveByDataClass<PostDraftRequest> {
                     // 如果 postId 等于 0，证明传参 null
                     it.postId > 0
@@ -193,7 +193,7 @@ fun Route.postAdminRouting() {
             }
 
             /** 修改文章草稿名 **/
-            put("/content/draft/name") {
+            put("/draft/name") {
                 val params = call.receiveByDataClass<PostDraftNameRequest> {
                     it.postId > 0
                 }
@@ -202,7 +202,7 @@ fun Route.postAdminRouting() {
             }
 
             /** 将文章草稿转换为文章正文 **/
-            put("/content/draft/publish") {
+            put("/draft/publish") {
                 val params = call.receiveByDataClass<PostDraft2ContentRequest> {
                     it.postId > 0
                 }
@@ -218,7 +218,7 @@ fun Route.postAdminRouting() {
             }
 
             /** 获取文章草稿 **/
-            get("/content/{postId}/draft/{draftName}") {
+            get("/{postId}/draft/{draftName}") {
                 val params = call.receivePathParams("postId", "draftName")
                 // 判断文章 ID 是否为整数
                 val postId = params["postId"]?.toIntOrNull() ?: throw ParamMismatchException()
