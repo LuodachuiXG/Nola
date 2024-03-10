@@ -2,6 +2,7 @@ package cc.loac.data.models
 
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
+import java.io.Serializable
 
 /**
  * 文章数据类
@@ -41,4 +42,4 @@ data class Post(
     val createTime: Long,
     /** 最后修改时间 **/
     val lastModifyTime: Long?
-)
+): Serializable

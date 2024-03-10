@@ -57,6 +57,10 @@ object DatabaseSingleton {
 
     /**
      * 创建 Hikari 数据源
+     * @param url 数据库连接地址
+     * @param driver 数据库驱动类名
+     * @param username 用户名
+     * @param password 密码
      */
     private fun createHikariDataSource(
         url: String,
