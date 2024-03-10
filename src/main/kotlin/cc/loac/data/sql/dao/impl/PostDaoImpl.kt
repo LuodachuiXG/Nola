@@ -603,7 +603,7 @@ class PostDaoImpl : PostDao {
                 PostContents.postContentId eq postContentId
             }) {
                 it[status] = PostContentStatus.DRAFT
-                it[PostContents.draftName] = contentName ?: draftName
+                it[PostContents.draftName] = if (contentName.isNullOrEmpty()) draftName else contentName
             }
         }
 
