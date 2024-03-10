@@ -6,6 +6,8 @@ val logback_version: String by project
 val exposed_version: String by project
 val h2_version: String by project
 val koin_version: String by project
+val hikaricp_version: String by project
+val ehcache_version: String by project
 
 plugins {
     kotlin("jvm") version "1.9.22"
@@ -50,6 +52,13 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
     implementation("com.mysql:mysql-connector-j:8.3.0")
+
+    // H2 驱动
+    implementation("com.h2database:h2:$h2_version")
+
+    // 数据库连接池和缓存
+    implementation("com.zaxxer:HikariCP:$hikaricp_version")
+    implementation("org.ehcache:ehcache:$ehcache_version")
 
     // 根据异常返回指定的页面
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
