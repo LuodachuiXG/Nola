@@ -319,7 +319,6 @@ class PostServiceImpl : PostService {
         draftName: String?
     ): Boolean {
         val result = postDao.updatePostContent(postContent, status, draftName)
-
         // 启动线程执行耗时操作
         launchCoroutine {
             // 如果修改文章没有任何操作，就不执行下面的剩余操作
