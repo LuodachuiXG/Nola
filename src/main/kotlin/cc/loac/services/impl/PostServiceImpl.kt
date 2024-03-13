@@ -246,6 +246,9 @@ class PostServiceImpl : PostService {
             postBySlug(slug!!) ?: return null
         }
 
+        // 博客前端 API 只能获取已发布文章内容
+        if (post.status != PostStatus.PUBLISHED) return null
+
         // 判断文章是否有密码，以及密码是否正确
         if (post.encrypted) {
             // 文章有密码，但是接口提供的密码为空
