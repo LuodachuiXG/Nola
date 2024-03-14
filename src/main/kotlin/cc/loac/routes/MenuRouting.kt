@@ -8,7 +8,6 @@ import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
-import kotlinx.css.tr
 import org.koin.java.KoinJavaComponent.inject
 
 private val menuService: MenuService by inject(MenuService::class.java)

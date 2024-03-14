@@ -10,10 +10,6 @@ import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.MenuDao
 import cc.loac.services.MenuService
 import cc.loac.utils.error
-import io.ktor.utils.io.*
-import kotlinx.css.hr
-import kotlinx.css.th
-import kotlinx.css.tr
 import org.koin.java.KoinJavaComponent.inject
 
 private val menuDao: MenuDao by inject(MenuDao::class.java)
