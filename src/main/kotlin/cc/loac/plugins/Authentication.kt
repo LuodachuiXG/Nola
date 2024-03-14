@@ -3,11 +3,9 @@ package cc.loac.plugins
 import cc.loac.security.token.TokenConfig
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.auth0.jwt.exceptions.JWTVerificationException
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import kotlinx.css.a
 
 /**
  * 配置 JWT 身份验证

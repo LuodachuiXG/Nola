@@ -15,8 +15,11 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
-        // 静态文件
-        staticResources("/", "/static")
+        route("/") {
+            // 博客页面路由
+            blogRouting()
+        }
+
         /** 后台接口 **/
         route("/admin") {
             // user 用户相关路由

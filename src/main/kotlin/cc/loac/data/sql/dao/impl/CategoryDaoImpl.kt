@@ -7,11 +7,7 @@ import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Categories
 import cc.loac.data.sql.tables.PostCategories
-import cc.loac.data.sql.tables.PostTags
-import cc.loac.data.sql.tables.Tags
-import kotlinx.css.tr
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
 /**

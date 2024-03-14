@@ -20,7 +20,6 @@ import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.markdownToPlainText
-import kotlinx.css.tr
 import org.koin.java.KoinJavaComponent.inject
 
 /**
