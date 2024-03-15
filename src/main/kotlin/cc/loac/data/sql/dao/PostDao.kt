@@ -39,10 +39,11 @@ interface PostDao {
     suspend fun updatePostStatusToDeleted(postIds: List<Int>): Boolean
 
     /**
-     * 将文章转为草稿状态
+     * 将文章转为指定状态
      * @param postIds 文章 ID 集合
+     * @param status 文章状态
      */
-    suspend fun updatePostStatusToDraft(postIds: List<Int>): Boolean
+    suspend fun updatePostStatusTo(postIds: List<Int>, status: PostStatus): Boolean
 
     /**
      * 修改文章
