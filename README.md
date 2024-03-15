@@ -6,7 +6,7 @@
 
 [API 接口文档](https://apifox.com/apidoc/shared-82cab87c-63f3-4613-9264-69f4b68528ce)
 
-[Nola-Console](https://github.com/LuodachuiXG/Nola-Console)
+[Nola-Admin](https://github.com/LuodachuiXG/Nola-Admin)
 
 [Nola-Android](https://github.com/LuodachuiXG/Nola-Android)
 
