@@ -52,9 +52,17 @@ fun Route.postAdminRouting() {
             }
 
             /** 恢复文章 - 根据文章 ID **/
-            put("/restore") {
+            put("/restore/{status}") {
                 val postIds = call.receiveByDataClass<List<Int>>()
-                call.respondSuccess(postService.updatePostStatusToDraft(postIds))
+                val status = call.receivePathParam("status")
+                // 判断是否是合法的枚举
+                val statusEnum = kotlin.runCatching {
+                    PostStatus.valueOf(status)
+                }.getOrNull() ?: throw ParamMismatchException()
+                // 状态不能为已删除
+                if (statusEnum == PostStatus.DELETED) throw ParamMismatchException()
+
+                call.respondSuccess(postService.updatePostStatusTo(postIds, statusEnum))
             }
 
             /** 删除文章 - 根据文章 ID **/

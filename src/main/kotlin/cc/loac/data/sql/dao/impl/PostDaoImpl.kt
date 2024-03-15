@@ -184,14 +184,15 @@ class PostDaoImpl : PostDao {
     }
 
     /**
-     * 将文章转为草稿状态
+     * 将文章转为指定状态
      * @param postIds 文章 ID 集合
+     * @param status 文章状态
      */
-    override suspend fun updatePostStatusToDraft(postIds: List<Int>): Boolean = dbQuery {
+    override suspend fun updatePostStatusTo(postIds: List<Int>, status: PostStatus): Boolean = dbQuery {
         Posts.update({
             Posts.postId inList postIds
         }) {
-            it[status] = PostStatus.DRAFT
+            it[Posts.status] = status
         } > 0
     }
 
