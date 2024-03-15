@@ -40,6 +40,12 @@ interface PostService {
     suspend fun updatePostStatusToDeleted(postIds: List<Int>): Boolean
 
     /**
+     * 将文章转为草稿状态
+     * @param postIds 文章 ID 集合
+     */
+    suspend fun updatePostStatusToDraft(postIds: List<Int>): Boolean
+
+    /**
      * 修改文章
      * @param pr 文章请求数据类
      */
