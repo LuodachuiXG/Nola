@@ -69,6 +69,14 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 将文章转为草稿状态
+     * @param postIds 文章 ID 集合
+     */
+    override suspend fun updatePostStatusToDraft(postIds: List<Int>): Boolean {
+        return postDao.updatePostStatusToDraft(postIds)
+    }
+
+    /**
      * 修改文章
      * @param pr 文章请求数据类
      */

@@ -51,6 +51,12 @@ fun Route.postAdminRouting() {
                 call.respondSuccess(postService.updatePostStatusToDeleted(postIds))
             }
 
+            /** 恢复文章 - 根据文章 ID **/
+            put("/restore") {
+                val postIds = call.receiveByDataClass<List<Int>>()
+                call.respondSuccess(postService.updatePostStatusToDraft(postIds))
+            }
+
             /** 删除文章 - 根据文章 ID **/
             delete {
                 val postIds = call.receiveByDataClass<List<Int>>()

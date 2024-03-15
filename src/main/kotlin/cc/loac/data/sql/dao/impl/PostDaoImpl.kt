@@ -1,9 +1,7 @@
 package cc.loac.data.sql.dao.impl
 
-import cc.loac.data.models.Category
 import cc.loac.data.models.Post
 import cc.loac.data.models.PostContent
-import cc.loac.data.models.Tag
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostSort.*
@@ -28,7 +26,6 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
-import org.jetbrains.exposed.sql.statements.UpdateStatement
 import org.koin.java.KoinJavaComponent.inject
 import java.util.Date
 
@@ -183,6 +180,18 @@ class PostDaoImpl : PostDao {
             Posts.postId inList postIds
         }) {
             it[status] = PostStatus.DELETED
+        } > 0
+    }
+
+    /**
+     * 将文章转为草稿状态
+     * @param postIds 文章 ID 集合
+     */
+    override suspend fun updatePostStatusToDraft(postIds: List<Int>): Boolean = dbQuery {
+        Posts.update({
+            Posts.postId inList postIds
+        }) {
+            it[status] = PostStatus.DRAFT
         } > 0
     }
 
