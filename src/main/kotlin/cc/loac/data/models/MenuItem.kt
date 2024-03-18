@@ -11,7 +11,7 @@ data class MenuItem(
     /** 菜单名称 **/
     val displayName: String,
     /** 菜单地址 **/
-    val href: String?,
+    val href: String,
     /** 打开方式 **/
     val target: MenuItemTarget,
     /** 父菜单 ID **/
