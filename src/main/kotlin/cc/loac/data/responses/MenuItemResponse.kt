@@ -20,6 +20,8 @@ data class MenuItemResponse(
     val parentMenuItemId: Int?,
     /** 子菜单 */
     val children: List<MenuItemResponse> = emptyList(),
+    /** 菜单项排序索引 **/
+    val index: Int,
     /** 创建时间 */
     val createTime: Long,
     /** 最后修改时间 **/

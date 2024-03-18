@@ -78,7 +78,7 @@ interface MenuDao {
     suspend fun menuItem(menuItemId: Int): MenuItem?
 
     /**
-     * 获取所有菜单项
+     * 根据菜单 ID 获取所有菜单项
      * @param menuId 菜单 ID
      */
     suspend fun menuItems(menuId: Int): List<MenuItem>
