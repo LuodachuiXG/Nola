@@ -79,6 +79,11 @@ interface PostService {
     suspend fun addPostVisit(postId: Int): Boolean
 
     /**
+     * 获取文章总数
+     */
+    suspend fun postCount(): Long
+
+    /**
      * 获取所有文章
      */
     suspend fun posts(): List<Post>

@@ -38,3 +38,26 @@ data class PostRequest(
     /** 密码 **/
     val password: String?
 )
+
+/**
+ * 第一篇文章
+ */
+fun firstPost(): PostRequest {
+    return PostRequest(
+        title = "这是你的第一篇文章",
+        autoGenerateExcerpt = true,
+        slug = "first",
+        allowComment = true,
+        status = PostStatus.PUBLISHED,
+        visible = PostVisible.VISIBLE,
+        content = "这是第一篇文章，欢迎使用 Nola。",
+        categoryId = null,
+        tagIds = emptyList(),
+        cover = null,
+        encrypted = false,
+        excerpt = null,
+        postId = null,
+        password = null
+    )
+}
+

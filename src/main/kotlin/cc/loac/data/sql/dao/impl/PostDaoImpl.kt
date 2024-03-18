@@ -303,6 +303,13 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 获取文章总数
+     */
+    override suspend fun postCount(): Long = dbQuery {
+        Posts.selectAll().count()
+    }
+
+    /**
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> = dbQuery {
