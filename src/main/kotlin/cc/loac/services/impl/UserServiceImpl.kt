@@ -1,9 +1,15 @@
 package cc.loac.services.impl
 
 import cc.loac.data.models.User
+import cc.loac.data.models.enums.PostStatus
+import cc.loac.data.models.enums.PostVisible
+import cc.loac.data.requests.PostRequest
+import cc.loac.data.requests.firstPost
 import cc.loac.data.sql.dao.UserDao
 import cc.loac.security.hashing.SHA256HashingService
+import cc.loac.services.PostService
 import cc.loac.services.UserService
+import cc.loac.utils.launchCoroutine
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -12,6 +18,7 @@ import org.koin.java.KoinJavaComponent.inject
 class UserServiceImpl : UserService {
 
     private val hashingService = SHA256HashingService()
+    private val postService: PostService by inject(PostService::class.java)
     private val userDao: UserDao by inject(UserDao::class.java)
 
     /**
@@ -25,8 +32,19 @@ class UserServiceImpl : UserService {
             password = saltHash.hash,
             salt = saltHash.salt
         )
+        val result = userDao.addUser(u) != null
+        if (result) {
+            launchCoroutine {
+                // 管理员初始化完成，判断是否有文章，没有的话就插入默认文章
+                if (postService.postCount() == 0L) {
+                    val postRequest = firstPost()
+                    postService.addPost(postRequest)
+                }
+            }
+        }
+
         // 添加用户
-        return userDao.addUser(u) != null
+        return result
     }
 
     /**

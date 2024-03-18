@@ -144,6 +144,13 @@ class PostServiceImpl : PostService {
     }
 
     /**
+     * 获取文章总数
+     */
+    override suspend fun postCount(): Long {
+        return postDao.postCount();
+    }
+
+    /**
      * 获取所有文章
      */
     override suspend fun posts(): List<Post> {

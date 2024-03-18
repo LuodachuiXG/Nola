@@ -15,6 +15,7 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
+//        staticResources("/", "/static")
         route("/") {
             // 博客页面路由
             blogRouting()
