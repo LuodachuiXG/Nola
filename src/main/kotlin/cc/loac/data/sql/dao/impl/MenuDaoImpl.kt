@@ -124,7 +124,6 @@ class MenuDaoImpl : MenuDao {
     override suspend fun menus(): List<Menu> = dbQuery {
         Menus
             .selectAll()
-            .orderBy(Menus.createTime, SortOrder.DESC)
             .map(::resultToMenu)
     }
 
@@ -135,7 +134,7 @@ class MenuDaoImpl : MenuDao {
      */
     override suspend fun menus(page: Int, size: Int): Pager<Menu> {
         return Menus.startPage(page, size, ::resultToMenu) {
-            selectAll().orderBy(Menus.createTime, SortOrder.DESC)
+            selectAll()
         }
     }
 

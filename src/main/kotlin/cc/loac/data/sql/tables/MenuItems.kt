@@ -15,7 +15,7 @@ object MenuItems : Table("menu_item") {
     val displayName = varchar("displayName", 256)
 
     /** 菜单项地址 **/
-    val href = varchar("href", 512).nullable()
+    val href = varchar("href", 512)
 
     /** 菜单项打开方式 **/
     val target = enumerationByName<MenuItemTarget>("target", 12)
