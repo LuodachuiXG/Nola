@@ -172,7 +172,8 @@ class MenuServiceImpl : MenuService {
                         target = parentMenuItem.target,
                         parentMenuId = parentMenuItem.parentMenuId,
                         // 将原先的子菜单的（当前要修改的菜单项的父菜单项）的父菜单项置为空
-                        parentMenuItemId = null
+                        parentMenuItemId = null,
+                        index = parentMenuItem.index
                     )
                 )
             }
@@ -209,6 +210,7 @@ class MenuServiceImpl : MenuService {
                 href = it.href,
                 target = it.target,
                 parentMenuItemId = it.parentMenuItemId,
+                index = it.index,
                 lastModifyTime = it.lastModifyTime,
                 createTime = it.createTime
             )
@@ -236,6 +238,7 @@ class MenuServiceImpl : MenuService {
                 href = it.href,
                 target = it.target,
                 parentMenuItemId = it.parentMenuItemId,
+                index = it.index,
                 lastModifyTime = it.lastModifyTime,
                 createTime = it.createTime
             )
@@ -262,6 +265,7 @@ class MenuServiceImpl : MenuService {
                     parentMenuItemId = menuItem.parentMenuItemId,
                     // 递归查找子菜单
                     children = findMenuItemChildren(menuItem.menuItemId, items),
+                    index = menuItem.index,
                     lastModifyTime = menuItem.lastModifyTime,
                     createTime = menuItem.createTime
                 )

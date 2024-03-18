@@ -26,6 +26,9 @@ object MenuItems : Table("menu_item") {
     /** 父菜单项 ID **/
     val parentMenuItemId = integer("parentMenuItemId").nullable()
 
+    /** 菜单项排序索引 **/
+    val index = integer("index")
+
     /** 创建时间 **/
     val createTime = long("createTime")
 

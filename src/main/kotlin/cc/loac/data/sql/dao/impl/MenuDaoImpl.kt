@@ -28,7 +28,7 @@ class MenuDaoImpl : MenuDao {
         isMain = row[Menus.isMain],
         displayName = row[Menus.displayName],
         createTime = row[Menus.createTime],
-        lastModifyTime = row[Menus.lastModifyTime]
+        lastModifyTime = row[Menus.lastModifyTime],
     )
 
     /**
@@ -42,7 +42,8 @@ class MenuDaoImpl : MenuDao {
         parentMenuId = row[MenuItems.parentMenuId],
         parentMenuItemId = row[MenuItems.parentMenuItemId],
         createTime = row[MenuItems.createTime],
-        lastModifyTime = row[MenuItems.lastModifyTime]
+        lastModifyTime = row[MenuItems.lastModifyTime],
+        index = row[MenuItems.index]
     )
 
 
@@ -149,6 +150,7 @@ class MenuDaoImpl : MenuDao {
             it[target] = menuItem.target ?: MenuItemTarget.BLANK
             it[parentMenuId] = menuItem.parentMenuId
             it[parentMenuItemId] = menuItem.parentMenuItemId
+            it[index] = menuItem.index
             it[createTime] = Date().time
         }
         insertStatement.resultedValues?.singleOrNull()?.let(::resultToMenuItem)
@@ -177,6 +179,7 @@ class MenuDaoImpl : MenuDao {
             it[target] = menuItem.target ?: MenuItemTarget.BLANK
             it[parentMenuId] = menuItem.parentMenuId
             it[parentMenuItemId] = menuItem.parentMenuItemId
+            it[index] = menuItem.index
             it[lastModifyTime] = Date().time
         } > 0
     }
@@ -194,12 +197,15 @@ class MenuDaoImpl : MenuDao {
     }
 
     /**
-     * 获取所有菜单项
+     * 根据菜单 ID 获取所有菜单项
+     * @param menuId 菜单 ID
      */
     override suspend fun menuItems(menuId: Int): List<MenuItem> = dbQuery {
         MenuItems
             .selectAll()
             .where { MenuItems.parentMenuId eq menuId }
+            .groupBy(MenuItems.parentMenuId)
+            .orderBy(MenuItems.index, SortOrder.ASC)
             .map(::resultToMenuItem)
     }
 
@@ -209,6 +215,8 @@ class MenuDaoImpl : MenuDao {
     override suspend fun menuItems(): List<MenuItem> = dbQuery {
         MenuItems
             .selectAll()
+            .groupBy(MenuItems.parentMenuId)
+            .orderBy(MenuItems.index, SortOrder.ASC)
             .map(::resultToMenuItem)
     }
 
@@ -218,7 +226,12 @@ class MenuDaoImpl : MenuDao {
     override suspend fun mainMenuItems(): List<MenuItem> = dbQuery {
         MenuItems.join(Menus, JoinType.LEFT, additionalConstraint = {
             Menus.menuId eq MenuItems.parentMenuId
-        }).selectAll().map(::resultToMenuItem)
+        })
+            .selectAll()
+            .where { Menus.isMain eq true }
+            .groupBy(MenuItems.parentMenuId)
+            .orderBy(MenuItems.index, SortOrder.ASC)
+            .map(::resultToMenuItem)
     }
 
 
