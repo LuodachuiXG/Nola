@@ -49,6 +49,7 @@ fun Route.menuAdminRouting() {
             post("/item") {
                 val menuItem = call.receiveByDataClass<MenuItemRequest> {
                     it.parentMenuId > 0
+                    it.index >= 0
                 }
                 call.respondSuccess(
                     menuService.addMenuItem(menuItem)
@@ -65,7 +66,7 @@ fun Route.menuAdminRouting() {
             /** 修改菜单项 **/
             put("/item") {
                 val menuItem = call.receiveByDataClass<MenuItemRequest> {
-                    it.menuItemId != null && it.parentMenuId > 0
+                    it.menuItemId != null && it.parentMenuId > 0 && it.index >= 0
                 }
                 call.respondSuccess(menuService.updateMenuItem(menuItem))
             }
