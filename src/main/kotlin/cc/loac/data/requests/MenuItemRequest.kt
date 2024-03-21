@@ -19,5 +19,5 @@ data class MenuItemRequest(
     /** 父菜单项 ID */
     val parentMenuItemId: Int?,
     /** 菜单项排序索引 **/
-    val index: Int
+    var index: Int
 )
