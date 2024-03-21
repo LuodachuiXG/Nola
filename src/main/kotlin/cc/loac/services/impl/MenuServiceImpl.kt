@@ -209,6 +209,7 @@ class MenuServiceImpl : MenuService {
                 displayName = it.displayName,
                 href = it.href,
                 target = it.target,
+                parentMenuId = it.parentMenuId,
                 parentMenuItemId = it.parentMenuItemId,
                 index = it.index,
                 lastModifyTime = it.lastModifyTime,
@@ -237,6 +238,7 @@ class MenuServiceImpl : MenuService {
                 displayName = it.displayName,
                 href = it.href,
                 target = it.target,
+                parentMenuId = it.parentMenuId,
                 parentMenuItemId = it.parentMenuItemId,
                 index = it.index,
                 lastModifyTime = it.lastModifyTime,
@@ -262,6 +264,7 @@ class MenuServiceImpl : MenuService {
                     displayName = menuItem.displayName,
                     href = menuItem.href,
                     target = menuItem.target,
+                    parentMenuId = menuItem.parentMenuId,
                     parentMenuItemId = menuItem.parentMenuItemId,
                     // 递归查找子菜单
                     children = findMenuItemChildren(menuItem.menuItemId, items),

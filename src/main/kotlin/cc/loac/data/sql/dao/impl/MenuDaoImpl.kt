@@ -13,6 +13,7 @@ import cc.loac.data.sql.tables.MenuItems
 import cc.loac.data.sql.tables.Menus
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import java.util.*
 
 /**
@@ -143,6 +144,8 @@ class MenuDaoImpl : MenuDao {
      * @param menuItem 菜单项请求数据类
      */
     override suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem? = dbQuery {
+        // 先留出空位给新添加的菜单项
+        sqlUpdateMenuItemIndex(menuItem)
         val insertStatement = MenuItems.insert {
             it[displayName] = menuItem.displayName
             it[href] = menuItem.href
@@ -170,6 +173,8 @@ class MenuDaoImpl : MenuDao {
      * @param menuItem 菜单项请求数据类
      */
     override suspend fun updateMenuItem(menuItem: MenuItemRequest): Boolean = dbQuery {
+        // 先留出空位给新修改的菜单项
+        sqlUpdateMenuItemIndex(menuItem, false)
         MenuItems.update({
             MenuItems.menuItemId eq menuItem.menuItemId!!
         }) {
@@ -249,4 +254,51 @@ class MenuDaoImpl : MenuDao {
             it[isMain] = false
         }
     }
+
+    /**
+     * 重新设置和新添加的菜单同级的菜单的 index
+     * 需要在添加（修改）当前给定的菜单 SQL 语句前调用该方法，空出当前菜单的 index 空位
+     * @param newMenuItem 新添加的菜单项
+     * @param isAddMenu 是否是添加菜单，修改菜单的话赋 false
+     */
+    private fun sqlUpdateMenuItemIndex(
+        newMenuItem: MenuItemRequest,
+        isAddMenu: Boolean = true
+    ) {
+        // 获取所有同级菜单
+        val sameLevelMenuItems = MenuItems.selectAll()
+            .where {
+                MenuItems.parentMenuId eq newMenuItem.parentMenuId and
+                        (MenuItems.parentMenuItemId eq newMenuItem.parentMenuItemId)
+            }
+            .orderBy(MenuItems.index, SortOrder.ASC)
+            .map(::resultToMenuItem)
+        var newIndex = 0
+        sameLevelMenuItems.forEach { menuItem ->
+            if (isAddMenu) {
+                // 当前是添加菜单，只需留出空位即可
+                if (newIndex != newMenuItem.index) {
+                    MenuItems.update({
+                        MenuItems.menuItemId eq menuItem.menuItemId
+                    }) {
+                        it[index] = newIndex
+                    }
+                }
+                newIndex++
+            } else {
+                // 当前是修改菜单，sameLevelMenuItems 中已经包含了新菜单
+                if (menuItem.menuItemId != newMenuItem.menuItemId) {
+                    // 如果当前位置是新菜单要用的位置，这里留出空位
+                    if (newIndex == newMenuItem.index) newIndex++
+                    MenuItems.update({
+                        MenuItems.menuItemId eq menuItem.menuItemId
+                    }) {
+                        it[index] = newIndex
+                    }
+                    newIndex++
+                }
+            }
+        }
+    }
+
 }
