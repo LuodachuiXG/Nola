@@ -70,10 +70,9 @@ class MenuDaoImpl : MenuDao {
      * @param menuIds 菜单 ID 集合
      */
     override suspend fun deleteMenu(menuIds: List<Int>): Boolean = dbQuery {
-        val result = Menus.deleteWhere { menuId inList menuIds } > 0
-        // 同时删除被删除的菜单下的菜单项
+        // 先删除被删除的菜单下的菜单项
         MenuItems.deleteWhere { parentMenuId inList menuIds }
-        result
+        Menus.deleteWhere { menuId inList menuIds } > 0
     }
 
     /**

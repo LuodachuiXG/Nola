@@ -121,7 +121,6 @@ class MenuServiceImpl : MenuService {
         // 将要删除的菜单项 ID 集合也加入子菜单项 ID 集合中，一起删除
         childrenIds.addAll(menuItemIds)
         // 删除菜单项
-        childrenIds.toString().error()
         return menuDao.deleteMenuItems(childrenIds)
     }
 
