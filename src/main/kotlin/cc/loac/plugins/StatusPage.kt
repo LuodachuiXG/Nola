@@ -8,6 +8,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
+import org.thymeleaf.exceptions.TemplateInputException
 
 /**
  * 配置状态页面插件
@@ -39,6 +40,13 @@ fun Application.configureStatusPage() {
             "${call.request.host()} - ${call.request.uri}: 自定义异常：${e.message}".error()
             call.respondFailure(e.message ?: "Unknown Error")
         }
+
+        /** Thymeleaf 异常 **/
+        exception<TemplateInputException> { call, e ->
+            "${call.request.host()} - ${call.request.uri}: Thymeleaf异常：${e.message}".error()
+            call.respondFailure("Thymeleaf 模板解析异常", HttpStatusCode.InternalServerError)
+        }
+
 
         /** 参数不匹配异常 **/
         exception<ParamMismatchException> { call, e ->

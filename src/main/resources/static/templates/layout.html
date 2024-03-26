@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" th:fragment="html(content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${blogInfo.title + ' | ' + blogInfo.subtitle}"></title>
+    <link rel="icon" type="image/svg+xml" th:href="${blogInfo.logo}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/bootstrap-5.2.3.css}">
+    <link rel="stylesheet" type="text/css" th:href="@{css/index.css}">
+</head>
+<body>
+<section>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a href="/" class="navbar-brand" th:text="${blogInfo.title + ' | ' + blogInfo.subtitle}"></a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav">
+                    <a href="#" class="nav-item nav-link active">Home</a>
+                    <a href="#" class="nav-item nav-link">Services</a>
+                    <a href="#" class="nav-item nav-link">About</a>
+                    <a href="#" class="nav-item nav-link">Contact</a>
+                </div>
+                <div class="navbar-nav ms-auto">
+                    <a href="#" class="nav-item nav-link">Login</a>
+                    <a href="#" class="nav-item nav-link">Register</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div th:insert="${content}"></div>
+    <hr>
+    <footer>
+        <div class="row">
+            <div class="col-md-6">
+                <p th:text="'Copyright ©' + ${#dates.year(#dates.createNow())} + ' ' + ${blogInfo.title}"></p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a href="#" class="text-dark">Terms of Use</a>
+                <span class="text-muted mx-2">|</span>
+                <a href="#" class="text-dark">Privacy Policy</a>
+            </div>
+        </div>
+    </footer>
+    <script type="text/javascript" th:src="@{js/bootstrap-5.2.3-min.js}"></script>
+</section>
+</body>
+</html>

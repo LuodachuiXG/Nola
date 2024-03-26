@@ -1,15 +1,23 @@
 package cc.loac.services.impl
 
+import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.User
-import cc.loac.data.models.enums.PostStatus
-import cc.loac.data.models.enums.PostVisible
-import cc.loac.data.requests.PostRequest
+import cc.loac.data.models.enums.TokenClaimEnum
+import cc.loac.data.requests.MenuItemRequest
+import cc.loac.data.requests.MenuRequest
 import cc.loac.data.requests.firstPost
+import cc.loac.data.responses.AuthResponse
 import cc.loac.data.sql.dao.UserDao
-import cc.loac.security.hashing.SHA256HashingService
+import cc.loac.security.hashing.HashingService
+import cc.loac.security.hashing.SaltedHash
+import cc.loac.security.token.TokenClaim
+import cc.loac.security.token.TokenConfig
+import cc.loac.security.token.TokenService
+import cc.loac.services.MenuService
 import cc.loac.services.PostService
 import cc.loac.services.UserService
 import cc.loac.utils.launchCoroutine
+import ognl.Token
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -17,8 +25,10 @@ import org.koin.java.KoinJavaComponent.inject
  */
 class UserServiceImpl : UserService {
 
-    private val hashingService = SHA256HashingService()
     private val postService: PostService by inject(PostService::class.java)
+    private val menuService: MenuService by inject(MenuService::class.java)
+    private val hashingService: HashingService by inject(HashingService::class.java)
+    private val tokenService: TokenService by inject(TokenService::class.java)
     private val userDao: UserDao by inject(UserDao::class.java)
 
     /**
@@ -32,6 +42,7 @@ class UserServiceImpl : UserService {
             password = saltHash.hash,
             salt = saltHash.salt
         )
+        // 添加用户
         val result = userDao.addUser(u) != null
         if (result) {
             launchCoroutine {
@@ -40,10 +51,29 @@ class UserServiceImpl : UserService {
                     val postRequest = firstPost()
                     postService.addPost(postRequest)
                 }
+
+                // 判断是否有菜单，没有的话就插入默认菜单
+                if (menuService.menuCount() == 0L) {
+                    val menuRequest = MenuRequest(
+                        menuId = null,
+                        displayName = "默认",
+                        isMain = true
+                    )
+                    val menu = menuService.addMenu(menuRequest)
+                    menu?.let { m ->
+                        val menuItemHome = MenuItemRequest(
+                            menuItemId = null,
+                            displayName = "首页",
+                            href = "/",
+                            parentMenuId = m.menuId,
+                            parentMenuItemId = null,
+                            index = 0
+                        )
+                        menuService.addMenuItem(menuItemHome)
+                    }
+                }
             }
         }
-
-        // 添加用户
         return result
     }
 
@@ -68,5 +98,58 @@ class UserServiceImpl : UserService {
      */
     override suspend fun updateLastLoginTime(userId: Int): Boolean {
         return userDao.updateUserLastLoginTime(userId)
+    }
+
+    /**
+     * 用户登录
+     * @param tokenConfig Token 令牌配置
+     * @param username 用户名
+     * @param password 密码
+     */
+    override suspend fun login(
+        tokenConfig: TokenConfig,
+        username: String,
+        password: String
+    ): AuthResponse {
+        val user = user(username) ?: throw MyException("非法用户名或密码")
+        // 验证密码合法性
+        val isValidPassword = hashingService.verify(
+            value = password,
+            saltedHash = SaltedHash(
+                salt = user.salt,
+                hash = user.password
+            )
+        )
+
+        // 密码不合法
+        if (!isValidPassword) {
+            throw MyException("非法用户名或密码")
+        }
+
+        // 生成 Token
+        val token = tokenService.generate(
+            config = tokenConfig,
+            TokenClaim(
+                name = TokenClaimEnum.USER_ID,
+                value = user.userId.toString()
+            )
+        )
+
+        launchCoroutine {
+            // 修改最后登录时间
+            updateLastLoginTime(user.userId)
+        }
+
+        // 封装登录响应数据类
+        return AuthResponse(
+            username = user.username,
+            email = user.email,
+            displayName = user.displayName,
+            description = user.description,
+            createDate = user.createDate,
+            lastLoginDate = user.lastLoginDate,
+            avatar = user.avatar,
+            token = token
+        )
     }
 }
