@@ -31,6 +31,11 @@ interface MenuService {
     suspend fun updateMenu(menuRequest: MenuRequest): Boolean
 
     /**
+     * 获取菜单数量
+     */
+    suspend fun menuCount(): Long
+
+    /**
      * 获取菜单
      * @param menuId 菜单 ID
      */

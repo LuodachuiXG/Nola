@@ -28,7 +28,7 @@ class MenuServiceImpl : MenuService {
         if (menu(menuRequest.displayName) != null)
             throw MyException("菜单名 [${menuRequest.displayName}] 已存在")
         // 判断当前菜单是否是第一个菜单
-        if (menuDao.menuCount() == 0L) {
+        if (menuCount() == 0L) {
             // 将第一个菜单默认设置成主菜单
             menuRequest.isMain = true
         }
@@ -53,6 +53,13 @@ class MenuServiceImpl : MenuService {
         if (menu != null && menu.menuId != menuRequest.menuId)
             throw MyException("菜单名 [${menuRequest.displayName}] 已存在")
         return menuDao.updateMenu(menuRequest)
+    }
+
+    /**
+     * 获取菜单数量
+     */
+    override suspend fun menuCount(): Long {
+        return menuDao.menuCount()
     }
 
     /**

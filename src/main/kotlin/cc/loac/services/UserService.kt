@@ -1,6 +1,8 @@
 package cc.loac.services
 
 import cc.loac.data.models.User
+import cc.loac.data.responses.AuthResponse
+import cc.loac.security.token.TokenConfig
 
 /**
  * 用户服务接口
@@ -28,4 +30,16 @@ interface UserService {
      * @param userId 用户 ID
      */
     suspend fun updateLastLoginTime(userId: Int): Boolean
+
+    /**
+     * 用户登录
+     * @param tokenConfig Token 令牌配置
+     * @param username 用户名
+     * @param password 密码
+     */
+    suspend fun login(
+        tokenConfig: TokenConfig,
+        username: String,
+        password: String
+    ): AuthResponse
 }

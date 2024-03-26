@@ -9,13 +9,15 @@ import io.ktor.server.routing.*
 
 /**
  * 配置博客路由
+ * @param tokenConfig Token 令牌配置
  */
 fun Application.configureRouting(
-    tokenService: TokenService,
     tokenConfig: TokenConfig
 ) {
     routing {
-//        staticResources("/", "/static")
+        staticResources("/console", "/static/console")
+        staticResources("/css", "/static/templates/css")
+        staticResources("/js", "/static/templates/js")
         route("/") {
             // 博客页面路由
             blogRouting()
@@ -24,7 +26,7 @@ fun Application.configureRouting(
         /** 后台接口 **/
         route("/admin") {
             // user 用户相关路由
-            userRouting(tokenService, tokenConfig)
+            userRouting(tokenConfig)
             // config 博客配置管理员路由
             configAdminRouting()
             // tag 标签管理员路由

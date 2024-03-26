@@ -1,6 +1,8 @@
 package cc.loac.utils
 
 import cc.loac.data.exceptions.ParamMismatchException
+import cc.loac.data.models.enums.TokenClaimEnum
+import cc.loac.security.token.TokenClaim
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -198,10 +200,13 @@ suspend fun ApplicationCall.receivePageAndSize(
 
 /**
  * 获取请求的 Token 的 Claim
+ * @param tokenClaim Claim 枚举
  */
-fun ApplicationCall.getTokenClaim(name: String): String? {
+fun ApplicationCall.getTokenClaim(tokenClaim: TokenClaimEnum): TokenClaim? {
     val principal = this.principal<JWTPrincipal>()
-    return principal?.getClaim(name, String::class)
+    return principal?.getClaim(tokenClaim.toString(), String::class)?.let { value ->
+        TokenClaim(name = tokenClaim, value = value)
+    }
 }
 
 /**

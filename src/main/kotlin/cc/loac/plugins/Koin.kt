@@ -4,12 +4,15 @@ import cc.loac.data.sql.dao.*
 import cc.loac.data.sql.dao.impl.*
 import cc.loac.security.hashing.HashingService
 import cc.loac.security.hashing.SHA256HashingService
+import cc.loac.security.token.JwtTokenService
+import cc.loac.security.token.TokenService
 import cc.loac.services.*
 import cc.loac.services.impl.*
 import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
+import kotlin.math.sin
 
 /**
  * 配置 Koin
@@ -24,6 +27,7 @@ fun Application.configureKoin() {
 
 /** 配置 Koin 注入模块 **/
 val appModule = module {
+    single<TokenService> { JwtTokenService() }
     single<HashingService> { SHA256HashingService() }
 
     single<ConfigService> { ConfigServiceImpl() }
@@ -46,5 +50,4 @@ val appModule = module {
 
     single<MenuService> { MenuServiceImpl() }
     single<MenuDao> { MenuDaoImpl() }
-
 }
