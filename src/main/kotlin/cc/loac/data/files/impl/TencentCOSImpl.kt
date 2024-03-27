@@ -47,7 +47,7 @@ class TencentCOSImpl private constructor() : FileOption {
     override fun uploadFile(file: ByteArray, fileName: String): Boolean {
         val inputStream = file.inputStream()
         val objectMetadata = ObjectMetadata()
-        val key = "${_config!!.path}/$fileName"
+        val key = "${_config!!.path ?: ""}/${fileName.removeFirstSlash()}"
         val putObjectRequest =
             PutObjectRequest(_config!!.bucket, key, inputStream, objectMetadata)
         try {
@@ -67,7 +67,7 @@ class TencentCOSImpl private constructor() : FileOption {
     override fun deleteFiles(fileNames: List<String>): List<String> {
         val deleteObjectsRequest = DeleteObjectsRequest(_config!!.bucket)
         val keyList = fileNames.map { fileName ->
-            KeyVersion("${_config!!.path}/${fileName.removeFirstSlash()}")
+            KeyVersion("${_config!!.path ?: ""}/${fileName.removeFirstSlash()}")
         }
         deleteObjectsRequest.keys = keyList
         return try {
@@ -85,9 +85,9 @@ class TencentCOSImpl private constructor() : FileOption {
      * @param newName 新文件名
      * @return 是否复制成功
      */
-    fun copyFile(oldName: String, newName: String): Boolean {
-        val mOldName = "${_config!!.path}/${oldName.removeFirstSlash()}"
-        val mNewName = "${_config!!.path}/${newName.removeFirstSlash()}"
+    private fun copyFile(oldName: String, newName: String): Boolean {
+        val mOldName = "${_config!!.path ?: ""}/${oldName.removeFirstSlash()}"
+        val mNewName = "${_config!!.path ?: ""}/${newName.removeFirstSlash()}"
         val copyRequest = CopyObjectRequest(
             Region(_config!!.region), _config!!.bucket,
             mOldName, _config!!.bucket, mNewName
@@ -131,7 +131,7 @@ class TencentCOSImpl private constructor() : FileOption {
         try {
             return _cosClient!!.doesObjectExist(
                 _config!!.bucket,
-                "${_config!!.path}/${fileName.removeFirstSlash()}"
+                "${_config!!.path ?: ""}/${fileName.removeFirstSlash()}"
             )
         } catch (e: Exception) {
             e.printStackTrace()

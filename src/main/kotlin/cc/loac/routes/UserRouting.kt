@@ -1,6 +1,5 @@
 package cc.loac.routes
 
-import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.responses.toUserInfoResponse

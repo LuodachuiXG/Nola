@@ -15,6 +15,6 @@ data class TencentCOSConfig(
     val secretKey: String,
     val region: String,
     val bucket: String,
-    val path: String,
-    val https: Boolean,
+    val path: String?,
+    val https: Boolean
 )

@@ -2,10 +2,10 @@ package cc.loac.plugins
 
 import cc.loac.routes.*
 import cc.loac.security.token.TokenConfig
-import cc.loac.security.token.TokenService
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
+import java.io.File
 
 /**
  * 配置博客路由
@@ -15,9 +15,14 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
+        // 博客控制台静态资源
         staticResources("/console", "/static/console")
         staticResources("/css", "/static/templates/css")
         staticResources("/js", "/static/templates/js")
+
+        // 本地存储文件路由
+        staticFiles("/upload", File(".nola/upload"))
+
         route("/") {
             // 博客页面路由
             blogRouting()
@@ -41,6 +46,8 @@ fun Application.configureRouting(
             menuAdminRouting()
             // diary 日记管理员路由
             diaryAdminRouting()
+            // file 文件管理员路由
+            fileAdminRouting()
         }
 
         /** 博客接口 **/
