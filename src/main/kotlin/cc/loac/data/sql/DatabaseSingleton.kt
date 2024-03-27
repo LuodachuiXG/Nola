@@ -56,6 +56,8 @@ object DatabaseSingleton {
             SchemaUtils.create(FileGroup)
             // 文件表
             SchemaUtils.create(Files)
+            // 日记表
+            SchemaUtils.create(Diaries)
         }
     }
 

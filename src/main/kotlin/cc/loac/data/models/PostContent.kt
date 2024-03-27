@@ -2,22 +2,22 @@ package cc.loac.data.models
 
 import cc.loac.data.models.enums.PostContentStatus
 
+/**
+ * 文章内容数据类
+ * @param postContentId 文章内容 ID
+ * @param postId 文章 ID
+ * @param content 内容
+ * @param html HTML（由 content 解析得来）
+ * @param status 状态
+ * @param draftName 草稿名
+ * @param lastModifyTime 最后修改时间
+ */
 data class PostContent(
-    /** 文章内容 ID **/
     val postContentId: Int,
-
-    /** 文章 ID **/
     val postId: Int,
-
-    /** 内容 **/
     val content: String,
-
-    /** 状态 **/
+    val html: String,
     val status: PostContentStatus,
-
-    /** 草稿名 **/
     val draftName: String?,
-
-    /** 最后修改时间 **/
     val lastModifyTime: Long?
 )

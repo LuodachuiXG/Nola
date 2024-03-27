@@ -20,6 +20,7 @@ import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
 import cc.loac.utils.launchCoroutine
+import cc.loac.utils.markdownToHtml
 import cc.loac.utils.sha256Hex
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -88,6 +89,7 @@ class PostDaoImpl : PostDao {
         postContentId = row[PostContents.postContentId],
         postId = row[PostContents.postId],
         content = row[PostContents.content],
+        html = row[PostContents.html],
         status = row[PostContents.status],
         draftName = row[PostContents.draftName],
         lastModifyTime = row[PostContents.lastModifyTime]
@@ -149,6 +151,7 @@ class PostDaoImpl : PostDao {
         PostContents.insert {
             it[postId] = post.postId
             it[content] = pr.content ?: ""
+            it[html] = pr.content?.markdownToHtml() ?: ""
             it[status] = PostContentStatus.PUBLISHED
             it[lastModifyTime] = currentTime
         }
@@ -550,6 +553,7 @@ class PostDaoImpl : PostDao {
                     (if (status == PostContentStatus.DRAFT) PostContents.draftName eq draftName else null)
         }) {
             it[content] = postContent.content
+            it[html] = postContent.content.markdownToHtml()
             it[lastModifyTime] = currentTime
         } > 0
 

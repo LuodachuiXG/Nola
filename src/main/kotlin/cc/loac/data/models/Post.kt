@@ -6,40 +6,40 @@ import java.io.Serializable
 
 /**
  * 文章数据类
+ * @param postId 文章 ID
+ * @param title 标题
+ * @param autoGenerateExcerpt 是否自动生成摘要
+ * @param excerpt 摘要
+ * @param slug 别名
+ * @param cover 封面
+ * @param allowComment 是否允许评论
+ * @param pinned 是否置顶
+ * @param status 状态
+ * @param visible 可见性
+ * @param encrypted 是否加密
+ * @param password 密码
+ * @param visit 访问量
+ * @param category 文章分类
+ * @param tags 文章标签
+ * @param createTime 创建时间
+ * @param lastModifyTime 最后修改时间
  */
 data class Post(
-    /** 文章 ID **/
     val postId: Int = -1,
-    /** 标题 **/
     val title: String,
-    /** 是否自动生成摘要 **/
     val autoGenerateExcerpt: Boolean,
-    /** 摘要 **/
     val excerpt: String,
-    /** 别名 **/
     val slug: String,
-    /** 封面 **/
     val cover: String?,
-    /** 是否允许评论 **/
     val allowComment: Boolean,
-    /** 是否置顶 **/
     val pinned: Boolean?,
-    /** 状态 **/
     val status: PostStatus,
-    /** 可见性 **/
     val visible: PostVisible,
-    /** 是否加密 **/
     val encrypted: Boolean,
-    /** 密码 **/
     val password: String?,
-    /** 访问量 **/
     val visit: Int,
-    /** 文章分类 **/
     var category: Category?,
-    /** 文章标签 **/
     var tags: List<Tag>,
-    /** 创建时间 **/
     val createTime: Long,
-    /** 最后修改时间 **/
     val lastModifyTime: Long?
 ): Serializable
