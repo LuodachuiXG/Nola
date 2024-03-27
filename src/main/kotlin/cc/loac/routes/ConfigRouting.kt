@@ -47,10 +47,6 @@ fun Route.configAdminRouting() {
                     throw MyException("请先初始化博客")
                 }
 
-                // 判断是否已经初始了管理员
-                if (userService.allUsers().isNotEmpty()) {
-                    throw MyException("管理员已经创建")
-                }
                 // 获取请求传参
                 val receive = call.receiveMapByName(
                     "username",
@@ -58,22 +54,6 @@ fun Route.configAdminRouting() {
                     "displayName",
                     "password"
                 )
-
-                if (!receive["username"]!!.isAlphaAndNumeric()) {
-                    throw MyException("用户名只支持英文和数字")
-                }
-
-                if (receive["username"]!!.length < 4) {
-                    throw MyException("用户名不能小于 4 位")
-                }
-
-                if (!receive["email"]!!.isEmail()) {
-                    throw MyException("邮箱地址错误")
-                }
-
-                if (receive["password"]!!.length < 8) {
-                    throw MyException("密码长度不能小于 8 位")
-                }
 
                 // 封装用户类
                 val user = User(

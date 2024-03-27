@@ -1,6 +1,7 @@
 package cc.loac.services
 
 import cc.loac.data.models.User
+import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.responses.AuthResponse
 import cc.loac.security.token.TokenConfig
 
@@ -26,10 +27,30 @@ interface UserService {
     suspend fun user(username: String): User?
 
     /**
+     * 根据用户 ID 获取用户
+     * @param userId 用户 ID
+     */
+    suspend fun user(userId: Int): User?
+
+    /**
      * 根据用户 ID 修改最后登录时间
      * @param userId 用户 ID
      */
     suspend fun updateLastLoginTime(userId: Int): Boolean
+
+    /**
+     * 修改用户信息
+     * @param userId 用户 ID
+     * @param userInfo 用户信息
+     */
+    suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean
+
+    /**
+     * 修改用户密码
+     * @param userId 用户 ID
+     * @param password 新密码
+     */
+    suspend fun updatePassword(userId: Int, password: String): Boolean
 
     /**
      * 用户登录
