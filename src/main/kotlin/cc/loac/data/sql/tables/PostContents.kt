@@ -16,6 +16,9 @@ object PostContents : Table("post_content") {
     /** 内容 **/
     val content = text("content")
 
+    /** HTML（由 content 解析得来） **/
+    val html = text("html")
+
     /** 状态 **/
     val status = enumerationByName("status", 24, PostContentStatus::class)
 

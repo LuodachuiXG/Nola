@@ -12,7 +12,6 @@ import io.ktor.server.application.*
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
-import kotlin.math.sin
 
 /**
  * 配置 Koin
@@ -62,4 +61,8 @@ val appModule = module {
     // 文件服务
     single<FileService> { FileServiceImpl() }
     single<FileDao> { FileDaoImpl() }
+
+    // 日记服务
+    single<DiaryService> { DiaryServiceImpl() }
+    single<DiaryDao> { DiaryDaoImpl() }
 }
