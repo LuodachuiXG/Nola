@@ -2,6 +2,12 @@ package cc.loac.data.models
 
 /**
  * 友情链接数据类
+ * @param linkId 友情链接 ID
+ * @param displayName 链接名称
+ * @param url 链接地址
+ * @param logo logo 地址
+ * @param description 描述
+ * @param priority 优先级（0默认，1 - 10）
  */
 
 data class Link(

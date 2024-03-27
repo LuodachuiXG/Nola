@@ -52,6 +52,10 @@ object DatabaseSingleton {
             SchemaUtils.create(Menus)
             // 菜单项表
             SchemaUtils.create(MenuItems)
+            // 文件组表
+            SchemaUtils.create(FileGroup)
+            // 文件表
+            SchemaUtils.create(Files)
         }
     }
 

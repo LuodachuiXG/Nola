@@ -27,27 +27,39 @@ fun Application.configureKoin() {
 
 /** 配置 Koin 注入模块 **/
 val appModule = module {
+    // 令牌服务
     single<TokenService> { JwtTokenService() }
     single<HashingService> { SHA256HashingService() }
 
+    // 配置服务
     single<ConfigService> { ConfigServiceImpl() }
     single<ConfigDao> { ConfigDaoImpl() }
 
+    // 用户服务
     single<UserService> { UserServiceImpl() }
     single<UserDao> { UserDaoImpl() }
 
+    // 标签服务
     single<TagService> { TagServiceImpl() }
     single<TagDao> { TagDaoImpl() }
 
+    // 分类服务
     single<CategoryService> { CategoryServiceImpl() }
     single<CategoryDao> { CategoryDaoImpl() }
 
+    // 文章服务
     single<PostService> { PostServiceImpl() }
     single<PostDao> { PostDaoImpl() }
 
+    // 链接服务
     single<LinkService> { LinkServiceImpl() }
     single<LinkDao> { LinkDaoImpl() }
 
+    // 菜单服务
     single<MenuService> { MenuServiceImpl() }
     single<MenuDao> { MenuDaoImpl() }
+
+    // 文件服务
+    single<FileService> { FileServiceImpl() }
+    single<FileDao> { FileDaoImpl() }
 }
