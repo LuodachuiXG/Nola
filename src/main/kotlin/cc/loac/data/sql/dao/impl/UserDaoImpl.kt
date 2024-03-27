@@ -3,7 +3,9 @@ package cc.loac.data.sql.dao.impl
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.UserDao
 import cc.loac.data.models.User
+import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.sql.tables.Users
+import cc.loac.security.hashing.SaltedHash
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.Date
@@ -76,16 +78,33 @@ class UserDaoImpl : UserDao {
     }
 
     /**
-     * 修改用户
-     * @param user 用户数据类
+     * 修改用户信息
+     * @param userId 用户 ID
+     * @param userInfo 用户信息
      */
-    override suspend fun updateUser(user: User): Boolean = dbQuery {
+    override suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean = dbQuery {
         Users.update({
-            Users.userId eq user.userId
+            Users.userId eq userId
         }) {
-            it[displayName] = user.displayName
-            it[description] = user.description
-            it[avatar] = user.avatar
+            it[username] = userInfo.username
+            it[email] = userInfo.email
+            it[displayName] = userInfo.displayName
+            it[description] = userInfo.description
+            it[avatar] = userInfo.avatar
+        } > 0
+    }
+
+    /**
+     * 修改用户密码
+     * @param userId 用户 ID
+     * @param saltHash 加盐哈希
+     */
+    override suspend fun updatePassword(userId: Int, saltHash: SaltedHash): Boolean = dbQuery {
+        Users.update({
+            Users.userId eq userId
+        }) {
+            it[password] = saltHash.hash
+            it[salt] = saltHash.salt
         } > 0
     }
 

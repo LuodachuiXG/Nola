@@ -5,6 +5,7 @@ import cc.loac.data.models.User
 import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
+import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.requests.firstPost
 import cc.loac.data.responses.AuthResponse
 import cc.loac.data.sql.dao.UserDao
@@ -16,8 +17,9 @@ import cc.loac.security.token.TokenService
 import cc.loac.services.MenuService
 import cc.loac.services.PostService
 import cc.loac.services.UserService
+import cc.loac.utils.isAlphaAndNumeric
+import cc.loac.utils.isEmail
 import cc.loac.utils.launchCoroutine
-import ognl.Token
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -36,6 +38,27 @@ class UserServiceImpl : UserService {
      * @param user 用户数据类
      */
     override suspend fun initAdmin(user: User): Boolean {
+        // 判断是否已经初始了管理员
+        if (allUsers().isNotEmpty()) {
+            throw MyException("管理员已经创建")
+        }
+
+        if (!user.username.isAlphaAndNumeric()) {
+            throw MyException("用户名只支持英文和数字")
+        }
+
+        if (user.username.length < 4) {
+            throw MyException("用户名不能小于 4 位")
+        }
+
+        if (!user.email.isEmail()) {
+            throw MyException("邮箱格式错误")
+        }
+
+        if (user.password.length < 8) {
+            throw MyException("密码长度不能小于 8 位")
+        }
+
         // 对密码生成加盐哈希
         val saltHash = hashingService.generatedSaltedHash(user.password)
         val u = user.copy(
@@ -93,11 +116,42 @@ class UserServiceImpl : UserService {
     }
 
     /**
+     * 根据用户 ID 获取用户
+     * @param userId 用户 ID
+     */
+    override suspend fun user(userId: Int): User? {
+        return userDao.user(userId)
+    }
+
+    /**
      * 根据用户 ID 修改最后登录时间
      * @param userId 用户 ID
      */
     override suspend fun updateLastLoginTime(userId: Int): Boolean {
         return userDao.updateUserLastLoginTime(userId)
+    }
+
+    /**
+     * 修改用户信息
+     * @param userId 用户 ID
+     * @param userInfo 用户信息
+     */
+    override suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean {
+        if (!userInfo.email.isEmail()) throw MyException("邮箱格式错误")
+        if (!userInfo.username.isAlphaAndNumeric()) throw MyException("用户名只支持英文和数字")
+        if (userInfo.username.length < 4) throw MyException("用户名不能小于 4 位")
+        return userDao.updateUser(userId, userInfo)
+    }
+
+    /**
+     * 修改用户密码
+     * @param userId 用户 ID
+     * @param password 新密码
+     */
+    override suspend fun updatePassword(userId: Int, password: String): Boolean {
+        // 对密码生成加盐哈希
+        val saltHash = hashingService.generatedSaltedHash(password)
+        return userDao.updatePassword(userId, saltHash)
     }
 
     /**

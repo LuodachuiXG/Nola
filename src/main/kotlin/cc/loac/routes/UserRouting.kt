@@ -1,13 +1,13 @@
 package cc.loac.routes
 
+import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.enums.TokenClaimEnum
+import cc.loac.data.requests.UserInfoRequest
+import cc.loac.data.responses.toUserInfoResponse
 import cc.loac.plugins.LIMITER_ADMIN_LOGIN
-import cc.loac.utils.respondSuccess
 import cc.loac.security.token.TokenConfig
 import cc.loac.services.UserService
-import cc.loac.utils.error
-import cc.loac.utils.getTokenClaim
-import cc.loac.utils.receiveMapByName
+import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.ratelimit.*
@@ -33,7 +33,22 @@ fun Route.userRouting(
 
             /** 获取登录用户信息 **/
             get {
-                call.getTokenClaim(TokenClaimEnum.USER_ID)?.value?.error()
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
+                call.respondSuccess(userService.user(userId.toInt())?.toUserInfoResponse())
+            }
+
+            /** 修改登录用户的信息 **/
+            put {
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
+                val userInfo = call.receiveByDataClass<UserInfoRequest>()
+                call.respondSuccess(userService.updateUser(userId.toInt(), userInfo))
+            }
+
+            /** 修改密码 **/
+            put("/password") {
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
+                val newPassword = call.receiveMapByName("password")["password"]!!
+                call.respondSuccess(userService.updatePassword(userId.toInt(), newPassword))
             }
         }
 

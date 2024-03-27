@@ -1,6 +1,8 @@
 package cc.loac.data.sql.dao
 
 import cc.loac.data.models.User
+import cc.loac.data.requests.UserInfoRequest
+import cc.loac.security.hashing.SaltedHash
 
 /**
  * 用户表操作接口
@@ -30,10 +32,18 @@ interface UserDao {
     suspend fun addUser(user: User): User?
 
     /**
-     * 修改用户
-     * @param user 用户数据类
+     * 修改用户信息
+     * @param userId 用户 ID
+     * @param userInfo 用户信息
      */
-    suspend fun updateUser(user: User): Boolean
+    suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean
+
+    /**
+     * 修改用户密码
+     * @param userId 用户 ID
+     * @param saltHash 加盐哈希
+     */
+    suspend fun updatePassword(userId: Int, saltHash: SaltedHash): Boolean
 
     /**
      * 修改用户最后登录时间
