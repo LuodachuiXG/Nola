@@ -16,4 +16,6 @@ object Diaries : Table("diary") {
     val createTime = long("createTime")
     /** 最后修改时间 **/
     val lastModifyTime = long("lastModifyTime").nullable()
+
+    override val primaryKey = PrimaryKey(diaryId)
 }

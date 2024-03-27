@@ -55,7 +55,7 @@ class LinkDaoImpl : LinkDao {
      */
     override suspend fun deleteLinks(ids: List<Int>): Boolean = dbQuery {
         Links.deleteWhere {
-            linkId inList  ids
+            linkId inList ids
         } > 0
     }
 
@@ -104,7 +104,7 @@ class LinkDaoImpl : LinkDao {
      */
     private fun sqlQueryLinks(sort: LinkSort?): Query {
         val query = Links.selectAll()
-        when(sort) {
+        when (sort) {
             LinkSort.PRIORITY_DESC -> query.orderBy(Links.priority, SortOrder.DESC)
             LinkSort.PRIORITY_ASC -> query.orderBy(Links.priority, SortOrder.ASC)
             LinkSort.CREATE_TIME_DESC -> query.orderBy(Links.createTime, SortOrder.DESC)

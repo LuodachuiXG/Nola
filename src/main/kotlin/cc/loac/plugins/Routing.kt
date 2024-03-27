@@ -39,6 +39,8 @@ fun Application.configureRouting(
             linkAdminRouting()
             // menu 菜单管理员路由
             menuAdminRouting()
+            // diary 日记管理员路由
+            diaryAdminRouting()
         }
 
         /** 博客接口 **/
@@ -55,6 +57,8 @@ fun Application.configureRouting(
             linkApiRouting()
             // menu 菜单 API 路由
             menuApiRouting()
+            // diary 日记 API 路由
+            diaryApiRouting()
         }
     }
 }
