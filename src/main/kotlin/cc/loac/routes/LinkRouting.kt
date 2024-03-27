@@ -13,7 +13,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
-val linkService: LinkService by inject(LinkService::class.java)
+private val linkService: LinkService by inject(LinkService::class.java)
 
 /**
  * 友情链接，管理员路由
