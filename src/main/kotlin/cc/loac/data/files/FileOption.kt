@@ -1,16 +1,23 @@
 package cc.loac.data.files
 
+import java.io.InputStream
+
 /**
  * 文件操作接口
  */
 interface FileOption {
     /**
      * 上传文件
-     * @param file 文件二进制数据
+     * @param inputStream 文件输入流
+     * @param path 文件路径
      * @param fileName 文件名
-     * @return 是否上传成功
+     * @return 文件是否上传成功
      */
-    fun uploadFile(file: ByteArray, fileName: String): Boolean
+    fun uploadFile(
+        inputStream: InputStream,
+        path: String,
+        fileName: String
+    ): Boolean
 
     /**
      * 批量删除文件
@@ -21,11 +28,11 @@ interface FileOption {
 
     /**
      * 移动文件
-     * @param oldName 旧文件名
-     * @param newName 新文件名
-     * @return 是否更新成功
+     * @param oldFileNames 旧文件名集合
+     * @param newGroupName 要移动到的新的文件组（文件夹）名
+     * @return 成功移动的文件的旧文件名（包括文件夹名）
      */
-    fun moveFile(oldName: String, newName: String): Boolean
+    fun moveFile(oldFileNames: List<String>, newGroupName: String): List<String>
 
 
     /**

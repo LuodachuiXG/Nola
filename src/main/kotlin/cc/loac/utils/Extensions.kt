@@ -183,3 +183,46 @@ fun String?.sha256Hex(): String? {
 inline fun <reified T : Enum<T>> String.isEnum(): Boolean {
     return this in T::class.java.enumConstants.map { it.toString() }
 }
+
+/**
+ * String 扩展函数
+ * 用于在文件名后，文件扩展名前面添加上五个随机字符
+ * 用于在文件名已存在时，防止文件名重复
+ * 如果该文件名后面已经有随机字符，则重新修改该随机字符为新的随机字符
+ */
+fun String.addRandomSuffix(): String {
+    // 先获取文件的扩展名
+    val fileExtension = this.substringAfterLast(".", "")
+    // 获取文件名
+    val fileName = this.substringBeforeLast(".", this)
+    val randomStr = randomString(5)
+    // 如果文件名最后已经有了 "_" 加五个随机字符的后缀，则重新修改该后缀
+    // 先获取文件名最后六个字符，判断是否符合随机字符规则
+    return if (fileName.length >= 6 &&
+        fileName.substring(fileName.length - 6).matches("^_[a-z0-9]+\$")
+    ) {
+        // 符合规则，则重新修改该后缀
+        fileName.substring(0, fileName.length - 6) + "_$randomStr.$fileExtension"
+    } else {
+        // 不符合，则直接在文件名后面添加上随机字符
+        "${fileName}_$randomStr.$fileExtension"
+    }
+}
+
+/**
+ * String 扩展函数
+ * 将所有双正反斜杠替换为单斜杠
+ */
+fun String.replaceDoubleSlash(): String {
+    return this
+        .replace("//", "/")
+        .replace("\\\\", "/")
+}
+
+/**
+ * 格式化斜杠
+ * 把所有反斜杠替换为正斜杠
+ */
+fun String.formatSlash(): String =
+    this.replace("\\", "/")
+        .replaceDoubleSlash()

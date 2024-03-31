@@ -2,8 +2,12 @@ package cc.loac.services
 
 import cc.loac.data.files.config.TencentCOSConfig
 import cc.loac.data.models.FileGroup
+import cc.loac.data.models.FileIndex
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
+import cc.loac.data.requests.FileMoveRequest
+import cc.loac.data.responses.FileResponse
+import java.io.InputStream
 
 /**
  * 文件服务接口
@@ -81,4 +85,42 @@ interface FileService {
         fileStorageMode: FileStorageModeEnum,
         path: String
     ): FileGroup?
+
+
+    /**
+     * 上传文件
+     * @param inputStream 文件二进制数据
+     * @param fileName 文件名
+     * @param storageMode 文件存储方式
+     * @param fileGroupId 文件组 ID
+     * @param fileLength 文件长度
+     */
+    suspend fun uploadFile(
+        inputStream: InputStream,
+        fileName: String,
+        storageMode: FileStorageModeEnum,
+        fileGroupId: Int?,
+        fileLength: Long?
+    ): FileResponse?
+
+    /**
+     * 根据文件 ID 删除文件
+     * @param ids 文件 ID 数组
+     * @return 删除成功的文件 ID 数组
+     */
+    suspend fun deleteFiles(ids: List<Int>): List<Int>
+
+    /**
+     * 根据文件索引删除文件
+     * @param fileIndexes 文件索引数组
+     * @return 删除成功的文件索引数组
+     */
+    suspend fun deleteFilesByFineIndexes(fileIndexes: List<FileIndex>): List<FileIndex>
+
+    /**
+     * 移动文件
+     * @param fileMoveRequest 文件移动请求数据类
+     * @return 移动成功旧文件的地址集合
+     */
+    suspend fun moveFiles(fileMoveRequest: FileMoveRequest): List<String>
 }
