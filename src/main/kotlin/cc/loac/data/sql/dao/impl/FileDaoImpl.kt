@@ -1,13 +1,18 @@
 package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.FileGroup
+import cc.loac.data.models.FileIndex
+import cc.loac.data.models.FileWithGroup
+import cc.loac.data.models.MFile
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
+import cc.loac.data.responses.FileResponse
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.FileDao
 import cc.loac.data.sql.tables.FileGroups
 import cc.loac.data.sql.tables.FileStorageModes
 import cc.loac.data.sql.tables.Files
+import cc.loac.utils.formatSlash
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -27,6 +32,39 @@ class FileDaoImpl : FileDao {
             displayName = row[FileGroups.displayName],
             path = row[FileGroups.path],
             storageMode = row[FileGroups.storageMode]
+        )
+    }
+
+    /**
+     * 将 ResultRow 转换为 MFile
+     * @param row ResultRow
+     */
+    private fun resultToMFile(row: ResultRow): MFile {
+        return MFile(
+            fileId = row[Files.fileId],
+            fileGroupId = row[Files.fileGroupId],
+            displayName = row[Files.displayName],
+            size = row[Files.size],
+            storageMode = row[Files.storageMode],
+            createTime = row[Files.createTime]
+        )
+    }
+
+    /**
+     * 将 ResultRow 转换为 FileWithGroup 文件和文件组数据类
+     * @param row ResultRow
+     */
+    private fun resultToFileWithGroup(row: ResultRow): FileWithGroup {
+        return FileWithGroup(
+            fileId = row[Files.fileId],
+            fileGroupId = row[Files.fileGroupId],
+            fileName = row[Files.displayName],
+            fileGroupName = row[FileGroups.displayName],
+            fileGroupPath = row[FileGroups.path],
+            size = row[Files.size],
+            storageMode = row[Files.storageMode],
+            createTime = row[Files.createTime]
+
         )
     }
 
@@ -122,7 +160,7 @@ class FileDaoImpl : FileDao {
     override suspend fun addFileGroup(fileGroup: FileGroup): FileGroup? = dbQuery {
         FileGroups.insert {
             it[displayName] = fileGroup.displayName
-            it[path] = fileGroup.path
+            it[path] = fileGroup.path.formatSlash()
             it[storageMode] = fileGroup.storageMode
         }.resultedValues?.singleOrNull()?.let(::resultToFileGroup)
     }
@@ -147,7 +185,6 @@ class FileDaoImpl : FileDao {
             FileGroups.fileGroupId eq fileGroup.fileGroupId
         }) {
             it[displayName] = fileGroup.displayName
-            it[path] = fileGroup.path
         } > 0
     }
 
@@ -175,5 +212,135 @@ class FileDaoImpl : FileDao {
             }
         }
         baseQuery.map(::resultToFileGroup)
+    }
+
+    /**
+     * 添加文件
+     * @param mFile 文件数据类
+     */
+    override suspend fun addFile(mFile: MFile): MFile? = dbQuery {
+        Files.insert {
+            if (mFile.fileGroupId != null) {
+                it[fileGroupId] = mFile.fileGroupId
+            }
+            it[displayName] = mFile.displayName
+            it[size] = mFile.size
+            it[storageMode] = mFile.storageMode
+            it[createTime] = mFile.createTime
+        }.resultedValues?.singleOrNull()?.let(::resultToMFile)
+    }
+
+    /**
+     * 删除文件
+     * @param fileId 文件 ID
+     */
+    override suspend fun deleteFile(fileId: Int): Boolean = dbQuery {
+        Files.deleteWhere {
+            Files.fileId eq fileId
+        } > 0
+    }
+
+    /**
+     * 根据文件名数组和文件存储方式批量删除文件
+     * @param fileNames 文件名集合
+     * @param storageMode 文件存储方式
+     */
+    override suspend fun deleteFile(fileNames: List<String>, storageMode: FileStorageModeEnum): Boolean = dbQuery {
+        Files.deleteWhere {
+            displayName inList fileNames and (Files.storageMode eq storageMode)
+        } > 0
+    }
+
+
+    /**
+     * 批量删除文件
+     * @param fileIds 文件 ID 集合
+     */
+    override suspend fun deleteFile(fileIds: List<Int>): Boolean = dbQuery {
+        Files.deleteWhere {
+            fileId inList fileIds
+        } > 0
+    }
+
+    /**
+     * 修改文件
+     * @param mFile 文件数据类
+     */
+    override suspend fun updateFile(mFile: MFile): Boolean = dbQuery {
+        Files.update({
+            Files.fileId eq mFile.fileId
+        }) {
+            it[fileGroupId] = mFile.fileGroupId
+            it[displayName] = mFile.displayName
+            it[size] = mFile.size
+            it[storageMode] = mFile.storageMode
+        } > 0
+    }
+
+    /**
+     * 批量修改文件
+     * @param files 文件集合
+     */
+    override suspend fun updateFiles(files: List<MFile>): Boolean = dbQuery {
+        var result = 0
+        files.forEach { file ->
+            Files.update({
+                Files.fileId eq file.fileId
+            }) {
+                it[fileGroupId] = file.fileGroupId
+                it[displayName] = file.displayName
+                it[size] = file.size
+                it[storageMode] = file.storageMode
+            }.let { if(it > 0) result++ }
+        }
+        result > 0
+    }
+
+    /**
+     * 根据文件名、文件组 ID 和文件存储方式获取文件
+     * @param fileName 文件名
+     * @param fileGroupId 文件组 ID
+     * @param storageMode 文件存储方式
+     */
+    override suspend fun getFile(
+        fileName: String,
+        fileGroupId: Int?,
+        storageMode: FileStorageModeEnum
+    ): MFile? = dbQuery {
+        val baseQuery = Files.selectAll()
+        if (fileGroupId != null) {
+            baseQuery.andWhere {
+                Files.fileGroupId eq fileGroupId
+            }
+        }
+        baseQuery.andWhere {
+            Files.displayName eq fileName and
+                    (Files.storageMode eq storageMode)
+        }
+        baseQuery
+            .map(::resultToMFile)
+            .singleOrNull()
+    }
+
+    /**
+     * 根据文件 ID 集合获取文件和文件组数据类
+     * @param ids 文件 ID 集合
+     */
+    override suspend fun getFileWithGroups(ids: List<Int>): List<FileWithGroup> = dbQuery {
+        Files.leftJoin(
+            FileGroups,
+            additionalConstraint = { Files.fileGroupId eq FileGroups.fileGroupId }
+        )
+            .selectAll()
+            .where { Files.fileId inList ids }
+            .map(::resultToFileWithGroup)
+    }
+
+    /**
+     * 获取所有文件
+     * @param fileIds 文件 ID 集合
+     */
+    override suspend fun getFiles(fileIds: List<Int>): List<MFile> = dbQuery {
+        Files.selectAll().where { Files.fileId inList fileIds }.map(::resultToMFile)
     }
 }
