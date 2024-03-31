@@ -3,10 +3,12 @@ package cc.loac.services
 import cc.loac.data.files.config.TencentCOSConfig
 import cc.loac.data.models.FileGroup
 import cc.loac.data.models.FileIndex
+import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
 import cc.loac.data.responses.FileResponse
+import cc.loac.data.responses.Pager
 import java.io.InputStream
 
 /**
@@ -123,4 +125,20 @@ interface FileService {
      * @return 移动成功旧文件的地址集合
      */
     suspend fun moveFiles(fileMoveRequest: FileMoveRequest): List<String>
+
+    /**
+     * 获取文件
+     * @param page 当前页
+     * @param size 每页条数
+     * @param sort 排序方式
+     * @param mode 文件存储方式
+     * @param key 关键字
+     */
+    suspend fun getFiles(
+        page: Int,
+        size: Int,
+        sort: FileSort? = null,
+        mode: FileStorageModeEnum? = null,
+        key: String? = null
+    ): Pager<FileResponse>
 }

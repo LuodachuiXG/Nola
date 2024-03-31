@@ -5,6 +5,7 @@ import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.data.files.config.TencentCOSConfig
 import cc.loac.data.models.FileGroup
 import cc.loac.data.models.FileIndex
+import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
@@ -26,16 +27,14 @@ private val fileService: FileService by inject(FileService::class.java)
  */
 fun Route.fileAdminRouting() {
     route("/file") {
-        authenticate {
-            // 文件存储方式相关路由
-            fileStorageModeRouting()
+        // 文件存储方式相关路由
+        fileStorageModeRouting()
 
-            // 文件相关路由
-            fileRouting()
+        // 文件相关路由
+        fileRouting()
 
-            // 文件组相关路由
-            fileGroupRouting()
-        }
+        // 文件组相关路由
+        fileGroupRouting()
     }
 }
 
@@ -106,8 +105,22 @@ private fun Route.fileRouting() {
     /** 移动文件 **/
     put {
         val fileMoveRequest = call.receiveByDataClass<FileMoveRequest>()
-        fileMoveRequest.toString().error()
         call.respondSuccess(fileService.moveFiles(fileMoveRequest))
+    }
+
+    /** 获取文件 **/
+    get {
+        call.receivePageAndSize { page, size ->
+            val sort = call.receiveNullablePathParam("sort") {
+                it?.isEnum<FileSort>()
+            }?.let { FileSort.valueOf(it) }
+            val mode = call.receiveNullablePathParam("mode") {
+                it?.isEnum<FileStorageModeEnum>()
+            }?.let { FileStorageModeEnum.valueOf(it) }
+            val key = call.receiveNullablePathParam("key")
+
+            call.respondSuccess(fileService.getFiles(page, size, sort, mode, key))
+        }
     }
 }
 
