@@ -6,14 +6,17 @@ import cc.loac.data.files.FileOption
 import cc.loac.data.files.config.TencentCOSConfig
 import cc.loac.data.files.impl.LocalFileStorageImpl
 import cc.loac.data.files.impl.TencentCOSImpl
+import cc.loac.data.files.impl.URL_STORAGE_PATH
 import cc.loac.data.models.FileGroup
 import cc.loac.data.models.FileIndex
 import cc.loac.data.models.FileWithGroup
 import cc.loac.data.models.MFile
+import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
 import cc.loac.data.responses.FileResponse
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.FileDao
 import cc.loac.services.FileService
 import cc.loac.utils.*
@@ -490,6 +493,60 @@ class FileServiceImpl : FileService {
         // 修改成功移动的文件的文件组
         fileDao.updateFiles(newFiles)
         return movedFileNames
+    }
+
+    /**
+     * 获取文件
+     * @param page 当前页
+     * @param size 每页条数
+     * @param sort 排序方式
+     * @param mode 文件存储方式
+     * @param key 关键字
+     */
+    override suspend fun getFiles(
+        page: Int,
+        size: Int,
+        sort: FileSort?,
+        mode: FileStorageModeEnum?,
+        key: String?
+    ): Pager<FileResponse> {
+        val fileResponses = LinkedList<FileResponse>()
+        // 先分页获取文件和文件组分页数据
+        val fileWithGroupPager = fileDao.getFileWithGroups(page, size, sort, mode, key)
+        fileWithGroupPager.data.forEach {
+            fileResponses.add(
+                FileResponse(
+                    fileId = it.fileId,
+                    fileGroupId = it.fileGroupId,
+                    fileGroupName = it.fileGroupName,
+                    displayName = it.fileName,
+                    url = when (it.storageMode) {
+                        // 本地存储，返回相对地址
+                        FileStorageModeEnum.LOCAL ->
+                            "$URL_STORAGE_PATH/${it.fileGroupPath}/${it.fileName}".formatSlash()
+                        // 腾讯云对象存储，返回绝对地址
+                        FileStorageModeEnum.TENCENT_COS -> {
+                            // 先尝试初始化腾讯云对象存储
+                            initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
+                                ?: throw FileStorageNotConfiguredException(FileStorageModeEnum.TENCENT_COS)
+                            tencentCOSUrl(tencentConfig!!, it.fileName, it.fileGroupName)
+                        }
+
+                    },
+                    size = it.size,
+                    storageMode = it.storageMode,
+                    createTime = it.createTime
+                )
+            )
+        }
+
+        return Pager(
+            page = fileWithGroupPager.page,
+            size = fileWithGroupPager.size,
+            data = fileResponses,
+            totalData = fileWithGroupPager.totalData,
+            totalPages = fileWithGroupPager.totalPages
+        )
     }
 
     /**

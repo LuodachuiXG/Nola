@@ -4,11 +4,14 @@ import cc.loac.data.models.FileGroup
 import cc.loac.data.models.FileIndex
 import cc.loac.data.models.FileWithGroup
 import cc.loac.data.models.MFile
+import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.responses.FileResponse
+import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.FileDao
+import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.FileGroups
 import cc.loac.data.sql.tables.FileStorageModes
 import cc.loac.data.sql.tables.Files
@@ -291,7 +294,7 @@ class FileDaoImpl : FileDao {
                 it[displayName] = file.displayName
                 it[size] = file.size
                 it[storageMode] = file.storageMode
-            }.let { if(it > 0) result++ }
+            }.let { if (it > 0) result++ }
         }
         result > 0
     }
@@ -334,6 +337,54 @@ class FileDaoImpl : FileDao {
             .selectAll()
             .where { Files.fileId inList ids }
             .map(::resultToFileWithGroup)
+    }
+
+    /**
+     * 分页获取文件和文件组数据
+     * @param page 当前页（0 获取所有文件）
+     * @param size 每页条数
+     * @param sort 排序方式
+     * @param mode 文件存储方式
+     * @param key 关键字
+     */
+    override suspend fun getFileWithGroups(
+        page: Int,
+        size: Int,
+        sort: FileSort?,
+        mode: FileStorageModeEnum?,
+        key: String?
+    ): Pager<FileWithGroup> {
+        val query = Files.leftJoin(
+            FileGroups,
+            additionalConstraint = { Files.fileGroupId eq FileGroups.fileGroupId }
+        ).selectAll()
+
+        if (mode != null) {
+            query.andWhere { Files.storageMode eq mode }
+        }
+
+        if (key != null) {
+            query.andWhere {
+                Files.displayName like "%$key%" or
+                        (Files.fileGroupId.isNotNull() and (FileGroups.displayName like "%$key%"))
+            }
+        }
+
+        when (sort) {
+            FileSort.CREATE_TIME_DESC -> query.orderBy(Files.createTime, SortOrder.DESC)
+            FileSort.CREATE_TIME_ASC -> query.orderBy(Files.createTime, SortOrder.ASC)
+            FileSort.SIZE_DESC -> query.orderBy(Files.size, SortOrder.DESC)
+            FileSort.SIZE_ASC -> query.orderBy(Files.size, SortOrder.ASC)
+            else -> {}
+        }
+
+        if (page == 0) {
+            // 获取所有文件
+            val files = dbQuery { query.map(::resultToFileWithGroup) }
+            return Pager(0, 0, files, files.size.toLong(), 1)
+        }
+        // page 不等于 0，分页查询
+        return Files.startPage(page, size, ::resultToFileWithGroup) { query }
     }
 
     /**

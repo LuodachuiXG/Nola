@@ -4,9 +4,11 @@ import cc.loac.data.models.FileGroup
 import cc.loac.data.models.FileIndex
 import cc.loac.data.models.FileWithGroup
 import cc.loac.data.models.MFile
+import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.responses.FileResponse
+import cc.loac.data.responses.Pager
 
 /**
  * 文件表操作接口
@@ -141,6 +143,22 @@ interface FileDao {
     suspend fun getFileWithGroups(
         ids: List<Int>
     ): List<FileWithGroup>
+
+    /**
+     * 分页获取文件和文件组数据
+     * @param page 当前页（0 获取所有文件）
+     * @param size 每页条数
+     * @param sort 排序方式
+     * @param mode 文件存储方式
+     * @param key 关键字
+     */
+    suspend fun getFileWithGroups(
+        page: Int,
+        size: Int,
+        sort: FileSort?,
+        mode: FileStorageModeEnum?,
+        key: String?
+    ): Pager<FileWithGroup>
 
     /**
      * 获取所有文件

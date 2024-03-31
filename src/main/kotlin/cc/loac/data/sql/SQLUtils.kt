@@ -2,6 +2,7 @@ package cc.loac.data.sql
 
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
+import cc.loac.utils.error
 import org.jetbrains.exposed.sql.FieldSet
 import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.ResultRow
@@ -22,13 +23,14 @@ suspend fun <T> FieldSet.startPage(
 ): Pager<T> {
     // 计算 limit 的偏移量
     val offset = ((page - 1) * size).toLong()
+    // 查询给定的 query 检索条件下的总条数
+    val totalData = dbQuery { query().count() }
+    totalData.toString().error()
     // 检索数据、分页、将检索结果转为 T 类型集合
     val data = dbQuery {
         this.query().limit(size, offset).map(transform)
     }
-    // 查询给定的 query 检索条件下的总条数
-    val totalData = dbQuery { this.query().count() }
     // 计算总页数
-    val totalPage = (totalData + size - 1) / size
+    val totalPage = if (totalData % size == 0L) totalData / size else totalData / size + 1
     return Pager(page, size, data, totalData, totalPage)
 }
