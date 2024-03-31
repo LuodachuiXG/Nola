@@ -27,14 +27,16 @@ private val fileService: FileService by inject(FileService::class.java)
  */
 fun Route.fileAdminRouting() {
     route("/file") {
-        // 文件存储方式相关路由
-        fileStorageModeRouting()
+        authenticate {
+            // 文件存储方式相关路由
+            fileStorageModeRouting()
 
-        // 文件相关路由
-        fileRouting()
+            // 文件相关路由
+            fileRouting()
 
-        // 文件组相关路由
-        fileGroupRouting()
+            // 文件组相关路由
+            fileGroupRouting()
+        }
     }
 }
 

@@ -149,6 +149,7 @@ class UserServiceImpl : UserService {
      * @param password 新密码
      */
     override suspend fun updatePassword(userId: Int, password: String): Boolean {
+        if (password.length < 8) throw MyException("密码长度不能小于 8 位")
         // 对密码生成加盐哈希
         val saltHash = hashingService.generatedSaltedHash(password)
         return userDao.updatePassword(userId, saltHash)
