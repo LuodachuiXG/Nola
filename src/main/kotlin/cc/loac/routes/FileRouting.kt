@@ -152,7 +152,7 @@ private fun Route.fileGroupRouting() {
         }
 
         /** 根据文件组存储方式获取文件组 **/
-        get("/{fileStorageMode}") {
+        get {
             val fileStorageMode = call.receiveNullablePathParam("fileStorageMode") {
                 it?.isEnum<FileStorageModeEnum>()
             }?.let { FileStorageModeEnum.valueOf(it) }
@@ -167,7 +167,7 @@ private fun Route.fileGroupRouting() {
 private fun Route.fileStorageModeRouting() {
     /** 获取已经设置的所有存储方式 **/
     route("/mode") {
-        get("/list") {
+        get {
             call.respondSuccess(fileService.getModes())
         }
 
