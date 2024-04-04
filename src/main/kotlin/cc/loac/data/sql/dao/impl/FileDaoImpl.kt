@@ -208,7 +208,7 @@ class FileDaoImpl : FileDao {
     override suspend fun getFileGroups(
         fileStorageMode: FileStorageModeEnum?
     ): List<FileGroup> = dbQuery {
-        val baseQuery = FileGroups.selectAll()
+        val baseQuery = FileGroups.selectAll().orderBy(FileGroups.storageMode)
         if (fileStorageMode != null) {
             baseQuery.andWhere {
                 FileGroups.storageMode eq fileStorageMode
