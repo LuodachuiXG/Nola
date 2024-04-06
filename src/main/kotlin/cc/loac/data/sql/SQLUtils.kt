@@ -25,7 +25,6 @@ suspend fun <T> FieldSet.startPage(
     val offset = ((page - 1) * size).toLong()
     // 查询给定的 query 检索条件下的总条数
     val totalData = dbQuery { query().count() }
-    totalData.toString().error()
     // 检索数据、分页、将检索结果转为 T 类型集合
     val data = dbQuery {
         this.query().limit(size, offset).map(transform)

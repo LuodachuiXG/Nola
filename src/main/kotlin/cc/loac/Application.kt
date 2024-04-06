@@ -1,12 +1,11 @@
 package cc.loac
 
-import cc.loac.data.files.FileOption
-import cc.loac.data.files.impl.LocalFileStorageImpl
 import cc.loac.plugins.*
 import cc.loac.data.sql.DatabaseSingleton
 import cc.loac.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
+
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {

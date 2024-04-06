@@ -363,10 +363,9 @@ class FileDaoImpl : FileDao {
             query.andWhere { Files.storageMode eq mode }
         }
 
-        if (key != null) {
+        if (!key.isNullOrBlank()) {
             query.andWhere {
-                Files.displayName like "%$key%" or
-                        (Files.fileGroupId.isNotNull() and (FileGroups.displayName like "%$key%"))
+                Files.displayName like "%$key%"
             }
         }
 

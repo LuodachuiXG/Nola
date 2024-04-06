@@ -523,7 +523,7 @@ class FileServiceImpl : FileService {
                     url = when (it.storageMode) {
                         // 本地存储，返回相对地址
                         FileStorageModeEnum.LOCAL ->
-                            "$URL_STORAGE_PATH/${it.fileGroupPath}/${it.fileName}".formatSlash()
+                            "$URL_STORAGE_PATH/${it.fileGroupPath ?: ""}/${it.fileName}".formatSlash()
                         // 腾讯云对象存储，返回绝对地址
                         FileStorageModeEnum.TENCENT_COS -> {
                             // 先尝试初始化腾讯云对象存储
