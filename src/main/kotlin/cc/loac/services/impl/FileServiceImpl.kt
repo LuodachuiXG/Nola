@@ -438,7 +438,9 @@ class FileServiceImpl : FileService {
         files.forEach { fileWithGroup ->
             if (fileWithGroup.fileGroupId != newFileGroup?.fileGroupId) {
                 // 如果要移动的文件，不在目标文件组中，就加入待移动的文件集合中
-                waitForMoveFileNames.add((fileWithGroup.fileGroupPath ?: "") + "/${fileWithGroup.fileName}")
+                waitForMoveFileNames.add(
+                    (((fileWithGroup.fileGroupPath ?: "") + "/${fileWithGroup.fileName}").formatSlash())
+                )
             }
         }
 
@@ -531,7 +533,7 @@ class FileServiceImpl : FileService {
                             // 先尝试初始化腾讯云对象存储
                             initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
                                 ?: throw FileStorageNotConfiguredException(FileStorageModeEnum.TENCENT_COS)
-                            tencentCOSUrl(tencentConfig!!, it.fileName, it.fileGroupName)
+                            tencentCOSUrl(tencentConfig!!, it.fileName, it.fileGroupPath)
                         }
 
                     },
