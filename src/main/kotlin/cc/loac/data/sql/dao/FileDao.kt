@@ -145,11 +145,12 @@ interface FileDao {
     ): List<FileWithGroup>
 
     /**
-     * 分页获取文件和文件组数据
-     * @param page 当前页（0 获取所有文件）
+     * 获取文件
+     * @param page 当前页
      * @param size 每页条数
      * @param sort 排序方式
      * @param mode 文件存储方式
+     * @param groupId 文件组 ID
      * @param key 关键字
      */
     suspend fun getFileWithGroups(
@@ -157,6 +158,7 @@ interface FileDao {
         size: Int,
         sort: FileSort?,
         mode: FileStorageModeEnum?,
+        groupId: Int?,
         key: String?
     ): Pager<FileWithGroup>
 

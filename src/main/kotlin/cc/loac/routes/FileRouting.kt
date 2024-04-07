@@ -119,9 +119,12 @@ private fun Route.fileRouting() {
             val mode = call.receiveNullablePathParam("mode") {
                 it?.isEnum<FileStorageModeEnum>()
             }?.let { FileStorageModeEnum.valueOf(it) }
+            val groupId = call.receiveNullablePathParam("groupId") {
+                it?.isInt()
+            }?.toInt()
             val key = call.receiveNullablePathParam("key")
 
-            call.respondSuccess(fileService.getFiles(page, size, sort, mode, key))
+            call.respondSuccess(fileService.getFiles(page, size, sort, mode, groupId, key))
         }
     }
 }
