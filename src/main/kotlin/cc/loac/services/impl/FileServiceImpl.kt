@@ -137,11 +137,11 @@ class FileServiceImpl : FileService {
 
         // 添加前先判断相同存储方式下，文件组名和文件组路径是否重复
         if (getFileGroupByDisplayName(fileGroup.storageMode, fileGroup.displayName) != null) {
-            throw MyException("文件组名 [${fileGroup.displayName}}] 已经存在")
+            throw MyException("文件组名 [${fileGroup.displayName}] 已经存在")
         }
 
         if (getFileGroupByPath(fileGroup.storageMode, fileGroup.path) != null) {
-            throw MyException("文件组路径 [${fileGroup.path}}] 已经存在")
+            throw MyException("文件组路径 [${fileGroup.path}] 已经存在")
         }
 
         // 添加文件组
@@ -501,6 +501,7 @@ class FileServiceImpl : FileService {
      * @param size 每页条数
      * @param sort 排序方式
      * @param mode 文件存储方式
+     * @param groupId 文件组 ID
      * @param key 关键字
      */
     override suspend fun getFiles(
@@ -508,11 +509,12 @@ class FileServiceImpl : FileService {
         size: Int,
         sort: FileSort?,
         mode: FileStorageModeEnum?,
+        groupId: Int?,
         key: String?
     ): Pager<FileResponse> {
         val fileResponses = LinkedList<FileResponse>()
         // 先分页获取文件和文件组分页数据
-        val fileWithGroupPager = fileDao.getFileWithGroups(page, size, sort, mode, key)
+        val fileWithGroupPager = fileDao.getFileWithGroups(page, size, sort, mode, groupId, key)
         fileWithGroupPager.data.forEach {
             fileResponses.add(
                 FileResponse(

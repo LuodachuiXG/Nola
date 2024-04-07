@@ -132,6 +132,7 @@ interface FileService {
      * @param size 每页条数
      * @param sort 排序方式
      * @param mode 文件存储方式
+     * @param groupId 文件组 ID
      * @param key 关键字
      */
     suspend fun getFiles(
@@ -139,6 +140,7 @@ interface FileService {
         size: Int,
         sort: FileSort? = null,
         mode: FileStorageModeEnum? = null,
+        groupId: Int? = null,
         key: String? = null
     ): Pager<FileResponse>
 }
