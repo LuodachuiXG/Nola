@@ -10,10 +10,10 @@ import java.io.InputStream
 import java.util.LinkedList
 
 // URL 存储路径
-val URL_STORAGE_PATH = "/upload"
+const val URL_STORAGE_PATH = "/upload"
 
 // 本地存储路径
-val LOCAL_STORAGE_PATH = ".nola/$URL_STORAGE_PATH"
+const val LOCAL_STORAGE_PATH = ".nola/$URL_STORAGE_PATH"
 
 /**
  * 本地存储实现类
@@ -91,6 +91,12 @@ class LocalFileStorageImpl : FileOption {
                 )
                 if (oldFile.renameTo(newFile)) {
                     result.add(oldFileName)
+                }
+
+                // 如果被移动的文件的父文件夹下没有文件了，就删除该文件夹
+                val parentDir = File(oldFileName.substringBeforeLast("/"))
+                if (parentDir.listFiles()?.isEmpty() == true) {
+                    parentDir.delete()
                 }
             }
         }
