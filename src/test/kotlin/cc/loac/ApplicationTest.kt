@@ -1,7 +1,7 @@
 package cc.loac
 
-import cc.loac.data.files.impl.LocalFileStorageImpl
 import org.junit.Test
+import java.io.File
 
 
 class ApplicationTest {
