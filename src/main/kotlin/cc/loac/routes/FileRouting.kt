@@ -59,11 +59,11 @@ private fun Route.fileRouting() {
         multipartData.forEachPart { part ->
             when(part) {
                 is PartData.FormItem -> {
-                    if (part.name == "fileGroupId") {
+                    if (part.name == "fileGroupId" && part.value.isNotBlank()) {
                         if (part.value.isInt()) fileGroupId = part.value.toInt()
                     }
 
-                    if (part.name == "storageMode") {
+                    if (part.name == "storageMode" && part.value.isNotBlank()) {
                         if (!part.value.isEnum<FileStorageModeEnum>()) throw ParamMismatchException()
                         storageMode = FileStorageModeEnum.valueOf(part.value)
                     }
