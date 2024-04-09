@@ -332,7 +332,7 @@ class FileServiceImpl : FileService {
         val fileIndexes = files.map {
             FileIndex(
                 fileId = it.fileId,
-                name = "${it.fileGroupName ?: ""}/${it.fileName}",
+                name = "${it.fileGroupPath ?: ""}/${it.fileName}",
                 storageMode = it.storageMode
             )
         }
