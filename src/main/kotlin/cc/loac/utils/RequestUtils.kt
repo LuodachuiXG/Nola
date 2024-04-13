@@ -195,6 +195,10 @@ suspend fun ApplicationCall.receivePageAndSize(
         // 抛出参数不匹配异常
         throw ParamMismatchException()
     }
+    // 如果 page 不为 0，size 为 0，抛出参数不匹配异常
+    if (page != "0" && size == "0") {
+        throw ParamMismatchException()
+    }
     block(page.toInt(), size.toInt())
 }
 
