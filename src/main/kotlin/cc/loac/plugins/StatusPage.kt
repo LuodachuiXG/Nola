@@ -15,7 +15,6 @@ import org.thymeleaf.exceptions.TemplateInputException
  * 用于指定不同的异常或状态时的响应
  */
 fun Application.configureStatusPage() {
-    val log = this.environment.log
     install(StatusPages) {
         /** 404 Not Found 状态 **/
         status(HttpStatusCode.NotFound) { call, status ->

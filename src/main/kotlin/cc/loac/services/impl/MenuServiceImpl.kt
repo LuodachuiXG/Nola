@@ -210,7 +210,6 @@ class MenuServiceImpl : MenuService {
         // 不构建菜单项树
         return menuItems.map {
             MenuItemResponse(
-                menuId = menuId,
                 menuItemId = it.menuItemId,
                 displayName = it.displayName,
                 href = it.href,
@@ -239,7 +238,6 @@ class MenuServiceImpl : MenuService {
         // 不构建菜单项树
         return menuItems.map {
             MenuItemResponse(
-                menuId = it.parentMenuId,
                 menuItemId = it.menuItemId,
                 displayName = it.displayName,
                 href = it.href,
@@ -265,7 +263,6 @@ class MenuServiceImpl : MenuService {
         return items.filter { it.parentMenuItemId == parentMenuItemId }
             .map { menuItem ->
                 MenuItemResponse(
-                    menuId = menuItem.parentMenuId,
                     menuItemId = menuItem.menuItemId,
                     displayName = menuItem.displayName,
                     href = menuItem.href,

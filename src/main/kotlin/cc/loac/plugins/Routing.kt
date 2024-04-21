@@ -30,7 +30,7 @@ fun Application.configureRouting(
 
         /** 后台接口 **/
         route("/admin") {
-            // user 用户相关路由
+            // user 用户路由
             userRouting(tokenConfig)
             // config 博客配置管理员路由
             configAdminRouting()
@@ -52,6 +52,8 @@ fun Application.configureRouting(
 
         /** 博客接口 **/
         route("/api") {
+            // user 用户 API 路由
+            userApiRouting()
             // config 博客配置 API 路由
             configApiRouting()
             // tag 标签 API 路由
