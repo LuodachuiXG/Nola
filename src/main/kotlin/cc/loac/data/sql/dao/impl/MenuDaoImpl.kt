@@ -276,6 +276,7 @@ class MenuDaoImpl : MenuDao {
         sameLevelMenuItems.forEach { menuItem ->
             if (isAddMenu) {
                 // 当前是添加菜单，只需留出空位即可
+                if (newIndex == newMenuItem.index) newIndex++
                 if (newIndex != newMenuItem.index) {
                     MenuItems.update({
                         MenuItems.menuItemId eq menuItem.menuItemId
