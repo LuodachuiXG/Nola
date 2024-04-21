@@ -20,7 +20,7 @@ fun Route.blogRouting() {
     get {
         val blogInfo = configService.config(ConfigKey.BLOG_INFO)?.jsonToClass<BlogInfo>()
         // 如果博客信息为空，跳转到管理页面
-        blogInfo ?: return@get call.respondRedirect("/admin")
+        blogInfo ?: return@get call.respondRedirect("/console")
         call.respond(ThymeleafContent("index", mapOf("blogInfo" to blogInfo)))
     }
 }

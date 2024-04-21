@@ -5,7 +5,6 @@ import cc.loac.data.models.enums.MenuItemTarget
 /**
  * 菜单项响应数据类
  * @param menuItemId 菜单项 ID
- * @param menuId 菜单 ID
  * @param displayName 菜单项名称
  * @param href 菜单地址
  * @param target 打开方式
@@ -18,7 +17,6 @@ import cc.loac.data.models.enums.MenuItemTarget
  */
 data class MenuItemResponse(
     val menuItemId: Int,
-    val menuId: Int,
     val displayName: String,
     val href: String?,
     val target: MenuItemTarget,

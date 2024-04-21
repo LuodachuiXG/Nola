@@ -2,6 +2,7 @@ package cc.loac.routes
 
 import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.UserInfoRequest
+import cc.loac.data.responses.toBloggerResponse
 import cc.loac.data.responses.toUserInfoResponse
 import cc.loac.plugins.LIMITER_ADMIN_LOGIN
 import cc.loac.security.token.TokenConfig
@@ -59,6 +60,19 @@ fun Route.userRouting(
                 // 返回登录响应数据类
                 call.respondSuccess(userService.login(tokenConfig, receive["username"]!!, receive["password"]!!))
             }
+        }
+    }
+}
+
+
+/**
+ * 用户 API 路由
+ */
+fun Route.userApiRouting() {
+    route("/blogger") {
+        /** 获取博主信息 **/
+        get {
+            call.respondSuccess(userService.allUsers().first().toBloggerResponse())
         }
     }
 }
