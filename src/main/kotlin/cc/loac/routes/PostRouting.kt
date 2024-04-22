@@ -8,9 +8,12 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.*
+import cc.loac.data.responses.ApiPostResponse
+import cc.loac.data.responses.toApiPostResponse
 import cc.loac.plugins.LIMITER_ENCRYPT_POST
 import cc.loac.services.PostService
 import cc.loac.utils.*
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.ratelimit.*
@@ -264,6 +267,28 @@ fun Route.postApiRouting() {
 
                 call.respondSuccess(postService.apiPosts(page, size, key, tag, category))
             }
+        }
+
+        /** 获取文章 - 根据文章 ID **/
+        get("/{postId}") {
+            val postId = call.receiveIntPathParam("postId")
+            val post = postService.posts(listOf(postId), true).firstOrNull()
+            // 如果文章不存在，或者文章不可见，或者文章未发布，则返回 404
+            if (post == null || post.visible != PostVisible.VISIBLE || post.status != PostStatus.PUBLISHED) {
+                return@get call.respondFailure(HttpStatusCode.NotFound.description, HttpStatusCode.NotFound)
+            }
+            call.respondSuccess(post.toApiPostResponse())
+        }
+
+        /** 获取文章 - 根据文章别名 **/
+        get("/slug/{slug}") {
+            val slug = call.receivePathParam("slug")
+            val post = postService.postBySlug(slug)
+            // 如果文章不存在，或者文章不可见，或者文章未发布，则返回 404
+            if (post == null || post.visible != PostVisible.VISIBLE || post.status != PostStatus.PUBLISHED) {
+                return@get call.respondFailure(HttpStatusCode.NotFound.description, HttpStatusCode.NotFound)
+            }
+            call.respondSuccess(post.toApiPostResponse())
         }
 
         // 给文章添加速率限制器

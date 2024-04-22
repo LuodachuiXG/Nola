@@ -1,6 +1,7 @@
 package cc.loac.data.responses
 
 import cc.loac.data.models.Category
+import cc.loac.data.models.Post
 import cc.loac.data.models.Tag
 
 /**
@@ -34,3 +35,26 @@ data class ApiPostResponse(
     val createTime: Long,
     val lastModifyTime: Long?
 )
+
+/**
+ * 将 Post 转换为 ApiPostResponse
+ */
+fun Post.toApiPostResponse(): ApiPostResponse {
+    return ApiPostResponse(
+        postId = this.postId,
+        title = this.title,
+        // 如果文章加密，则不返回摘要
+        excerpt = if(this.encrypted) null else this.excerpt,
+        slug = this.slug,
+        cover = this.cover,
+        allowComment = this.allowComment,
+        pinned = this.pinned,
+        encrypted = this.encrypted,
+        visit = this.visit,
+        category = this.category,
+        tags = this.tags,
+        createTime = this.createTime,
+        // 如果文章加密，则不返回最后修改时间
+        lastModifyTime = if (this.encrypted) null else this.lastModifyTime
+    )
+}
