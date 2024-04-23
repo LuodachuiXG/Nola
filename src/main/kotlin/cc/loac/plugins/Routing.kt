@@ -15,13 +15,21 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
-        // 博客控制台静态资源
-        staticResources("/console", "/static/console")
         staticResources("/css", "/static/templates/css")
         staticResources("/js", "/static/templates/js")
 
         // 本地存储文件路由
         staticFiles("/upload", File(".nola/upload"))
+
+
+        // Vue 后台单页应用路由
+        singlePageApplication {
+            vue("static/console")
+            applicationRoute = "/console"
+            useResources = true
+        }
+
+
 
         route("/") {
             // 博客页面路由
