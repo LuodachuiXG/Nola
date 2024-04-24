@@ -13,7 +13,7 @@ object Tags : Table("tag") {
     val displayName = varchar("displayName", 256)
 
     /** 标签别名 **/
-    val slug = varchar("slug", 256).uniqueIndex()
+    val slug = varchar("slug", 128, "utf8mb4_general_ci").uniqueIndex()
 
     /** 标签颜色 **/
     val color = varchar("color", 24).nullable()

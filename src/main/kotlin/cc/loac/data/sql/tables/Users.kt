@@ -12,7 +12,7 @@ object Users : Table("user") {
     val userId = integer("userId").autoIncrement()
 
     /** 用户名 **/
-    val username = varchar("username", 64).uniqueIndex()
+    val username = varchar("username", 64, "utf8mb4_general_ci").uniqueIndex()
 
     /** 电子邮箱 **/
     val email = varchar("email", 64)

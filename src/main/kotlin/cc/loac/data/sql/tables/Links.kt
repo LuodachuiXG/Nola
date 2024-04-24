@@ -16,7 +16,7 @@ object Links : Table("link") {
     val url = varchar("url", 512)
 
     /** logo 地址 **/
-    val logo = varchar("logo", 256).nullable()
+    val logo = varchar("logo", 512).nullable()
 
     /** 描述 **/
     val description = varchar("description", 512).nullable()

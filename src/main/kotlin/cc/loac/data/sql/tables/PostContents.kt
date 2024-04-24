@@ -14,10 +14,10 @@ object PostContents : Table("post_content") {
     val postId = integer("postId").references(Posts.postId)
 
     /** 内容 **/
-    val content = text("content")
+    val content = text("content", "utf8mb4_general_ci")
 
     /** HTML（由 content 解析得来） **/
-    val html = text("html")
+    val html = text("html", "utf8mb4_general_ci")
 
     /** 状态 **/
     val status = enumerationByName("status", 24, PostContentStatus::class)

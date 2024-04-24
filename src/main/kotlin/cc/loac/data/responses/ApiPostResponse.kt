@@ -51,8 +51,8 @@ fun Post.toApiPostResponse(): ApiPostResponse {
         pinned = this.pinned,
         encrypted = this.encrypted,
         visit = this.visit,
-        category = this.category,
-        tags = this.tags,
+        category = if (this.encrypted) null else this.category,
+        tags = if (this.encrypted) emptyList() else this.tags,
         createTime = this.createTime,
         // 如果文章加密，则不返回最后修改时间
         lastModifyTime = if (this.encrypted) null else this.lastModifyTime
