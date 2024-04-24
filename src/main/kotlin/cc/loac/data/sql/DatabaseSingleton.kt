@@ -30,6 +30,7 @@ object DatabaseSingleton {
 
         // 开启事物，要么全部成功，要么回滚
         transaction(database) {
+            SchemaUtils.createDatabase("nola")
             // 用户表
             SchemaUtils.create(Users)
             // 配置表

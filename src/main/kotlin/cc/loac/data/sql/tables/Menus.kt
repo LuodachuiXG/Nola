@@ -13,7 +13,7 @@ object Menus : Table("menu") {
     val isMain = bool("isMain")
 
     /** 菜单名 **/
-    val displayName = varchar("displayName", 256).uniqueIndex()
+    val displayName = varchar("displayName", 128, "utf8mb4_general_ci").uniqueIndex()
 
     /** 创建时间 **/
     val createTime = long("createTime")

@@ -2,6 +2,7 @@ package cc.loac.plugins
 
 import cc.loac.routes.*
 import cc.loac.security.token.TokenConfig
+import cc.loac.utils.error
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
 import io.ktor.server.routing.*
@@ -21,7 +22,6 @@ fun Application.configureRouting(
         // 本地存储文件路由
         staticFiles("/upload", File(".nola/upload"))
 
-
         // Vue 后台单页应用路由
         singlePageApplication {
             vue("static/console")
@@ -29,12 +29,17 @@ fun Application.configureRouting(
             useResources = true
         }
 
-
-
-        route("/") {
-            // 博客页面路由
-            blogRouting()
+        // Vue 前台单页应用路由
+        singlePageApplication {
+            vue("static")
+            applicationRoute = "/"
+            useResources = true
         }
+
+//        route("/") {
+//            // 博客页面路由
+//            blogRouting()
+//        }
 
         /** 后台接口 **/
         route("/admin") {

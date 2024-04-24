@@ -12,7 +12,7 @@ object MenuItems : Table("menu_item") {
     val menuItemId = integer("menuItemId").autoIncrement()
 
     /** 菜单项名称 **/
-    val displayName = varchar("displayName", 256)
+    val displayName = varchar("displayName", 128)
 
     /** 菜单项地址 **/
     val href = varchar("href", 512)

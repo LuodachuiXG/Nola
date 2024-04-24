@@ -12,19 +12,19 @@ object Posts : Table("post") {
     val postId = integer("postId").autoIncrement()
 
     /** 标题 **/
-    val title = varchar("title", 512)
+    val title = varchar("title", 256)
 
     /** 是否自动生成摘要 **/
     val autoGenerateExcerpt = bool("autoGenerateExcerpt")
 
     /** 摘要 **/
-    val excerpt = varchar("excerpt", 1024)
+    val excerpt = varchar("excerpt", 1024, "utf8mb4_general_ci")
 
     /** 别名 **/
-    val slug = varchar("slug", 512).uniqueIndex()
+    val slug = varchar("slug", 128, "utf8mb4_general_ci").uniqueIndex()
 
     /** 封面 **/
-    val cover = varchar("cover", 256).nullable()
+    val cover = varchar("cover", 512).nullable()
 
     /** 是否允许评论 **/
     val allowComment = bool("allowComment")
@@ -39,7 +39,7 @@ object Posts : Table("post") {
     val visible = enumerationByName("visible", 24, PostVisible::class)
 
     /** 密码 **/
-    val password = varchar("password", 128).nullable()
+    val password = varchar("password", 64).nullable()
 
     /** 访问量 **/
     val visit = integer("visit").default(0)
