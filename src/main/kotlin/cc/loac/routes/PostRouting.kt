@@ -255,17 +255,25 @@ fun Route.postApiRouting() {
                 // 可空文章关键字
                 val key = call.receiveNullablePathParam("key")
 
-                // 可空文章标签
-                val tag = call.receiveNullablePathParam("tag") {
+                // 可空文章标签 ID
+                val tagId = call.receiveNullablePathParam("tagId") {
                     it?.isInt()
                 }?.toInt()
 
-                // 可空文章分类
-                val category = call.receiveNullablePathParam("category") {
+                // 可空文章分类 ID
+                val categoryId = call.receiveNullablePathParam("categoryId") {
                     it?.isInt()
                 }?.toInt()
 
-                call.respondSuccess(postService.apiPosts(page, size, key, tag, category))
+                // 可空标签名或别名
+                val tag = call.receiveNullablePathParam("tag")
+                tag?.error()
+
+                // 可空分类名或别名
+                val category = call.receiveNullablePathParam("category")
+                category?.error()
+
+                call.respondSuccess(postService.apiPosts(page, size, key, tagId, categoryId, tag, category))
             }
         }
 
@@ -296,7 +304,7 @@ fun Route.postApiRouting() {
             /** 获取文章内容 **/
             get("/content") {
                 // 可空参数，文章 ID
-                val postId = call.receiveNullablePathParam("postId") {
+                val postId = call.receiveNullablePathParam("id") {
                     it?.isInt()
                 }?.toInt()
 

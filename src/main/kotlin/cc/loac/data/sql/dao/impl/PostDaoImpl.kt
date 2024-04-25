@@ -366,9 +366,11 @@ class PostDaoImpl : PostDao {
             status = status,
             visible = visible,
             key = key,
-            tag = tag,
-            category = category,
-            sort = sort
+            tagId = tag,
+            categoryId = category,
+            sort = sort,
+            tag = null,
+            category = null
         ) {
             Posts.leftJoin(PostContents, additionalConstraint = {
                 Posts.postId eq PostContents.postId and
@@ -423,21 +425,27 @@ class PostDaoImpl : PostDao {
      * @param page 当前页数
      * @param size 每页条数
      * @param key 关键字
-     * @param tag 文章标签
-     * @param category 文章分类
+     * @param tagId 文章标签 ID
+     * @param categoryId 文章分类 ID
+     * @param tag 标签名或别名
+     * @param category 分类名或别名
      */
     override suspend fun apiPosts(
         page: Int,
         size: Int,
         key: String?,
-        tag: Int?,
-        category: Int?
+        tagId: Int?,
+        categoryId: Int?,
+        tag: String?,
+        category: String?
     ): Pager<ApiPostResponse> {
         // 构造查询语句
         val query = sqlQueryPosts(
             status = PostStatus.PUBLISHED,
             visible = PostVisible.VISIBLE,
             key = key,
+            tagId = tagId,
+            categoryId = categoryId,
             tag = tag,
             category = category,
             sort = PINNED
@@ -456,6 +464,7 @@ class PostDaoImpl : PostDao {
             return Pager(0, 0, posts, posts.size.toLong(), 1)
         }
 
+        // 分页获取文章
         val pager = Posts.startPage(page, size, ::resultRowToApiPostResponse) { query }
         getApiPostTagAndCategory(pager.data)
         return pager
@@ -673,15 +682,20 @@ class PostDaoImpl : PostDao {
     private suspend fun getApiPostTagAndCategory(posts: List<ApiPostResponse>) = dbQuery {
         posts.forEach { post ->
             // 如果当前是 API 请求，同时文章是加密状态的话就跳过当前文章的标签和分类检索
-            if (post.encrypted) {
-                post.category = null
-                post.tags = emptyList()
-            } else {
-                // 获取文章标签
-                post.tags = tagDao.tags(post.postId)
-                // 获取文章分类
-                post.category = categoryDao.categoryByPostId(post.postId)
-            }
+//            if (post.encrypted) {
+//                post.category = null
+//                post.tags = emptyList()
+//            } else {
+//                // 获取文章标签
+//                post.tags = tagDao.tags(post.postId)
+//                // 获取文章分类
+//                post.category = categoryDao.categoryByPostId(post.postId)
+//            }
+
+            // 获取文章标签
+            post.tags = tagDao.tags(post.postId)
+            // 获取文章分类
+            post.category = categoryDao.categoryByPostId(post.postId)
         }
     }
 
@@ -705,8 +719,10 @@ class PostDaoImpl : PostDao {
      * @param status 文章状态
      * @param visible 文章可见性
      * @param key 关键字
-     * @param tag 文章标签
-     * @param category 文章分类
+     * @param tagId 文章标签 ID
+     * @param categoryId 文章分类 ID
+     * @param tag 标签名或别名
+     * @param category 分类名或别名
      * @param sort 文章排序排序
      * @param baseQuery 基础查询
      */
@@ -714,8 +730,10 @@ class PostDaoImpl : PostDao {
         status: PostStatus?,
         visible: PostVisible?,
         key: String?,
-        tag: Int?,
-        category: Int?,
+        tagId: Int?,
+        categoryId: Int?,
+        tag: String?,
+        category: String?,
         sort: PostSort?,
         baseQuery: () -> Query
     ): Query {
@@ -730,25 +748,56 @@ class PostDaoImpl : PostDao {
         // 如果文章可见性不为空，则添加可见性查询条件
         if (visible != null) query.andWhere { Posts.visible eq visible }
         // 如果关键字不为空，则添加关键字查询条件
-        if (key != null) query.andWhere { sqlQueryKey(key) }
-        // 如果文章标签不为空，则添加标签查询条件
-        if (tag != null) {
+        if (!key.isNullOrBlank()) query.andWhere { sqlQueryKey(key) }
+
+        // 如果文章标签 ID 不为空，则添加标签 ID 查询条件
+        if (tagId != null) {
             // 与当前标签匹配的的文章 ID 集合
             val matchedPostIds = dbQuery {
                 PostTags.selectAll().where {
-                    PostTags.tagId eq tag
+                    PostTags.tagId eq tagId
                 }.map { it[PostTags.postId] }
             }
             query.andWhere {
                 Posts.postId inList matchedPostIds
             }
         }
-        // 如果文章分类不为空，则添加分类查询条件
-        if (category != null) {
+        // 如果文章分类 ID 不为空，则添加分类 ID 查询条件
+        if (categoryId != null) {
             // 与当前分类匹配的的文章 ID 集合
             val matchedPostIds = dbQuery {
                 PostCategories.selectAll().where {
-                    PostCategories.categoryId eq category
+                    PostCategories.categoryId eq categoryId
+                }.map { it[PostCategories.postId] }
+            }
+            query.andWhere {
+                Posts.postId inList matchedPostIds
+            }
+        }
+
+        // 如果标签名或别名不为空，则添加标签名或别名查询条件
+        if (!tag.isNullOrBlank()) {
+            // 与当前标签匹配的的文章 ID 集合
+            val matchedPostIds = dbQuery {
+                PostTags.leftJoin(Tags, additionalConstraint = {
+                    PostTags.tagId eq Tags.tagId
+                }).select(PostTags.postId).where {
+                    Tags.displayName eq tag or (Tags.slug eq tag)
+                }.map { it[PostTags.postId] }
+            }
+            query.andWhere {
+                Posts.postId inList matchedPostIds
+            }
+        }
+
+        // 如果分类名或别名不为空，则添加分类名或别名查询条件
+        if (!category.isNullOrBlank()) {
+            // 与当前分类匹配的的文章 ID 集合
+            val matchedPostIds = dbQuery {
+                PostCategories.leftJoin(Categories, additionalConstraint = {
+                    PostCategories.categoryId eq Categories.categoryId
+                }).select(PostCategories.postId).where {
+                    Categories.displayName eq category or (Categories.slug eq category)
                 }.map { it[PostCategories.postId] }
             }
             query.andWhere {
