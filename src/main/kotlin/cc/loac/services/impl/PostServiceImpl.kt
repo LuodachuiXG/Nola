@@ -206,17 +206,21 @@ class PostServiceImpl : PostService {
      * @param page 当前页数
      * @param size 每页条数
      * @param key 关键字
-     * @param tag 文章标签
-     * @param category 文章分类
+     * @param tagId 文章标签 ID
+     * @param categoryId 文章分类 ID
+     * @param tag 标签名或别名
+     * @param category 分类名或别名
      */
     override suspend fun apiPosts(
         page: Int,
         size: Int,
         key: String?,
-        tag: Int?,
-        category: Int?
+        tagId: Int?,
+        categoryId: Int?,
+        tag: String?,
+        category: String?
     ): Pager<ApiPostResponse> {
-        return postDao.apiPosts(page, size, key, tag, category)
+        return postDao.apiPosts(page, size, key, tagId, categoryId, tag, category)
     }
 
     /**
