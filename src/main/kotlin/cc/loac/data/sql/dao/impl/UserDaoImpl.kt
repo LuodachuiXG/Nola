@@ -90,7 +90,7 @@ class UserDaoImpl : UserDao {
             it[email] = userInfo.email
             it[displayName] = userInfo.displayName
             it[description] = userInfo.description
-            it[avatar] = userInfo.avatar
+            it[avatar] = if (userInfo.avatar.isNullOrBlank()) null else userInfo.avatar
         } > 0
     }
 
