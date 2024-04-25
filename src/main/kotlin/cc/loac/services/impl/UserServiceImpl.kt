@@ -2,6 +2,7 @@ package cc.loac.services.impl
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.User
+import cc.loac.data.models.enums.MenuItemTarget
 import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
@@ -90,7 +91,8 @@ class UserServiceImpl : UserService {
                             href = "/",
                             parentMenuId = m.menuId,
                             parentMenuItemId = null,
-                            index = 0
+                            index = 0,
+                            target = MenuItemTarget.SELF
                         )
                         menuService.addMenuItem(menuItemHome)
                     }
