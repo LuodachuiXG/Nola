@@ -41,10 +41,10 @@ class LinkDaoImpl : LinkDao {
         Links.insert {
             it[displayName] = link.displayName
             it[url] = link.url
-            it[logo] = link.logo
-            it[description] = link.description
+            it[logo] = if (link.logo.isNullOrBlank()) null else link.logo
+            it[description] = if (link.description.isNullOrBlank()) null else link.description
             it[priority] = link.priority
-            it[remark] = link.remark
+            it[remark] = if (link.remark.isNullOrBlank()) null else link.remark
             it[createTime] = Date().time
         }.resultedValues?.singleOrNull()?.let(::resultRowToLink)
     }
@@ -69,10 +69,10 @@ class LinkDaoImpl : LinkDao {
         }) {
             it[displayName] = link.displayName
             it[url] = link.url
-            it[logo] = link.logo
-            it[description] = link.description
+            it[logo] = if (link.logo.isNullOrBlank()) null else link.logo
+            it[description] = if (link.description.isNullOrBlank()) null else link.description
             it[priority] = link.priority
-            it[remark] = link.remark
+            it[remark] = if (link.remark.isNullOrBlank()) null else link.remark
             it[lastModifyTime] = Date().time
         } > 0
     }

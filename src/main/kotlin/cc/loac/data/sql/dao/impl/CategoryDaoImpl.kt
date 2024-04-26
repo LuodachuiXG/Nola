@@ -36,7 +36,7 @@ class CategoryDaoImpl : CategoryDao {
         val insertStatement = Categories.insert {
             it[displayName] = category.displayName
             it[slug] = category.slug
-            it[cover] = category.cover
+            it[cover] = if (category.cover.isNullOrBlank()) null else category.cover
             it[unifiedCover] = category.unifiedCover
         }
         insertStatement.resultedValues?.singleOrNull()?.let { resultRow ->
@@ -79,7 +79,7 @@ class CategoryDaoImpl : CategoryDao {
         }) {
             it[displayName] = category.displayName
             it[slug] = category.slug
-            it[cover] = category.cover
+            it[cover] = if (category.cover.isNullOrBlank()) null else category.cover
             it[unifiedCover] = category.unifiedCover
         } > 0
     }

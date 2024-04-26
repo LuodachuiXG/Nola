@@ -36,7 +36,7 @@ class TagDaoImpl : TagDao {
         Tags.insert {
             it[displayName] = tag.displayName
             it[slug] = tag.slug
-            it[color] = tag.color
+            it[color] = if (tag.color.isNullOrBlank()) null else tag.color
         }.resultedValues?.singleOrNull()?.let { resultRow ->
             resultRowToTag(resultRow, false)
         }
@@ -77,7 +77,7 @@ class TagDaoImpl : TagDao {
         }) {
             it[displayName] = tag.displayName
             it[slug] = tag.slug
-            it[color] = tag.color
+            it[color] = if (tag.color.isNullOrBlank()) null else tag.color
         } > 0
     }
 
