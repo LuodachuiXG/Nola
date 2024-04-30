@@ -525,6 +525,7 @@ class PostDaoImpl : PostDao {
             it[PostContents.draftName] = draftName
             it[status] = PostContentStatus.DRAFT
             it[lastModifyTime] = Date().time
+            it[html] = content.markdownToHtml()
         }.resultedValues?.firstOrNull()?.let(::resultRowToPostContent)
     }
 
