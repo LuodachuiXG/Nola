@@ -249,7 +249,7 @@ fun Route.postAdminRouting() {
  */
 fun Route.postApiRouting() {
     route("post") {
-        /** 获取文章 **/
+        /** 分页获取文章 **/
         get {
             call.receivePageAndSize { page, size ->
                 // 可空文章关键字
@@ -281,8 +281,8 @@ fun Route.postApiRouting() {
         get("/{postId}") {
             val postId = call.receiveIntPathParam("postId")
             val post = postService.posts(listOf(postId), true).firstOrNull()
-            // 如果文章不存在，或者文章不可见，或者文章未发布，则返回 404
-            if (post == null || post.visible != PostVisible.VISIBLE || post.status != PostStatus.PUBLISHED) {
+            // 如果文章不存在，或者文章未发布，则返回 404
+            if (post == null || post.status != PostStatus.PUBLISHED) {
                 return@get call.respondFailure(HttpStatusCode.NotFound.description, HttpStatusCode.NotFound)
             }
             call.respondSuccess(post.toApiPostResponse())
@@ -293,7 +293,7 @@ fun Route.postApiRouting() {
             val slug = call.receivePathParam("slug")
             val post = postService.postBySlug(slug)
             // 如果文章不存在，或者文章不可见，或者文章未发布，则返回 404
-            if (post == null || post.visible != PostVisible.VISIBLE || post.status != PostStatus.PUBLISHED) {
+            if (post == null || post.status != PostStatus.PUBLISHED) {
                 return@get call.respondFailure(HttpStatusCode.NotFound.description, HttpStatusCode.NotFound)
             }
             call.respondSuccess(post.toApiPostResponse())
