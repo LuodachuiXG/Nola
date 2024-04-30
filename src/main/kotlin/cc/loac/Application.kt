@@ -6,6 +6,8 @@ import cc.loac.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 
+lateinit var globalEnvironment: ApplicationEnvironment
+
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
 fun Application.module() {
@@ -17,6 +19,7 @@ fun Application.module() {
         expiresIn = 3 * 1000 * 60 * 60,
         secret = environment.config.property("jwt.secret").getString()
     )
+    globalEnvironment = environment
 
     // 初始化数据库
     DatabaseSingleton.init(environment.config)
@@ -36,4 +39,6 @@ fun Application.module() {
     configureRouting(tokenConfig)
     // 状态页面配置（异常拦截器）
     configureStatusPage()
+    // 监视器插件配置
+    configureMonitorPlugin()
 }

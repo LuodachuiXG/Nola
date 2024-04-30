@@ -61,7 +61,10 @@ object DatabaseSingleton {
             SchemaUtils.create(Files)
             // 日记表
             SchemaUtils.create(Diaries)
+            // 访问日志表
+            SchemaUtils.create(AccessLogs)
         }
+
     }
 
     /**

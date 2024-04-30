@@ -7,14 +7,12 @@ import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
-import cc.loac.data.requests.PostDraftRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.requests.PostStatusRequest
 import cc.loac.data.responses.ApiPostContentResponse
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.responses.PostContentResponse
-import com.google.protobuf.Api
 
 /**
  * 文章服务接口

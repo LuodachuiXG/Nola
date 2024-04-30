@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.Table
 /**
  * 文件存储方式表
  */
-object FileStorageModes : Table("file_storage_modes") {
+object FileStorageModes : Table("file_storage_mode") {
     /** 文件存储方式 ID **/
     val fileStorageModeId = integer("fileStorageModeId").autoIncrement()
 

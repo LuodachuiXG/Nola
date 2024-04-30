@@ -65,4 +65,8 @@ val appModule = module {
     // 日记服务
     single<DiaryService> { DiaryServiceImpl() }
     single<DiaryDao> { DiaryDaoImpl() }
+
+    // 访问日志服务
+    single<AccessLogService> { AccessLogServiceImpl() }
+    single<AccessLogDao> { AccessLogDaoImpl() }
 }
