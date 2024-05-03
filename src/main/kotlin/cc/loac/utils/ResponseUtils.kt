@@ -7,6 +7,17 @@ import io.ktor.server.response.*
 import kotlinx.serialization.Serializable
 
 suspend fun ApplicationCall.respondFailure(
+    status: HttpStatusCode = HttpStatusCode.Conflict
+) {
+    val response = MyResponse(
+        code = status.value,
+        errMsg = status.description,
+        data = null
+    )
+    respond(status, response)
+}
+
+suspend fun ApplicationCall.respondFailure(
     errMsg: String,
     status: HttpStatusCode = HttpStatusCode.Conflict
 ) {
@@ -18,9 +29,6 @@ suspend fun ApplicationCall.respondFailure(
     respond(status, response)
 }
 
-/**
- * 封装响应方法
- */
 suspend fun <T> ApplicationCall.respondSuccess(
     data: T?,
     status: HttpStatusCode = HttpStatusCode.OK

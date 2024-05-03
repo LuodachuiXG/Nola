@@ -22,11 +22,15 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
+        // 静态资源
         staticResources("/css", "/static/templates/css")
         staticResources("/js", "/static/templates/js")
 
         // 本地存储文件路由
         staticFiles("/upload", File(".nola/upload"))
+
+        // 快捷接口
+        quickApiRouting()
 
         // Vue 后台单页应用路由
         singlePageApplication {
@@ -41,11 +45,6 @@ fun Application.configureRouting(
             applicationRoute = "/"
             useResources = true
         }
-
-//        route("/") {
-//            // 博客页面路由
-//            blogRouting()
-//        }
 
         /** 后台接口 **/
         route("/admin") {
