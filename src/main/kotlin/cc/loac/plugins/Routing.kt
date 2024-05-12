@@ -30,7 +30,7 @@ fun Application.configureRouting(
         staticFiles("/upload", File(".nola/upload"))
 
         // 快捷接口
-        quickApiRouting()
+        quickRouting()
 
         // Vue 后台单页应用路由
         singlePageApplication {
