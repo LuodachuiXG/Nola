@@ -13,7 +13,7 @@ private val configService: ConfigService by inject(ConfigService::class.java)
 /**
  * 快捷接口，API 路由
  */
-fun Route.quickApiRouting() {
+fun Route.quickRouting() {
     /** 重定向到博客 LOGO */
     get("/logo") {
         val blogInfo = configService.blogInfo() ?:

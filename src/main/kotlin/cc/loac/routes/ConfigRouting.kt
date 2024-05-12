@@ -33,7 +33,7 @@ fun Route.configAdminRouting() {
                     throw MyException("博客已经创建")
                 }
                 // 接收 "站点标题","站点副标题" 两个参数
-                val receive = call.receiveMapByName("title".nonNull(), "subtitle".nonNull())
+                val receive = call.receiveMapByName("title".nonNull(), "subtitle".nullable())
                 val blogInfo = BlogInfo(
                     title = receive["title"],
                     subtitle = receive["subtitle"],
