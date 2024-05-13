@@ -3,6 +3,7 @@ package cc.loac.routes
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.BlogInfo
 import cc.loac.data.models.Config
+import cc.loac.data.models.ICPFiling
 import cc.loac.data.models.User
 import cc.loac.data.models.enums.ConfigKey
 import cc.loac.data.requests.BlogInfoRequest
@@ -87,6 +88,24 @@ fun Route.configAdminRouting() {
                             )
                         )
                     )
+                }
+            }
+        }
+
+        route("icp") {
+            authenticate {
+                /** 修改备案信息 **/
+                put {
+                    val icpRequest = call.receiveByDataClass<ICPFiling>()
+                    // 不修改博客的创建时间
+                    call.respondSuccess(
+                        configService.setICPFiling(icpRequest)
+                    )
+                }
+
+                /** 获取备案信息 **/
+                get {
+                    call.respondSuccess(configService.icpFiling())
                 }
             }
         }

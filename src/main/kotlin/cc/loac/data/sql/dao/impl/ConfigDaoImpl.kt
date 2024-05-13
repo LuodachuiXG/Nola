@@ -49,7 +49,7 @@ class ConfigDaoImpl : ConfigDao {
      */
     override suspend fun updateConfig(config: Config) = dbQuery {
         Configs.update({
-            Configs.configId eq config.configId
+            Configs.key eq config.key
         }) {
             it[value] = config.value
         } > 0

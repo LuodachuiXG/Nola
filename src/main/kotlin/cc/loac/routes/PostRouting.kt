@@ -267,11 +267,9 @@ fun Route.postApiRouting() {
 
                 // 可空标签名或别名
                 val tag = call.receiveNullablePathParam("tag")
-                tag?.error()
 
                 // 可空分类名或别名
                 val category = call.receiveNullablePathParam("category")
-                category?.error()
 
                 call.respondSuccess(postService.apiPosts(page, size, key, tagId, categoryId, tag, category))
             }
