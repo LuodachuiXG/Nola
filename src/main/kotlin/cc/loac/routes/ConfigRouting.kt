@@ -128,5 +128,12 @@ fun Route.configApiRouting() {
                 call.respondSuccess(blogInfo?.copy(blogger = user?.displayName))
             }
         }
+
+        route("/icp") {
+            /** 获取备案信息 **/
+            get {
+                call.respondSuccess(configService.icpFiling())
+            }
+        }
     }
 }
