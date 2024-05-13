@@ -2,6 +2,7 @@ package cc.loac.services
 
 import cc.loac.data.models.BlogInfo
 import cc.loac.data.models.Config
+import cc.loac.data.models.ICPFiling
 import cc.loac.data.models.enums.ConfigKey
 
 
@@ -10,10 +11,10 @@ import cc.loac.data.models.enums.ConfigKey
  */
 interface ConfigService {
     /**
-     * 添加配置信息
+     * 设置配置信息
      * @param config 配置数据类
      */
-    suspend fun addConfig(config: Config): Config?
+    suspend fun setConfig(config: Config): Config?
 
     /**
      * 删除配置信息
@@ -44,4 +45,16 @@ interface ConfigService {
      * 获取博客信息
      */
     suspend fun blogInfo(): BlogInfo?
+
+
+    /**
+     * 设置备案信息
+     * @param icpFiling 备案信息数据类
+     */
+    suspend fun setICPFiling(icpFiling: ICPFiling): Boolean
+
+    /**
+     * 获取备案信息
+     */
+    suspend fun icpFiling(): ICPFiling?
 }

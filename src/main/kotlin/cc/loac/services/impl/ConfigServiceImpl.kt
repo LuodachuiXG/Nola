@@ -2,13 +2,13 @@ package cc.loac.services.impl
 
 import cc.loac.data.models.BlogInfo
 import cc.loac.data.models.Config
+import cc.loac.data.models.ICPFiling
 import cc.loac.data.models.enums.ConfigKey
 import cc.loac.data.sql.dao.ConfigDao
 import cc.loac.services.ConfigService
 import cc.loac.utils.jsonToClass
 import cc.loac.utils.toJSONString
 import org.koin.java.KoinJavaComponent.inject
-
 
 
 /**
@@ -19,11 +19,17 @@ class ConfigServiceImpl : ConfigService {
     private val configDao: ConfigDao by inject(ConfigDao::class.java)
 
     /**
-     * 添加配置信息
+     * 设置配置信息
      * @param config 配置数据类
      */
-    override suspend fun addConfig(config: Config): Config? {
-        return configDao.addConfig(config)
+    override suspend fun setConfig(config: Config): Config? {
+        return if (config(config.key) != null) {
+            // 配置已经存在，修改配置
+            if (updateConfig(config)) config else null
+        } else {
+            // 配置不存在，添加配置
+            configDao.addConfig(config)
+        }
     }
 
     /**
@@ -55,18 +61,28 @@ class ConfigServiceImpl : ConfigService {
      * @param blogInfo 博客信息数据类
      */
     override suspend fun setBlogInfo(blogInfo: BlogInfo): Boolean {
-        // 如果博客信息已经存在，则删除
-        blogInfo()?.let {
-            deleteConfig(ConfigKey.BLOG_INFO)
-        }
-        val config = Config(key = ConfigKey.BLOG_INFO, value = blogInfo.toJSONString())
-        return addConfig(config) != null
+        return setConfig(Config(key = ConfigKey.BLOG_INFO, value = blogInfo.toJSONString())) != null
     }
 
     /**
      * 获取博客信息
      */
     override suspend fun blogInfo(): BlogInfo? {
-        return config(ConfigKey.BLOG_INFO)?.jsonToClass<BlogInfo>()
+        return config(ConfigKey.BLOG_INFO)?.jsonToClass()
+    }
+
+    /**
+     * 设置备案信息
+     * @param icpFiling 备案信息数据类
+     */
+    override suspend fun setICPFiling(icpFiling: ICPFiling): Boolean {
+        return setConfig(Config(key = ConfigKey.ICP_FILING, value = icpFiling.toJSONString())) != null
+    }
+
+    /**
+     * 获取备案信息
+     */
+    override suspend fun icpFiling(): ICPFiling? {
+        return config(ConfigKey.ICP_FILING)?.jsonToClass()
     }
 }
