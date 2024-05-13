@@ -72,6 +72,11 @@ fun Route.userApiRouting() {
     route("/blogger") {
         /** 获取博主信息 **/
         get {
+            val users = userService.allUsers()
+            if (users.isEmpty()) {
+                call.respondSuccess(null)
+                return@get
+            }
             call.respondSuccess(userService.allUsers().first().toBloggerResponse())
         }
     }
