@@ -94,7 +94,47 @@ class UserServiceImpl : UserService {
                             index = 0,
                             target = MenuItemTarget.SELF
                         )
+                        val menuItemCategory = MenuItemRequest(
+                            menuItemId = null,
+                            displayName = "分类",
+                            href = "/category",
+                            parentMenuId = m.menuId,
+                            parentMenuItemId = null,
+                            index = 1,
+                            target = MenuItemTarget.SELF
+                        )
+                        val menuItemTag = MenuItemRequest(
+                            menuItemId = null,
+                            displayName = "标签",
+                            href = "/tag",
+                            parentMenuId = m.menuId,
+                            parentMenuItemId = null,
+                            index = 2,
+                            target = MenuItemTarget.SELF
+                        )
+                        val menuItemLink = MenuItemRequest(
+                            menuItemId = null,
+                            displayName = "友情链接",
+                            href = "/link",
+                            parentMenuId = m.menuId,
+                            parentMenuItemId = null,
+                            index = 3,
+                            target = MenuItemTarget.SELF
+                        )
+                        val menuItemDiary = MenuItemRequest(
+                            menuItemId = null,
+                            displayName = "日记",
+                            href = "/diary",
+                            parentMenuId = m.menuId,
+                            parentMenuItemId = null,
+                            index = 4,
+                            target = MenuItemTarget.SELF
+                        )
                         menuService.addMenuItem(menuItemHome)
+                        menuService.addMenuItem(menuItemCategory)
+                        menuService.addMenuItem(menuItemTag)
+                        menuService.addMenuItem(menuItemLink)
+                        menuService.addMenuItem(menuItemDiary)
                     }
                 }
             }
