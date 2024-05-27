@@ -19,7 +19,6 @@ import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
-import cc.loac.utils.error
 import cc.loac.utils.launchCoroutine
 import cc.loac.utils.markdownToHtml
 import cc.loac.utils.sha256Hex

@@ -10,6 +10,7 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.requests.PostStatusRequest
+import cc.loac.data.requests.newPostRequestByNameAndContent
 import cc.loac.data.responses.ApiPostContentResponse
 import cc.loac.data.responses.ApiPostResponse
 import cc.loac.data.responses.Pager
@@ -18,8 +19,7 @@ import cc.loac.data.sql.dao.PostDao
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
-import cc.loac.utils.launchCoroutine
-import cc.loac.utils.markdownToPlainText
+import cc.loac.utils.*
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -36,6 +36,9 @@ class PostServiceImpl : PostService {
      * @param pr 添加文章请求数据类
      */
     override suspend fun addPost(pr: PostRequest): Post? {
+        // 检查别名是否重复
+        postBySlug(pr.slug)?.let { throw MyException("别名 [${pr.slug}] 已存在") }
+
         // 检查标签和分类是否存在
         checkTagAndCategoryExist(pr)
 
@@ -44,6 +47,42 @@ class PostServiceImpl : PostService {
 
         // 添加文章
         return postDao.addPost(pr)
+    }
+
+    /**
+     * 根据名称和内容批量添加文章
+     * @param names 文章名称集合
+     * @param contents 文章内容集合
+     * @param errorMsg 文章添加错误回调
+     * @return 添加成功的文章集合
+     */
+    override suspend fun addPost(
+        names: List<String>,
+        contents: List<String>,
+        errorMsg: (name: String, error: String) -> Unit
+    ): List<Post> {
+        val result = mutableListOf<Post>()
+        names.forEachIndexed { i, name ->
+            // 封装文章请求类，用于添加文章
+            val pr = newPostRequestByNameAndContent(name, contents[i])
+            try {
+                // 检查别名是否重复
+                postBySlug(pr.slug)?.let {
+                    // 别名重复，修改别名。在别名后面加 _随机六位字符
+                    pr.slug = "${pr.slug}_${randomString(6)}"
+                }
+                // 检查是否需要自动生成摘要
+                autoGenerateExcerpt(pr)
+
+                // 添加文章
+                postDao.addPost(pr)?.let {
+                    result.add(it)
+                }
+            } catch (e: Exception) {
+                errorMsg(name, e.message ?: "未知错误，请查看服务器")
+            }
+        }
+        return result
     }
 
     /**
@@ -82,9 +121,10 @@ class PostServiceImpl : PostService {
      * @param pr 文章请求数据类
      */
     override suspend fun updatePost(pr: PostRequest): Boolean {
+        // 检查别名是否重复
+        postBySlug(pr.slug)?.let { throw MyException("别名 [${pr.slug}] 已存在") }
         // 检查标签和分类是否存在
         checkTagAndCategoryExist(pr)
-
         // 检查是否需要自动生成摘要
         autoGenerateExcerpt(pr, true)
         return postDao.updatePost(pr)
@@ -440,7 +480,7 @@ class PostServiceImpl : PostService {
 
 
         // 如果当前是修改文章，就从数据库获取文章内容
-        // 否则当前是添加文章，直接总 pr 对象中获取文章内容
+        // 否则当前是添加文章，直接从 pr 对象中获取文章内容
         val postContent = if (isUpdate) {
             postContent(pr.postId!!)?.content
         } else {

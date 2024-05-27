@@ -66,6 +66,8 @@ fun Application.configureRouting(
             diaryAdminRouting()
             // file 文件管理员路由
             fileAdminRouting()
+            // backup 备份路由
+            backupRouting()
         }
 
         /** 博客接口 **/

@@ -4,6 +4,11 @@ import cc.loac.security.hashing.HashingService
 import cc.loac.security.hashing.SHA256HashingService
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import net.sourceforge.pinyin4j.PinyinHelper
+import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
+import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
+import net.sourceforge.pinyin4j.format.HanyuPinyinToneType
+import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.html.HtmlRenderer
 import org.jsoup.Jsoup
@@ -71,11 +76,17 @@ fun Any.toJSONString(): String {
 /**
  * String 扩展函数
  * 验证正则表达式
+ * @param regex 正则表达式
+ * @param find 是否是查找模式
  */
-fun String.matches(regex: String): Boolean {
+fun String.matches(regex: String, find: Boolean = false): Boolean {
     val pattern = Pattern.compile(regex)
     val matcher = pattern.matcher(this)
-    return matcher.matches()
+    return if (find) {
+        matcher.find()
+    } else {
+        matcher.matches()
+    }
 }
 
 /**
@@ -226,3 +237,40 @@ fun String.replaceDoubleSlash(): String {
 fun String.formatSlash(): String =
     this.replace("\\", "/")
         .replaceDoubleSlash()
+
+
+/**
+ * String 扩展函数
+ * 将汉字转为拼音
+ */
+fun String.toPinyin(): String {
+    var pinyinStr = ""
+    // 去掉当前文本中的所有的非数字、非字母、非汉字文本
+    val newText = this.replace("[^0-9a-zA-Z\\u4e00-\\u9fa5]".toRegex(), "")
+    val newChar = newText.toCharArray()
+    val defaultFormat = HanyuPinyinOutputFormat()
+    defaultFormat.caseType = HanyuPinyinCaseType.LOWERCASE
+    defaultFormat.toneType = HanyuPinyinToneType.WITHOUT_TONE
+    newChar.forEach { char ->
+        if (char > 128.toChar()) {
+            try {
+                pinyinStr += PinyinHelper.toHanyuPinyinStringArray(char, defaultFormat)[0]
+            } catch (e: BadHanyuPinyinOutputFormatCombination) {
+                e.printStackTrace()
+            }
+        } else {
+            pinyinStr += char
+        }
+    }
+    return pinyinStr
+}
+
+/**
+ * 将文章名称转为别名
+ */
+fun String.postName2Slug(): String {
+    // 先将中文转拼音
+    val pinyin = this.toPinyin()
+    // 将所有空白字符替换成 -，并且 转小写
+    return pinyin.replace("\\s\\W+".toRegex(), "-").lowercase()
+}

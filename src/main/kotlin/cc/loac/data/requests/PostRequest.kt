@@ -2,6 +2,7 @@ package cc.loac.data.requests
 
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
+import cc.loac.utils.postName2Slug
 
 /**
  * 文章请求数据类
@@ -16,7 +17,7 @@ data class PostRequest(
     /** 摘要 **/
     var excerpt: String?,
     /** 别名 **/
-    val slug: String,
+    var slug: String,
     /** 是否允许评论 **/
     val allowComment: Boolean,
     /** 状态 **/
@@ -61,3 +62,32 @@ fun firstPost(): PostRequest {
     )
 }
 
+
+/**
+ * 根据名称和内容新建文章请求数据类
+ * @param name 文章名称
+ * @param content 文章内容
+ */
+fun newPostRequestByNameAndContent(name: String, content: String): PostRequest {
+    return PostRequest(
+        postId = null,
+        title = if (name.contains(".")) {
+            val index = name.lastIndexOf(".")
+            name.substring(0, index)
+        } else {
+            name
+        },
+        autoGenerateExcerpt = true,
+        slug = name.postName2Slug(),
+        excerpt = null,
+        allowComment = true,
+        status = PostStatus.PUBLISHED,
+        visible = PostVisible.VISIBLE,
+        content = content,
+        categoryId = null,
+        tagIds = null,
+        cover = null,
+        encrypted = false,
+        password = null
+    )
+}
