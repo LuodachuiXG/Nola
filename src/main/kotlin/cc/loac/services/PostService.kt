@@ -26,6 +26,19 @@ interface PostService {
     suspend fun addPost(pr: PostRequest): Post?
 
     /**
+     * 根据名称和内容批量添加文章
+     * @param names 文章名称集合
+     * @param contents 文章内容集合
+     * @param errorMsg 文章添加错误回调
+     * @return 添加成功的文章集合
+     */
+    suspend fun addPost(
+        names: List<String>,
+        contents: List<String>,
+        errorMsg: (name: String, error: String) -> Unit
+    ): List<Post>
+
+    /**
      * 删除文章
      * @param postIds 文章 ID 集合
      */

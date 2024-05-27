@@ -69,6 +69,10 @@ dependencies {
     // 腾讯云对象存储
     implementation("com.qcloud:cos_api:5.6.205")
 
+    // https://mvnrepository.com/artifact/com.belerweb/pinyin4j
+    implementation("com.belerweb:pinyin4j:2.5.1")
+
+
 
     implementation("io.ktor:ktor-server-netty-jvm")
     testImplementation("io.ktor:ktor-server-tests-jvm")
