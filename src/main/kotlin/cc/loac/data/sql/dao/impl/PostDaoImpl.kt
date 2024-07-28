@@ -314,13 +314,16 @@ class PostDaoImpl : PostDao {
 
     /**
      * 获取所有文章
+     * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    override suspend fun posts(): List<Post> = dbQuery {
+    override suspend fun posts(includeTagAndCategory: Boolean): List<Post> = dbQuery {
         val posts = Posts
             .selectAll()
             .orderBy(Posts.createTime, SortOrder.DESC)
             .map(::resultRowToPost)
-        getPostTagAndCategory(posts)
+        if (includeTagAndCategory) {
+            getPostTagAndCategory(posts)
+        }
         posts
     }
 

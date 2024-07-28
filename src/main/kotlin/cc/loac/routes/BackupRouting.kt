@@ -1,13 +1,12 @@
 package cc.loac.routes
 
 import cc.loac.services.PostService
-import cc.loac.utils.error
-import cc.loac.utils.markdownToHtml
 import cc.loac.utils.respondSuccess
 import cc.loac.utils.toJSON
 import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -19,8 +18,8 @@ private val postService: PostService by inject(PostService::class.java)
 fun Route.backupRouting() {
     /** 备份路由 **/
     route("/backup") {
-        /** 接收多个 Markdown 文件 **/
-        post("/md") {
+        /** 接收多个 Markdown 或 Txt 文件作为新文章 **/
+        post("/post") {
             val multipartData = call.receiveMultipart()
             val fileNames = mutableListOf<String>()
             val fileContents = mutableListOf<String>()
@@ -64,6 +63,11 @@ fun Route.backupRouting() {
                     "failResult" to errorResult
                 ).toJSON()
             )
+        }
+
+        /** 导出文章，将文章导出为 Markdown 格式的文件打成的压缩包 **/
+        get("/post") {
+            call.respondSuccess(postService.exportPosts())
         }
     }
 }

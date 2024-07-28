@@ -11,16 +11,17 @@ import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.requests.PostStatusRequest
 import cc.loac.data.requests.newPostRequestByNameAndContent
-import cc.loac.data.responses.ApiPostContentResponse
-import cc.loac.data.responses.ApiPostResponse
-import cc.loac.data.responses.Pager
-import cc.loac.data.responses.PostContentResponse
+import cc.loac.data.responses.*
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
 import cc.loac.utils.*
+import io.ktor.server.routing.*
+import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
+import java.io.File
+import java.util.Date
 
 /**
  * 文章服务接口实现类
@@ -192,9 +193,10 @@ class PostServiceImpl : PostService {
 
     /**
      * 获取所有文章
+     * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    override suspend fun posts(): List<Post> {
-        return postDao.posts()
+    override suspend fun posts(includeTagAndCategory: Boolean): List<Post> {
+        return postDao.posts(includeTagAndCategory)
     }
 
     /**
@@ -446,6 +448,122 @@ class PostServiceImpl : PostService {
      */
     override suspend fun isPostPasswordValid(postId: Int, password: String): Boolean {
         return postDao.isPostPasswordValid(postId, password)
+    }
+
+    /**
+     * 导出所有文章
+     */
+    override suspend fun exportPosts(): ExportPostResponse {
+        // 总处理文章数量
+        var totalCount = 0
+        // 成功的文章数量
+        var successCount = 0
+        // 失败原因的数组
+        val failResult = mutableListOf<String>()
+        val scope = CoroutineScope(Dispatchers.IO)
+
+        // 文件夹名前缀
+        val filePrefix = "${Date().formatDate()}_Post"
+
+        // 临时文件夹地址，一般以当前时间命名
+        val tempDir = File("./.nola/temp/$filePrefix")
+
+        if (tempDir.exists()) tempDir.deleteRecursively()
+
+        // 先获取所有未删除的文章
+        val posts = posts(false).filter {
+            it.status != PostStatus.DELETED
+        }
+
+        // 启用多协程获取所有文章的内容，并等待所有协程都执行完毕
+        val jobs = mutableListOf<Job>()
+        posts.forEach { post ->
+            // 每个文章启动一个协程
+            jobs += scope.launch {
+                // 当前文章的所有内容列表（包括正文和草稿）这里不是真实的文章内容
+                val postContentItems = postContents(post.postId)
+                // 获取文章的正文和所有草稿的实际内容，并写到文件
+                postContentItems.forEach { contentItem ->
+                    totalCount++
+                    // 获取当前文章的具体内容
+                    val content = postContent(contentItem.postId, contentItem.status, contentItem.draftName)
+                    if (content == null) {
+                        failResult += if (contentItem.status == PostContentStatus.PUBLISHED) {
+                            "[${post.title}] 文章没有任何内容"
+                        } else {
+                            "[${post.title}] 文章的 [${contentItem.draftName}] 草稿没有任何内容"
+                        }
+                        return@launch
+                    }
+                    // 将当前文章内容写到临时文件夹
+                    postToTempDir(post, content, tempDir) { errMsg ->
+                        // 写到文件出错回调
+                        // 将错误原因写到数组
+                        failResult += errMsg
+                    }.let {
+                        if (it) {
+                            // 文章内容写到文件成功
+                            successCount++
+                        }
+                    }
+                }
+            }
+        }
+
+
+        // 等待所有协程执行完毕
+        jobs.joinAll()
+
+        val backupFile = File("./.nola/backup")
+        if (!backupFile.exists()) {
+            backupFile.mkdirs()
+        }
+        // 将存储文章内容的临时文件夹压缩
+        tempDir.createZip("./.nola/backup/${filePrefix}.zip") ?: throw MyException("压缩文件失败")
+        // 删除临时文件夹
+        tempDir.deleteRecursively()
+        return ExportPostResponse(
+            successCount = successCount,
+            failCount = failResult.size,
+            failResult = failResult,
+            path = "/backup/${filePrefix}.zip",
+            count = totalCount,
+        )
+    }
+
+
+    /**
+     * 将文章内容写入临时文件夹
+     * @param post 文章数据类
+     * @param postContent 文章内容数据类
+     * @param dir 要写入的临时文件夹
+     * @param onFail 失败时的回调函数
+     */
+    private fun postToTempDir(
+        post: Post,
+        postContent: PostContent,
+        dir: File,
+        onFail: (String) -> Unit = {}
+    ): Boolean {
+        if (!dir.exists()) {
+            dir.mkdirs()
+        } else if (!dir.isDirectory) {
+            onFail("[${post.title}] 写入临时文件夹失败，因为临时文件夹地址不是一个文件夹")
+            return false
+        }
+
+        var postFileName = post.title
+        if (postContent.status == PostContentStatus.DRAFT) {
+            postFileName += "_${postContent.draftName}"
+        }
+        val postFile = File(dir, "$postFileName.md")
+        try {
+            postFile.writeText(postContent.content)
+            return true;
+        } catch (e: Exception) {
+            onFail("[${post.title}] 写入临时文件夹失败，${e.message}")
+            return false
+        }
     }
 
     /**

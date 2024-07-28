@@ -28,6 +28,7 @@ fun Application.configureRouting(
 
         // 本地存储文件路由
         staticFiles("/upload", File(".nola/upload"))
+        staticFiles("/backup", File(".nola/backup"))
 
         // 快捷接口
         quickRouting()
