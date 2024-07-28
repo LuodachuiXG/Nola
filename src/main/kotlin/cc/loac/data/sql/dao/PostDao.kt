@@ -85,8 +85,9 @@ interface PostDao {
 
     /**
      * 获取所有文章
+     * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    suspend fun posts(): List<Post>
+    suspend fun posts(includeTagAndCategory: Boolean = true): List<Post>
 
     /**
      * 根据文章 ID 获取文章

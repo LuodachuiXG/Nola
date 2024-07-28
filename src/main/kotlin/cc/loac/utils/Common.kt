@@ -9,7 +9,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 /**
- * 自动协程
+ * 启动协程
  * @param block 协程体
  * @param scope 协程上下文
  */

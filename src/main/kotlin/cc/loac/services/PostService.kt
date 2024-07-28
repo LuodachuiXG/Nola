@@ -9,10 +9,7 @@ import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.PostContentRequest
 import cc.loac.data.requests.PostRequest
 import cc.loac.data.requests.PostStatusRequest
-import cc.loac.data.responses.ApiPostContentResponse
-import cc.loac.data.responses.ApiPostResponse
-import cc.loac.data.responses.Pager
-import cc.loac.data.responses.PostContentResponse
+import cc.loac.data.responses.*
 
 /**
  * 文章服务接口
@@ -96,8 +93,9 @@ interface PostService {
 
     /**
      * 获取所有文章
+     * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    suspend fun posts(): List<Post>
+    suspend fun posts(includeTagAndCategory: Boolean = true): List<Post>
 
     /**
      * 根据文章 ID 获取文章
@@ -247,4 +245,9 @@ interface PostService {
      * @param password 密码
      */
     suspend fun isPostPasswordValid(postId: Int, password: String): Boolean
+
+    /**
+     * 导出所有文章
+     */
+    suspend fun exportPosts(): ExportPostResponse
 }
