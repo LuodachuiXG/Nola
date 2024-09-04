@@ -8,22 +8,22 @@ import org.jetbrains.exposed.sql.Table
  */
 object Files : Table("file") {
     /** 文件 ID **/
-    val fileId = integer("fileId").autoIncrement()
+    val fileId = long("fileId").autoIncrement()
 
     /** 文件组 ID **/
-    val fileGroupId = integer("fileGroupId").nullable()
+    val fileGroupId = integer("file_groupId").nullable()
 
     /** 文件名 **/
-    val displayName = varchar("displayName", 512)
+    val displayName = varchar("display_name", 512)
 
     /** 文件大小 **/
     val size = long("size")
 
     /** 文件存储方式 **/
-    val storageMode = enumerationByName("storageMode", 48, FileStorageModeEnum::class)
+    val storageMode = enumerationByName("storage_mode", 48, FileStorageModeEnum::class)
 
     /** 创建时间戳 **/
-    val createTime = long("createTime")
+    val createTime = long("create_time")
 
     override val primaryKey = PrimaryKey(fileId)
 }

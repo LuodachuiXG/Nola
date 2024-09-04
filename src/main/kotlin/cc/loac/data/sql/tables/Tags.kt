@@ -7,10 +7,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object Tags : Table("tag") {
     /** 标签 ID **/
-    val tagId = integer("tagId").autoIncrement()
+    val tagId = long("tag_id").autoIncrement()
 
     /** 标签名 **/
-    val displayName = varchar("displayName", 256)
+    val displayName = varchar("display_name", 256)
 
     /** 标签别名 **/
     val slug = varchar("slug", 128, "utf8mb4_general_ci").uniqueIndex()

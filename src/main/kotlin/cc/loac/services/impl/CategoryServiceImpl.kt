@@ -7,6 +7,9 @@ import cc.loac.data.sql.dao.CategoryDao
 import cc.loac.services.CategoryService
 import org.koin.java.KoinJavaComponent.inject
 
+/**
+ * 分类服务接口实现类
+ */
 class CategoryServiceImpl : CategoryService {
 
     private val categoryDao: CategoryDao by inject(CategoryDao::class.java)

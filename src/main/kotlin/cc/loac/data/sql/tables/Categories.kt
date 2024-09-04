@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.Table
  */
 object Categories : Table("category") {
     /** 分类 ID **/
-    val categoryId = integer("categoryId").autoIncrement()
+    val categoryId = long("categoryId").autoIncrement()
 
     /** 分类名 **/
     val displayName = varchar("displayName", 256)

@@ -7,10 +7,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object Links : Table("link") {
     /** 友情链接 ID **/
-    val linkId = integer("linkId").autoIncrement()
+    val linkId = long("link_id").autoIncrement()
 
     /** 链接名称 **/
-    val displayName = varchar("displayName", 128)
+    val displayName = varchar("display_name", 128)
 
     /** 链接地址 **/
     val url = varchar("url", 512)
@@ -28,10 +28,10 @@ object Links : Table("link") {
     val remark = varchar("remark", 256).nullable()
 
     /** 创建时间戳 **/
-    val createTime = long("createTime")
+    val createTime = long("create_time")
 
     /** 最后修改时间戳 **/
-    val lastModifyTime = long("lastModifyTime").nullable()
+    val lastModifyTime = long("last_modify_time").nullable()
 
     override val primaryKey = PrimaryKey(linkId)
 }

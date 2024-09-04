@@ -8,10 +8,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object PostContents : Table("post_content") {
     /** 文章内容 ID **/
-    val postContentId = integer("postContentId").autoIncrement()
+    val postContentId = long("post_content_id").autoIncrement()
 
     /** 文章 ID **/
-    val postId = integer("postId").references(Posts.postId)
+    val postId = long("post_id").references(Posts.postId)
 
     /** 内容 **/
     val content = text("content", "utf8mb4_general_ci")
@@ -23,10 +23,10 @@ object PostContents : Table("post_content") {
     val status = enumerationByName("status", 24, PostContentStatus::class)
 
     /** 草稿名 **/
-    val draftName = varchar("draftName", 256).nullable()
+    val draftName = varchar("draft_name", 256).nullable()
 
     /** 最后修改时间 **/
-    val lastModifyTime = long("lastModifyTime").nullable()
+    val lastModifyTime = long("last_modify_time").nullable()
 
     override val primaryKey = PrimaryKey(postContentId)
 }

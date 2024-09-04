@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.Table
  */
 object Configs : Table("config") {
     /** 配置表 ID **/
-    val configId = integer("configId").autoIncrement()
+    val configId = long("config_id").autoIncrement()
 
     /** 配置键 **/
     val key = enumerationByName<ConfigKey>("key", 64).uniqueIndex()

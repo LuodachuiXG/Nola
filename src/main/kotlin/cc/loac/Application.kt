@@ -40,5 +40,5 @@ fun Application.module() {
     // 状态页面配置（异常拦截器）
     configureStatusPage()
     // 监视器插件配置
-    configureMonitorPlugin()
+//    configureMonitorPlugin()
 }

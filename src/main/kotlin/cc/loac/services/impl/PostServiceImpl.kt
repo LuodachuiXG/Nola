@@ -123,7 +123,12 @@ class PostServiceImpl : PostService {
      */
     override suspend fun updatePost(pr: PostRequest): Boolean {
         // 检查别名是否重复
-        postBySlug(pr.slug)?.let { throw MyException("别名 [${pr.slug}] 已存在") }
+        postBySlug(pr.slug)?.let {
+            // 别名重复，且不是相同文章，别名重复
+            if (it.postId != pr.postId) {
+                throw MyException("别名 [${pr.slug}] 已存在")
+            }
+        }
         // 检查标签和分类是否存在
         checkTagAndCategoryExist(pr)
         // 检查是否需要自动生成摘要
