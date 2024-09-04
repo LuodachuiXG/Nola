@@ -21,7 +21,7 @@ import cc.loac.data.models.Tag
  * @param lastModifyTime 文章最后修改时间
  */
 data class ApiPostResponse(
-    val postId: Int,
+    val postId: Long,
     val title: String,
     val excerpt: String?,
     val slug: String,

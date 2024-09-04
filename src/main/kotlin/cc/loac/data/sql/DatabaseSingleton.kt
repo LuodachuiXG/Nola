@@ -7,6 +7,7 @@ import io.ktor.server.config.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -21,48 +22,36 @@ object DatabaseSingleton {
      */
     fun init(config: ApplicationConfig) {
         val driverClassName = config.property("ktor.storage.driverClassName").getString()
+        val databaseName = config.property("ktor.storage.databaseName").getString()
         val jdbcURL = config.property("ktor.storage.jdbcURL").getString()
         val username = config.property("ktor.storage.username").getString()
         val password = config.property("ktor.storage.password").getString()
-        val database = Database.connect(
-            createHikariDataSource(jdbcURL, driverClassName, username, password)
+        var database = Database.connect(
+            // 先不连接具体的数据库，只连接数据库服务器
+            createHikariDataSource(jdbcURL.substringBefore(databaseName), driverClassName, username, password)
         )
 
-        // 开启事物，要么全部成功，要么回滚
         transaction(database) {
-            SchemaUtils.createDatabase("nola")
-            // 用户表
-            SchemaUtils.create(Users)
-            // 配置表
-            SchemaUtils.create(Configs)
-            // 文章表
-            SchemaUtils.create(Posts)
-            // 标签表
-            SchemaUtils.create(Tags)
-            // 分类表
-            SchemaUtils.create(Categories)
-            // 文章标签表
-            SchemaUtils.create(PostTags)
-            // 文章分类表
-            SchemaUtils.create(PostCategories)
-            // 文章内容表
-            SchemaUtils.create(PostContents)
-            // 友情链接表
-            SchemaUtils.create(Links)
-            // 菜单表
-            SchemaUtils.create(Menus)
-            // 菜单项表
-            SchemaUtils.create(MenuItems)
-            // 文件存储方式表
-            SchemaUtils.create(FileStorageModes)
-            // 文件组表
-            SchemaUtils.create(FileGroups)
-            // 文件表
-            SchemaUtils.create(Files)
-            // 日记表
-            SchemaUtils.create(Diaries)
-            // 访问日志表
-            SchemaUtils.create(AccessLogs)
+            if (!SchemaUtils.listDatabases().contains(databaseName)) {
+                // 数据库不存在，创建数据库
+                SchemaUtils.createDatabase(databaseName)
+                // 连接到新创建的数据库
+                database = Database.connect(
+                    createHikariDataSource(jdbcURL, driverClassName, username, password)
+                )
+            }
+
+            // 开启事物，要么全部成功，要么回滚
+            transaction(database) {
+                // 所有表
+                val tables = listOf(
+                    Users, Configs, Posts, Tags, Categories, PostTags,
+                    PostCategories, Links, Menus, MenuItems, FileStorageModes,
+                    FileGroups, Files, Diaries, AccessLogs, Comments
+                )
+                // 创建表
+                SchemaUtils.create(*tables.toTypedArray())
+            }
         }
 
     }

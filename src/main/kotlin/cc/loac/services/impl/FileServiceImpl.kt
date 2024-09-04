@@ -152,7 +152,7 @@ class FileServiceImpl : FileService {
      * 删除文件组
      * @param fileGroupId 文件组 ID
      */
-    override suspend fun deleteFileGroup(fileGroupId: Int): Boolean {
+    override suspend fun deleteFileGroup(fileGroupId: Long): Boolean {
         // 删除前先判断当前文件组下是否还有文件
         val fileCount = fileDao.getFileCount(fileGroupId)
         if (fileCount > 0) throw MyException("文件组下还有 $fileCount 个文件，无法删除")
@@ -183,7 +183,7 @@ class FileServiceImpl : FileService {
      * 根据文件组 ID 获取文件组
      * @param fileGroupId 文件组 ID
      */
-    override suspend fun getFileGroup(fileGroupId: Int): FileGroup? {
+    override suspend fun getFileGroup(fileGroupId: Long): FileGroup? {
         return fileDao.getFileGroup(fileGroupId)
     }
 
@@ -231,7 +231,7 @@ class FileServiceImpl : FileService {
         inputStream: InputStream,
         fileName: String,
         storageMode: FileStorageModeEnum,
-        fileGroupId: Int?,
+        fileGroupId: Long?,
         fileLength: Long?
     ): FileResponse? {
         var fileGroup: FileGroup? = null
@@ -323,7 +323,7 @@ class FileServiceImpl : FileService {
      * @param ids 文件 ID 集合
      * @return 删除成功的文件 ID 集合
      */
-    override suspend fun deleteFiles(ids: List<Int>): List<Int> {
+    override suspend fun deleteFiles(ids: List<Long>): List<Long> {
         if (ids.isEmpty()) return emptyList()
 
         // 根据文件 ID 获取所有文件
@@ -511,7 +511,7 @@ class FileServiceImpl : FileService {
         size: Int,
         sort: FileSort?,
         mode: FileStorageModeEnum?,
-        groupId: Int?,
+        groupId: Long?,
         key: String?
     ): Pager<FileResponse> {
         val fileResponses = LinkedList<FileResponse>()

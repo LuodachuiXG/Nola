@@ -9,7 +9,7 @@ package cc.loac.data.models
  * @param lastModifyTime 最后修改时间
  */
 data class Diary(
-    val diaryId: Int,
+    val diaryId: Long,
     val content: String,
     val html: String,
     val createTime: Long,

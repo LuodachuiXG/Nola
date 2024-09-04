@@ -17,7 +17,7 @@ interface UserDao {
      * 根据用户 ID 获取用户
      * @param id 用户 ID
      */
-    suspend fun user(id: Int): User?
+    suspend fun user(id: Long): User?
 
     /**
      * 根据用户名获取用户
@@ -36,24 +36,24 @@ interface UserDao {
      * @param userId 用户 ID
      * @param userInfo 用户信息
      */
-    suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean
+    suspend fun updateUser(userId: Long, userInfo: UserInfoRequest): Boolean
 
     /**
      * 修改用户密码
      * @param userId 用户 ID
      * @param saltHash 加盐哈希
      */
-    suspend fun updatePassword(userId: Int, saltHash: SaltedHash): Boolean
+    suspend fun updatePassword(userId: Long, saltHash: SaltedHash): Boolean
 
     /**
      * 修改用户最后登录时间
      * @param userId 用户 ID
      */
-    suspend fun updateUserLastLoginTime(userId: Int): Boolean
+    suspend fun updateUserLastLoginTime(userId: Long): Boolean
 
     /**
      * 删除用户
      * @param id 用户 ID
      */
-    suspend fun deleteUser(id: Int): Boolean
+    suspend fun deleteUser(id: Long): Boolean
 }

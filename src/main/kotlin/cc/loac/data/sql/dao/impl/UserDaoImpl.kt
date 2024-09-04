@@ -42,7 +42,7 @@ class UserDaoImpl : UserDao {
      * 根据用户 ID 获取用户
      * @param id 用户 ID
      */
-    override suspend fun user(id: Int): User? = dbQuery {
+    override suspend fun user(id: Long): User? = dbQuery {
         Users
             .selectAll().where { Users.userId eq id }
             .map(::resultRowToUser)
@@ -82,7 +82,7 @@ class UserDaoImpl : UserDao {
      * @param userId 用户 ID
      * @param userInfo 用户信息
      */
-    override suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean = dbQuery {
+    override suspend fun updateUser(userId: Long, userInfo: UserInfoRequest): Boolean = dbQuery {
         Users.update({
             Users.userId eq userId
         }) {
@@ -99,7 +99,7 @@ class UserDaoImpl : UserDao {
      * @param userId 用户 ID
      * @param saltHash 加盐哈希
      */
-    override suspend fun updatePassword(userId: Int, saltHash: SaltedHash): Boolean = dbQuery {
+    override suspend fun updatePassword(userId: Long, saltHash: SaltedHash): Boolean = dbQuery {
         Users.update({
             Users.userId eq userId
         }) {
@@ -112,7 +112,7 @@ class UserDaoImpl : UserDao {
      * 修改用户最后登录时间
      * @param userId 用户 ID
      */
-    override suspend fun updateUserLastLoginTime(userId: Int): Boolean = dbQuery {
+    override suspend fun updateUserLastLoginTime(userId: Long): Boolean = dbQuery {
         Users.update({
             Users.userId eq userId
         }) {
@@ -124,7 +124,7 @@ class UserDaoImpl : UserDao {
      * 删除用户
      * @param id 用户 ID
      */
-    override suspend fun deleteUser(id: Int): Boolean = dbQuery {
-        Users.deleteWhere { Users.userId eq id } > 0
+    override suspend fun deleteUser(id: Long): Boolean = dbQuery {
+        Users.deleteWhere { userId eq id } > 0
     }
 }

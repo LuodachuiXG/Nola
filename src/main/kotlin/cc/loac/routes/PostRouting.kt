@@ -45,13 +45,13 @@ fun Route.postAdminRouting() {
 
             /** 回收文章 - 根据文章 ID **/
             put("/recycle") {
-                val postIds = call.receiveByDataClass<List<Int>>()
+                val postIds = call.receiveByDataClass<List<Long>>()
                 call.respondSuccess(postService.updatePostStatusToDeleted(postIds))
             }
 
             /** 恢复文章 - 根据文章 ID **/
             put("/restore/{status}") {
-                val postIds = call.receiveByDataClass<List<Int>>()
+                val postIds = call.receiveByDataClass<List<Long>>()
                 val status = call.receivePathParam("status")
                 // 判断是否是合法的枚举
                 val statusEnum = kotlin.runCatching {
@@ -65,7 +65,7 @@ fun Route.postAdminRouting() {
 
             /** 删除文章 - 根据文章 ID **/
             delete {
-                val postIds = call.receiveByDataClass<List<Int>>()
+                val postIds = call.receiveByDataClass<List<Long>>()
                 if (postIds.isEmpty()) call.respondSuccess(false)
                 call.respondSuccess(postService.deletePosts(postIds))
             }
@@ -86,7 +86,7 @@ fun Route.postAdminRouting() {
             /** 修改文章状态，如：文章状态、可见性、置顶 **/
             put("/status") {
                 val postStatusRequest = call.receiveByDataClass<PostStatusRequest> {
-                    it.postId != 0 && it.status != PostStatus.DELETED
+                    it.postId != 0L && it.status != PostStatus.DELETED
                 }
                 call.respondSuccess(postService.updatePostStatus(postStatusRequest))
             }
@@ -110,12 +110,12 @@ fun Route.postAdminRouting() {
                     // 可空文章标签
                     val tag = call.receiveNullablePathParam("tag") {
                         it?.isInt()
-                    }?.toInt()
+                    }?.toLong()
 
                     // 可空文章分类
                     val category = call.receiveNullablePathParam("category") {
                         it?.isInt()
-                    }?.toInt()
+                    }?.toLong()
 
                     // 可空文章排序
                     val sort = call.receiveNullablePathParam("sort") {
@@ -129,13 +129,13 @@ fun Route.postAdminRouting() {
 
             /** 获取文章所有内容，包括正文和所有草稿 **/
             get("content/{postId}") {
-                val postId = call.receiveIntPathParam("postId")
+                val postId = call.receiveIntPathParam("postId").toLong()
                 call.respondSuccess(postService.postContents(postId))
             }
 
             /** 获取文章 - 根据文章 ID **/
             get("/{postId}") {
-                val postId = call.receiveIntPathParam("postId")
+                val postId = call.receiveIntPathParam("postId").toLong()
                 call.respondSuccess(postService.posts(listOf(postId), true).firstOrNull())
             }
 
@@ -156,7 +156,7 @@ fun Route.postAdminRouting() {
 
             /** 获取文章正文 **/
             get("/publish/{postId}") {
-                val postId = call.receiveIntPathParam("postId")
+                val postId = call.receiveIntPathParam("postId").toLong()
                 call.respondSuccess(
                     postService.postContent(postId)
                         ?: throw MyException("文章 [$postId] 不存在")
@@ -182,7 +182,7 @@ fun Route.postAdminRouting() {
 
             /** 删除文章草稿 **/
             delete("/draft/{postId}") {
-                val postId = call.receiveIntPathParam("postId")
+                val postId = call.receiveIntPathParam("postId").toLong()
                 val draftNames = call.receiveByDataClass<List<String>>()
                 if (draftNames.isEmpty()) call.respondSuccess(false)
                 call.respondSuccess(postService.deletePostContent(postId, PostContentStatus.DRAFT, draftNames))
@@ -233,7 +233,7 @@ fun Route.postAdminRouting() {
             get("/{postId}/draft/{draftName}") {
                 val params = call.receivePathParams("postId", "draftName")
                 // 判断文章 ID 是否为整数
-                val postId = params["postId"]?.toIntOrNull() ?: throw ParamMismatchException()
+                val postId = params["postId"]?.toLongOrNull() ?: throw ParamMismatchException()
                 val draftName = params["draftName"]!!
                 call.respondSuccess(
                     postService.postContent(postId, PostContentStatus.DRAFT, draftName)
@@ -258,12 +258,12 @@ fun Route.postApiRouting() {
                 // 可空文章标签 ID
                 val tagId = call.receiveNullablePathParam("tagId") {
                     it?.isInt()
-                }?.toInt()
+                }?.toLong()
 
                 // 可空文章分类 ID
                 val categoryId = call.receiveNullablePathParam("categoryId") {
                     it?.isInt()
-                }?.toInt()
+                }?.toLong()
 
                 // 可空标签名或别名
                 val tag = call.receiveNullablePathParam("tag")
@@ -277,7 +277,7 @@ fun Route.postApiRouting() {
 
         /** 获取文章 - 根据文章 ID **/
         get("/{postId}") {
-            val postId = call.receiveIntPathParam("postId")
+            val postId = call.receiveIntPathParam("postId").toLong()
             val post = postService.posts(listOf(postId), true).firstOrNull()
             // 如果文章不存在，或者文章未发布，则返回 404
             if (post == null || post.status != PostStatus.PUBLISHED) {
@@ -304,7 +304,7 @@ fun Route.postApiRouting() {
                 // 可空参数，文章 ID
                 val postId = call.receiveNullablePathParam("id") {
                     it?.isInt()
-                }?.toInt()
+                }?.toLongOrNull()
 
                 // 可空参数，文章别名
                 val slug = call.receiveNullablePathParam("slug")

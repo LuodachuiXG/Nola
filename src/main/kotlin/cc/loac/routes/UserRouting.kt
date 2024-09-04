@@ -34,21 +34,21 @@ fun Route.userRouting(
             /** 获取登录用户信息 **/
             get {
                 val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
-                call.respondSuccess(userService.user(userId.toInt())?.toUserInfoResponse())
+                call.respondSuccess(userService.user(userId.toLong())?.toUserInfoResponse())
             }
 
             /** 修改登录用户的信息 **/
             put {
                 val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
                 val userInfo = call.receiveByDataClass<UserInfoRequest>()
-                call.respondSuccess(userService.updateUser(userId.toInt(), userInfo))
+                call.respondSuccess(userService.updateUser(userId.toLong(), userInfo))
             }
 
             /** 修改密码 **/
             put("/password") {
                 val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
                 val newPassword = call.receiveMapByName("password")["password"]!!
-                call.respondSuccess(userService.updatePassword(userId.toInt(), newPassword))
+                call.respondSuccess(userService.updatePassword(userId.toLong(), newPassword))
             }
         }
 

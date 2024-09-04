@@ -8,10 +8,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object Files : Table("file") {
     /** 文件 ID **/
-    val fileId = long("fileId").autoIncrement()
+    val fileId = long("file_id").autoIncrement()
 
     /** 文件组 ID **/
-    val fileGroupId = integer("file_groupId").nullable()
+    val fileGroupId = long("file_group_id").nullable()
 
     /** 文件名 **/
     val displayName = varchar("display_name", 512)

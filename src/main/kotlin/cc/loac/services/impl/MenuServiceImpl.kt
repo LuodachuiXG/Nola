@@ -39,7 +39,7 @@ class MenuServiceImpl : MenuService {
      * 删除菜单
      * @param menuIds 菜单 ID 集合
      */
-    override suspend fun deleteMenu(menuIds: List<Int>): Boolean {
+    override suspend fun deleteMenu(menuIds: List<Long>): Boolean {
         return menuDao.deleteMenu(menuIds)
     }
 
@@ -66,7 +66,7 @@ class MenuServiceImpl : MenuService {
      * 获取菜单
      * @param menuId 菜单 ID
      */
-    override suspend fun menu(menuId: Int): Menu? {
+    override suspend fun menu(menuId: Long): Menu? {
         return menuDao.menu(menuId)
     }
 
@@ -117,11 +117,11 @@ class MenuServiceImpl : MenuService {
      * 删除菜单项
      * @param menuItemIds 菜单项 ID 集合
      */
-    override suspend fun deleteMenus(menuItemIds: List<Int>): Boolean {
+    override suspend fun deleteMenus(menuItemIds: List<Long>): Boolean {
         // 先获取所有菜单项
         val menuItems = menuDao.menuItems()
         // 获取要删除的所有菜单项的所有子菜单项 ID
-        val childrenIds = mutableListOf<Int>()
+        val childrenIds = mutableListOf<Long>()
         menuItemIds.forEach { menuId ->
             childrenIds.addAll(findChildrenIds(menuId, menuItems))
         }
@@ -136,8 +136,8 @@ class MenuServiceImpl : MenuService {
      * @param parentMenuItemId 父菜单项 ID
      * @param menuItems 菜单项列表
      */
-    private fun findChildrenIds(parentMenuItemId: Int, menuItems: List<MenuItem>): List<Int> {
-        val childrenIds = mutableListOf<Int>()
+    private fun findChildrenIds(parentMenuItemId: Long, menuItems: List<MenuItem>): List<Long> {
+        val childrenIds = mutableListOf<Long>()
         menuItems.forEach { menuItem ->
             if (menuItem.parentMenuItemId == parentMenuItemId) {
                 childrenIds.add(menuItem.menuItemId)
@@ -191,7 +191,7 @@ class MenuServiceImpl : MenuService {
      * 获取菜单项
      * @param menuItemId 菜单项 ID
      */
-    override suspend fun menuItem(menuItemId: Int): MenuItem? {
+    override suspend fun menuItem(menuItemId: Long): MenuItem? {
         return menuDao.menuItem(menuItemId)
     }
 
@@ -199,7 +199,7 @@ class MenuServiceImpl : MenuService {
      * 获取菜单项（平铺，不构建菜单项树）
      * @param menuId 菜单 ID
      */
-    override suspend fun menuItems(menuId: Int, buildTree: Boolean): List<MenuItemResponse> {
+    override suspend fun menuItems(menuId: Long, buildTree: Boolean): List<MenuItemResponse> {
         // 先获取当前菜单所有菜单项
         val menuItems = menuDao.menuItems(menuId)
         // 是否构建菜单项树
@@ -257,7 +257,7 @@ class MenuServiceImpl : MenuService {
      * @param items 菜单项列表
      */
     private fun findMenuItemChildren(
-        parentMenuItemId: Int?,
+        parentMenuItemId: Long?,
         items: List<MenuItem>
     ): List<MenuItemResponse> {
         return items.filter { it.parentMenuItemId == parentMenuItemId }

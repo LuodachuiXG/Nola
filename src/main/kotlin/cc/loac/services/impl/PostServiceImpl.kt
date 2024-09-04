@@ -91,7 +91,7 @@ class PostServiceImpl : PostService {
      * 只能删除处于回收（已删除）状态的文章
      * @param postIds 文章 ID 集合
      */
-    override suspend fun deletePosts(postIds: List<Int>): Boolean {
+    override suspend fun deletePosts(postIds: List<Long>): Boolean {
         // 先判断给定的文章是否都处于回收状态
         val posts = posts(postIds, false)
         if (posts.any { it.status != PostStatus.DELETED }) {
@@ -104,7 +104,7 @@ class PostServiceImpl : PostService {
      * 修改文章为删除状态
      * @param postIds 文章 ID 集合
      */
-    override suspend fun updatePostStatusToDeleted(postIds: List<Int>): Boolean {
+    override suspend fun updatePostStatusToDeleted(postIds: List<Long>): Boolean {
         return postDao.updatePostStatusToDeleted(postIds)
     }
 
@@ -113,7 +113,7 @@ class PostServiceImpl : PostService {
      * @param postIds 文章 ID 集合
      * @param status 文章状态
      */
-    override suspend fun updatePostStatusTo(postIds: List<Int>, status: PostStatus): Boolean {
+    override suspend fun updatePostStatusTo(postIds: List<Long>, status: PostStatus): Boolean {
         return postDao.updatePostStatusTo(postIds, status)
     }
 
@@ -156,7 +156,7 @@ class PostServiceImpl : PostService {
      * @param postId 文章 ID
      * @param excerpt 摘要
      */
-    override suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean {
+    override suspend fun updatePostExcerpt(postId: Long, excerpt: String): Boolean {
         return postDao.updatePostExcerpt(postId, excerpt)
     }
 
@@ -164,7 +164,7 @@ class PostServiceImpl : PostService {
      * 尝试通过文章正文修改文章摘要
      * @param postId 文章 ID
      */
-    override suspend fun tryUpdatePostExcerptByPostContent(postId: Int): Boolean {
+    override suspend fun tryUpdatePostExcerptByPostContent(postId: Long): Boolean {
         // 获取到文章
         posts(listOf(postId), false).firstOrNull()?.let { post ->
             // 判断是否需要自动生成摘要
@@ -185,7 +185,7 @@ class PostServiceImpl : PostService {
      * 增加文章访问量
      * @param postId 文章 ID
      */
-    override suspend fun addPostVisit(postId: Int): Boolean {
+    override suspend fun addPostVisit(postId: Long): Boolean {
         return postDao.addPostVisit(postId)
     }
 
@@ -209,14 +209,20 @@ class PostServiceImpl : PostService {
      * @param postIds 文章 ID 集合
      * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    override suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean): List<Post> {
+    override suspend fun posts(postIds: List<Long>, includeTagAndCategory: Boolean): List<Post> {
         return postDao.posts(postIds, includeTagAndCategory)
     }
 
     /**
      * 分页获取所有文章
-     * @param page 页数
+     * @param page 当前页数
      * @param size 每页条数
+     * @param status 文章状态
+     * @param visible 文章可见性
+     * @param key 关键字
+     * @param tagId 文章标签 ID
+     * @param categoryId 文章分类 ID
+     * @param sort 文章排序
      */
     override suspend fun posts(
         page: Int,
@@ -224,11 +230,11 @@ class PostServiceImpl : PostService {
         status: PostStatus?,
         visible: PostVisible?,
         key: String?,
-        tag: Int?,
-        category: Int?,
+        tagId: Long?,
+        categoryId: Long?,
         sort: PostSort?
     ): Pager<Post> {
-        return postDao.posts(page, size, status, visible, key, tag, category, sort)
+        return postDao.posts(page, size, status, visible, key, tagId, categoryId, sort)
     }
 
     /**
@@ -262,8 +268,8 @@ class PostServiceImpl : PostService {
         page: Int,
         size: Int,
         key: String?,
-        tagId: Int?,
-        categoryId: Int?,
+        tagId: Long?,
+        categoryId: Long?,
         tag: String?,
         category: String?
     ): Pager<ApiPostResponse> {
@@ -275,7 +281,7 @@ class PostServiceImpl : PostService {
      * 包括文章正文和文章所有草稿
      * @param postId 文章 ID
      */
-    override suspend fun postContents(postId: Int): List<PostContentResponse> {
+    override suspend fun postContents(postId: Long): List<PostContentResponse> {
         // 判断文章是否存在
         if (!isPostExist(postId)) throw MyException("文章 [$postId] 不存在")
         return postDao.postContents(postId)
@@ -288,7 +294,7 @@ class PostServiceImpl : PostService {
      * @param draftName 草稿名
      */
     override suspend fun postContent(
-        postId: Int,
+        postId: Long,
         status: PostContentStatus,
         draftName: String?
     ): PostContent? {
@@ -302,7 +308,7 @@ class PostServiceImpl : PostService {
      * @param slug 文章别名
      * @param password 密码
      */
-    override suspend fun apiPostContent(postId: Int?, slug: String?, password: String?): ApiPostContentResponse? {
+    override suspend fun apiPostContent(postId: Long?, slug: String?, password: String?): ApiPostContentResponse? {
         if (postId == null && slug == null) return null
         // 如果文章 ID 不为空，通过文章 ID 获取文章
         val post = if (postId != null) {
@@ -360,7 +366,7 @@ class PostServiceImpl : PostService {
      * @param content 文章内容
      * @param draftName 草稿名
      */
-    override suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent? {
+    override suspend fun addPostDraft(postId: Long, content: String, draftName: String): PostContent? {
         // 先判断文章是否存在
         if (!isPostExist(postId)) throw MyException("文章 [$postId] 不存在")
         // 判断草稿名是否已经存在
@@ -374,7 +380,7 @@ class PostServiceImpl : PostService {
      * @param status 文章内容状态
      * @param draftNames 草稿名集合
      */
-    override suspend fun deletePostContent(postId: Int, status: PostContentStatus, draftNames: List<String>?): Boolean {
+    override suspend fun deletePostContent(postId: Long, status: PostContentStatus, draftNames: List<String>?): Boolean {
         return postDao.deletePostContent(postId, status, draftNames)
     }
 
@@ -408,7 +414,7 @@ class PostServiceImpl : PostService {
      * @param oldName 老草稿名
      * @param newName 新草稿名
      */
-    override suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean {
+    override suspend fun updatePostDraftName(postId: Long, oldName: String, newName: String): Boolean {
         if (oldName == newName) return false
         // 先判断新的草稿名是否已经存在
         if (isPostDraftNameExist(postId, newName)) throw MyException("草稿名 [$newName] 已存在")
@@ -423,7 +429,7 @@ class PostServiceImpl : PostService {
      * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
      */
     override suspend fun updatePostDraft2Content(
-        postId: Int,
+        postId: Long,
         draftName: String,
         deleteContent: Boolean,
         contentName: String?
@@ -451,7 +457,7 @@ class PostServiceImpl : PostService {
      * @param postId 文章 ID
      * @param password 密码
      */
-    override suspend fun isPostPasswordValid(postId: Int, password: String): Boolean {
+    override suspend fun isPostPasswordValid(postId: Long, password: String): Boolean {
         return postDao.isPostPasswordValid(postId, password)
     }
 
@@ -637,7 +643,7 @@ class PostServiceImpl : PostService {
      * 判断文章是否存在
      * @param postId 文章 ID
      */
-    private suspend fun isPostExist(postId: Int): Boolean {
+    private suspend fun isPostExist(postId: Long): Boolean {
         return posts(listOf(postId)).firstOrNull() != null
     }
 
@@ -646,7 +652,7 @@ class PostServiceImpl : PostService {
      * @param postId 文章 ID
      * @param draftName 草稿名
      */
-    private suspend fun isPostDraftNameExist(postId: Int, draftName: String): Boolean {
+    private suspend fun isPostDraftNameExist(postId: Long, draftName: String): Boolean {
         return postContent(postId, PostContentStatus.DRAFT, draftName) != null
     }
 

@@ -13,8 +13,8 @@ import cc.loac.data.models.enums.PostContentStatus
  * @param lastModifyTime 最后修改时间
  */
 data class PostContent(
-    val postContentId: Int,
-    val postId: Int,
+    val postContentId: Long,
+    val postId: Long,
     val content: String,
     val html: String,
     val status: PostContentStatus,

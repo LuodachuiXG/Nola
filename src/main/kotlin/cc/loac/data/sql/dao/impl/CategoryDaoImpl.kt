@@ -48,7 +48,7 @@ class CategoryDaoImpl : CategoryDao {
      * 删除分类
      * @param ids 分类 ID 集合
      */
-    override suspend fun deleteCategories(ids: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteCategories(ids: List<Long>): Boolean = dbQuery {
         // 先删除与分类对应的文章关联
         PostCategories.deleteWhere {
             categoryId inList ids
@@ -106,7 +106,7 @@ class CategoryDaoImpl : CategoryDao {
      * 根据文章 ID 获取文章分类
      * @param postId 文章 ID
      */
-    override suspend fun categoryByPostId(postId: Int): Category? = dbQuery {
+    override suspend fun categoryByPostId(postId: Long): Category? = dbQuery {
         sqlSelectCategory()
             .where { PostCategories.postId eq postId }
             .map(::resultRowToCategory)
@@ -117,7 +117,7 @@ class CategoryDaoImpl : CategoryDao {
      * 根据分类 ID 获取分类
      * @param id 分类 ID
      */
-    override suspend fun category(id: Int): Category? = dbQuery {
+    override suspend fun category(id: Long): Category? = dbQuery {
         sqlSelectCategory()
             .where { Categories.categoryId eq id }
             .map(::resultRowToCategory)

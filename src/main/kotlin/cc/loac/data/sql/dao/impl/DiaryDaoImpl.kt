@@ -46,7 +46,7 @@ class DiaryDaoImpl : DiaryDao {
      * 删除日记
      * @param diaryIds 日记 ID 数组
      */
-    override suspend fun deleteDiaries(diaryIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteDiaries(diaryIds: List<Long>): Boolean = dbQuery {
         Diaries.deleteWhere {
             diaryId inList diaryIds
         } > 0

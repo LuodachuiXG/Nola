@@ -16,12 +16,12 @@ import cc.loac.data.models.enums.MenuItemTarget
  * @param lastModifyTime 最后修改时间
  */
 data class MenuItemResponse(
-    val menuItemId: Int,
+    val menuItemId: Long,
     val displayName: String,
     val href: String?,
     val target: MenuItemTarget,
-    val parentMenuId: Int,
-    val parentMenuItemId: Int?,
+    val parentMenuId: Long,
+    val parentMenuItemId: Long?,
     val children: List<MenuItemResponse> = emptyList(),
     val index: Int,
     val createTime: Long,

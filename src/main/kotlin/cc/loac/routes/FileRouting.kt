@@ -53,14 +53,14 @@ private fun Route.fileRouting() {
         // 文件原始文件名
         var originName: String? = null
         // 文件组 ID
-        var fileGroupId: Int? = null
+        var fileGroupId: Long? = null
         // 文件存储方式
         var storageMode: FileStorageModeEnum? = null
         multipartData.forEachPart { part ->
             when(part) {
                 is PartData.FormItem -> {
                     if (part.name == "fileGroupId" && part.value.isNotBlank()) {
-                        if (part.value.isInt()) fileGroupId = part.value.toInt()
+                        if (part.value.isInt()) fileGroupId = part.value.toLong()
                     }
 
                     if (part.name == "storageMode" && part.value.isNotBlank()) {
@@ -94,7 +94,7 @@ private fun Route.fileRouting() {
 
     /** 根据文件 ID 集合删除文件 **/
     delete {
-        val ids = call.receiveByDataClass<List<Int>>()
+        val ids = call.receiveByDataClass<List<Long>>()
         call.respondSuccess(fileService.deleteFiles(ids))
     }
 
@@ -121,7 +121,7 @@ private fun Route.fileRouting() {
             }?.let { FileStorageModeEnum.valueOf(it) }
             val groupId = call.receiveNullablePathParam("groupId") {
                 it?.isInt()
-            }?.toInt()
+            }?.toLong()
             val key = call.receiveNullablePathParam("key")
 
             call.respondSuccess(fileService.getFiles(page, size, sort, mode, groupId, key))
@@ -142,7 +142,7 @@ private fun Route.fileGroupRouting() {
 
         /** 删除文件组 **/
         delete("/{fileGroupId}") {
-            val fileGroupId = call.receiveIntPathParam("fileGroupId")
+            val fileGroupId = call.receiveIntPathParam("fileGroupId").toLong()
             call.respondSuccess(fileService.deleteFileGroup(fileGroupId))
         }
 

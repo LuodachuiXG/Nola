@@ -21,7 +21,7 @@ interface MenuDao {
      * 删除菜单
      * @param menuIds 菜单 ID 集合
      */
-    suspend fun deleteMenu(menuIds: List<Int>): Boolean
+    suspend fun deleteMenu(menuIds: List<Long>): Boolean
 
     /**
      * 修改菜单
@@ -33,7 +33,7 @@ interface MenuDao {
      * 获取菜单
      * @param menuId 菜单 ID
      */
-    suspend fun menu(menuId: Int): Menu?
+    suspend fun menu(menuId: Long): Menu?
 
     /**
      * 获取菜单
@@ -63,7 +63,7 @@ interface MenuDao {
      * 删除菜单项
      * @param menuItemIds 菜单项 ID 集合
      */
-    suspend fun deleteMenuItems(menuItemIds: List<Int>): Boolean
+    suspend fun deleteMenuItems(menuItemIds: List<Long>): Boolean
 
     /**
      * 修改菜单项
@@ -75,13 +75,13 @@ interface MenuDao {
      * 获取菜单项
      * @param menuItemId 菜单项 ID
      */
-    suspend fun menuItem(menuItemId: Int): MenuItem?
+    suspend fun menuItem(menuItemId: Long): MenuItem?
 
     /**
      * 根据菜单 ID 获取所有菜单项
      * @param menuId 菜单 ID
      */
-    suspend fun menuItems(menuId: Int): List<MenuItem>
+    suspend fun menuItems(menuId: Long): List<MenuItem>
 
     /**
      * 获取所有菜单项

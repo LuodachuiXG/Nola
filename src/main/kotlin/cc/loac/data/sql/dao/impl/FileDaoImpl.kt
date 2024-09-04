@@ -139,7 +139,7 @@ class FileDaoImpl : FileDao {
      * 获取指定的文件组下的文件数量
      * @param fileGroupId 文件组 ID
      */
-    override suspend fun getFileCount(fileGroupId: Int): Long = dbQuery {
+    override suspend fun getFileCount(fileGroupId: Long): Long = dbQuery {
         Files.selectAll().where {
             Files.fileGroupId eq fileGroupId
         }.count()
@@ -177,7 +177,7 @@ class FileDaoImpl : FileDao {
      * 删除文件组
      * @param fileGroupId 文件组 ID
      */
-    override suspend fun deleteFileGroup(fileGroupId: Int): Boolean = dbQuery {
+    override suspend fun deleteFileGroup(fileGroupId: Long): Boolean = dbQuery {
         FileGroups.deleteWhere {
             FileGroups.fileGroupId eq fileGroupId
         } > 0
@@ -200,7 +200,7 @@ class FileDaoImpl : FileDao {
      * 根据文件组 ID 获取文件组
      * @param fileGroupId 文件组 ID
      */
-    override suspend fun getFileGroup(fileGroupId: Int): FileGroup? = dbQuery {
+    override suspend fun getFileGroup(fileGroupId: Long): FileGroup? = dbQuery {
         FileGroups.selectAll().where {
             FileGroups.fileGroupId eq fileGroupId
         }.map(::resultToFileGroup).singleOrNull()
@@ -242,7 +242,7 @@ class FileDaoImpl : FileDao {
      * 删除文件
      * @param fileId 文件 ID
      */
-    override suspend fun deleteFile(fileId: Int): Boolean = dbQuery {
+    override suspend fun deleteFile(fileId: Long): Boolean = dbQuery {
         Files.deleteWhere {
             Files.fileId eq fileId
         } > 0
@@ -264,7 +264,7 @@ class FileDaoImpl : FileDao {
      * 批量删除文件
      * @param fileIds 文件 ID 集合
      */
-    override suspend fun deleteFile(fileIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteFile(fileIds: List<Long>): Boolean = dbQuery {
         Files.deleteWhere {
             fileId inList fileIds
         } > 0
@@ -312,7 +312,7 @@ class FileDaoImpl : FileDao {
      */
     override suspend fun getFile(
         fileName: String,
-        fileGroupId: Int?,
+        fileGroupId: Long?,
         storageMode: FileStorageModeEnum
     ): MFile? = dbQuery {
         val baseQuery = Files.selectAll()
@@ -334,7 +334,7 @@ class FileDaoImpl : FileDao {
      * 根据文件 ID 集合获取文件和文件组数据类
      * @param ids 文件 ID 集合
      */
-    override suspend fun getFileWithGroups(ids: List<Int>): List<FileWithGroup> = dbQuery {
+    override suspend fun getFileWithGroups(ids: List<Long>): List<FileWithGroup> = dbQuery {
         Files.leftJoin(
             FileGroups,
             additionalConstraint = { Files.fileGroupId eq FileGroups.fileGroupId }
@@ -358,7 +358,7 @@ class FileDaoImpl : FileDao {
         size: Int,
         sort: FileSort?,
         mode: FileStorageModeEnum?,
-        groupId: Int?,
+        groupId: Long?,
         key: String?
     ): Pager<FileWithGroup> {
         val query = Files.leftJoin(
@@ -401,7 +401,7 @@ class FileDaoImpl : FileDao {
      * 获取所有文件
      * @param fileIds 文件 ID 集合
      */
-    override suspend fun getFiles(fileIds: List<Int>): List<MFile> = dbQuery {
+    override suspend fun getFiles(fileIds: List<Long>): List<MFile> = dbQuery {
         Files.selectAll().where { Files.fileId inList fileIds }.map(::resultToMFile)
     }
 }

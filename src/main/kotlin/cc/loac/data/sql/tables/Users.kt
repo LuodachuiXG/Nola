@@ -15,7 +15,7 @@ object Users : Table("user") {
     val username = varchar("username", 64, "utf8mb4_general_ci").uniqueIndex()
 
     /** 电子邮箱 **/
-    val email = varchar("email", 64)
+    val email = varchar("email", 128)
 
     /** 显示名称 **/
     val displayName = varchar("display_name", 128)

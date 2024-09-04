@@ -32,7 +32,7 @@ fun Route.linkAdminRouting() {
 
             /** 删除友情链接 **/
             delete {
-                val ids = call.receiveByDataClass<List<Int>>()
+                val ids = call.receiveByDataClass<List<Long>>()
                 if (ids.isEmpty()) call.respondSuccess(false)
                 call.respondSuccess(linkService.deleteLinks(ids))
             }

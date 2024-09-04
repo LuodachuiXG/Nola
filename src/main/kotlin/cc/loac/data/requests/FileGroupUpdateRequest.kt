@@ -8,6 +8,6 @@ package cc.loac.data.requests
  * @param displayName 文件组名
  */
 data class FileGroupUpdateRequest(
-    val fileGroupId: Int,
+    val fileGroupId: Long,
     val displayName: String
 )

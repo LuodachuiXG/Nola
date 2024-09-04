@@ -8,7 +8,7 @@ import cc.loac.data.models.enums.PostVisible
  */
 data class PostStatusRequest(
     /** 文章 ID **/
-    val postId: Int,
+    val postId: Long,
     /** 文章状态 **/
     val status: PostStatus?,
     /** 文章可见性 **/

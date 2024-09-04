@@ -9,7 +9,7 @@ package cc.loac.data.models
  * @param lastModifyTime 最后修改时间
  */
 data class Menu(
-    val menuId: Int,
+    val menuId: Long,
     val isMain: Boolean,
     val displayName: String,
     val createTime: Long,

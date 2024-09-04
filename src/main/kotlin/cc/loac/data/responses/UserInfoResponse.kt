@@ -14,7 +14,7 @@ import cc.loac.data.models.User
  * @param lastLoginDate 最后登录日期
  */
 data class UserInfoResponse(
-    val userId: Int,
+    val userId: Long,
     val username: String,
     val email: String,
     val displayName: String,

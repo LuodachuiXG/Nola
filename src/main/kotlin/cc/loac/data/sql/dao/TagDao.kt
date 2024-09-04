@@ -17,7 +17,7 @@ interface TagDao {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    suspend fun deleteTags(tagIds: List<Int>): Boolean
+    suspend fun deleteTags(tagIds: List<Long>): Boolean
 
     /**
      * 根据别名删除标签
@@ -47,18 +47,18 @@ interface TagDao {
      * 根据标签 ID 获取标签
      * @param tagId 标签 ID
      */
-    suspend fun tag(tagId: Int): Tag?
+    suspend fun tag(tagId: Long): Tag?
 
     /**
      * 根据文章 ID 获取标签
      */
-    suspend fun tags(postId: Int): List<Tag>
+    suspend fun tags(postId: Long): List<Tag>
 
     /**
      * 根据标签 ID 集合获取标签
      * @param tagIds 标签 ID 集合
      */
-    suspend fun tags(tagIds: List<Int>): List<Tag>
+    suspend fun tags(tagIds: List<Long>): List<Tag>
 
     /**
      * 根据标签名称获取标签

@@ -53,7 +53,7 @@ class LinkDaoImpl : LinkDao {
      * 删除友情链接
      * @param ids 友情链接 ID 集合
      */
-    override suspend fun deleteLinks(ids: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteLinks(ids: List<Long>): Boolean = dbQuery {
         Links.deleteWhere {
             linkId inList ids
         } > 0

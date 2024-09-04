@@ -13,7 +13,7 @@ package cc.loac.data.models
  * @param lastModifyTime 最后修改时间戳
  */
 data class Link(
-    val linkId: Int,
+    val linkId: Long,
     val displayName: String,
     val url: String,
     val logo: String?,

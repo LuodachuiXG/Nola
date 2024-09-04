@@ -10,7 +10,7 @@ package cc.loac.data.models
  * @param postCount 文章数量
  */
 data class Tag(
-    val tagId: Int,
+    val tagId: Long,
     val displayName: String,
     val slug: String,
     val color: String?,

@@ -14,8 +14,8 @@ import cc.loac.data.models.enums.FileStorageModeEnum
  * @param createTime 文件创建时间戳
  */
 data class FileResponse(
-    val fileId: Int,
-    val fileGroupId: Int?,
+    val fileId: Long,
+    val fileGroupId: Long?,
     val fileGroupName: String?,
     val displayName: String,
     val url: String,

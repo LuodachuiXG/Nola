@@ -25,7 +25,7 @@ import java.io.Serializable
  * @param lastModifyTime 最后修改时间
  */
 data class Post(
-    val postId: Int = -1,
+    val postId: Long = -1,
     val title: String,
     val autoGenerateExcerpt: Boolean,
     val excerpt: String,

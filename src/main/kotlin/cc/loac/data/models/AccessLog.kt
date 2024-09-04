@@ -7,7 +7,7 @@ import cc.loac.data.models.enums.AccessLogType
  */
 data class AccessLog(
     /** 访问日志 ID */
-    val accessLogId: Int,
+    val accessLogId: Long,
     /** 访问路径 */
     val path: String,
     /** 访问 IP */

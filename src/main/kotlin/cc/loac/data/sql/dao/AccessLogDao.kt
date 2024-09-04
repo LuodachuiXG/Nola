@@ -18,7 +18,7 @@ interface AccessLogDao {
      * 删除访问日志
      * @param accessLogId 访问日志 ID
      */
-    suspend fun deleteLog(accessLogId: Int): Boolean
+    suspend fun deleteLog(accessLogId: Long): Boolean
 
     /**
      * 删除最早的指定数量的日志
@@ -30,7 +30,7 @@ interface AccessLogDao {
      * 获取访问日志
      * @param accessLogId 访问日志 ID
      */
-    suspend fun accessLog(accessLogId: Int): AccessLog?
+    suspend fun accessLog(accessLogId: Long): AccessLog?
 
     /**
      * 分页获取所有访问日志

@@ -47,7 +47,7 @@ interface FileService {
      * 删除文件组
      * @param fileGroupId 文件组 ID
      */
-    suspend fun deleteFileGroup(fileGroupId: Int): Boolean
+    suspend fun deleteFileGroup(fileGroupId: Long): Boolean
 
     /**
      * 修改文件组
@@ -60,7 +60,7 @@ interface FileService {
      * 根据文件组 ID 获取文件组
      * @param fileGroupId 文件组 ID
      */
-    suspend fun getFileGroup(fileGroupId: Int): FileGroup?
+    suspend fun getFileGroup(fileGroupId: Long): FileGroup?
 
     /**
      * 根据文件存储方式获取文件组
@@ -101,7 +101,7 @@ interface FileService {
         inputStream: InputStream,
         fileName: String,
         storageMode: FileStorageModeEnum,
-        fileGroupId: Int?,
+        fileGroupId: Long?,
         fileLength: Long?
     ): FileResponse?
 
@@ -110,7 +110,7 @@ interface FileService {
      * @param ids 文件 ID 数组
      * @return 删除成功的文件 ID 数组
      */
-    suspend fun deleteFiles(ids: List<Int>): List<Int>
+    suspend fun deleteFiles(ids: List<Long>): List<Long>
 
     /**
      * 根据文件索引删除文件
@@ -140,7 +140,7 @@ interface FileService {
         size: Int,
         sort: FileSort? = null,
         mode: FileStorageModeEnum? = null,
-        groupId: Int? = null,
+        groupId: Long? = null,
         key: String? = null
     ): Pager<FileResponse>
 }

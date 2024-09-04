@@ -5,7 +5,7 @@ package cc.loac.data.requests
  */
 data class PostContentRequest(
     /** 文章 ID **/
-    val postId: Int,
+    val postId: Long,
     /** 文章内容 **/
     val content: String
 )

@@ -26,7 +26,7 @@ fun Route.diaryAdminRouting() {
 
             /** 删除日记 **/
             delete {
-                val ids = call.receiveByDataClass<List<Int>>()
+                val ids = call.receiveByDataClass<List<Long>>()
                 if (ids.isEmpty()) call.respondSuccess(false)
                 call.respondSuccess(diaryService.deleteDiaries(ids))
             }

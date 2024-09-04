@@ -30,7 +30,7 @@ class TagServiceImpl : TagService {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    override suspend fun deleteTags(tagIds: List<Int>): Boolean {
+    override suspend fun deleteTags(tagIds: List<Long>): Boolean {
         return tagDao.deleteTags(tagIds)
     }
 
@@ -78,7 +78,7 @@ class TagServiceImpl : TagService {
      * 根据标签 ID 获取标签
      * @param tagId 标签 ID
      */
-    override suspend fun tag(tagId: Int): Tag? {
+    override suspend fun tag(tagId: Long): Tag? {
         return tagDao.tag(tagId)
     }
 
@@ -113,13 +113,13 @@ class TagServiceImpl : TagService {
      * @param tagIds 标签 ID 集合
      * @return 如果标签都存在返回空集合，否则返回不存在的 ID 集合
      */
-    override suspend fun isIdsExist(tagIds: List<Int>): List<Int> {
+    override suspend fun isIdsExist(tagIds: List<Long>): List<Long> {
         val tags = tagDao.tags(tagIds)
         // 标签都存在，返回空集合
         if (tags.size == tagIds.size) return emptyList()
 
         // 检查哪些标签不存在
-        val nonExistIds = mutableListOf<Int>()
+        val nonExistIds = mutableListOf<Long>()
         tagIds.forEach { id ->
             if (tags.none { it.tagId == id }) {
                 nonExistIds.add(id)

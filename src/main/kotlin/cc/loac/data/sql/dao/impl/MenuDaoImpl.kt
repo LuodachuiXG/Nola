@@ -69,7 +69,7 @@ class MenuDaoImpl : MenuDao {
      * 删除菜单
      * @param menuIds 菜单 ID 集合
      */
-    override suspend fun deleteMenu(menuIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteMenu(menuIds: List<Long>): Boolean = dbQuery {
         // 先删除被删除的菜单下的菜单项
         MenuItems.deleteWhere { parentMenuId inList menuIds }
         Menus.deleteWhere { menuId inList menuIds } > 0
@@ -98,7 +98,7 @@ class MenuDaoImpl : MenuDao {
      * 获取菜单
      * @param menuId 菜单 ID
      */
-    override suspend fun menu(menuId: Int): Menu? = dbQuery {
+    override suspend fun menu(menuId: Long): Menu? = dbQuery {
         Menus
             .selectAll()
             .where { Menus.menuId eq menuId }
@@ -161,7 +161,7 @@ class MenuDaoImpl : MenuDao {
      * 删除菜单项
      * @param menuItemIds 菜单项 ID 集合
      */
-    override suspend fun deleteMenuItems(menuItemIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteMenuItems(menuItemIds: List<Long>): Boolean = dbQuery {
         MenuItems.deleteWhere {
             menuItemId inList menuItemIds
         } > 0
@@ -191,7 +191,7 @@ class MenuDaoImpl : MenuDao {
      * 获取菜单项
      * @param menuItemId 菜单项 ID
      */
-    override suspend fun menuItem(menuItemId: Int): MenuItem? = dbQuery {
+    override suspend fun menuItem(menuItemId: Long): MenuItem? = dbQuery {
         MenuItems
             .selectAll()
             .where { MenuItems.menuItemId eq menuItemId }
@@ -203,7 +203,7 @@ class MenuDaoImpl : MenuDao {
      * 根据菜单 ID 获取所有菜单项
      * @param menuId 菜单 ID
      */
-    override suspend fun menuItems(menuId: Int): List<MenuItem> = dbQuery {
+    override suspend fun menuItems(menuId: Long): List<MenuItem> = dbQuery {
         MenuItems
             .selectAll()
             .where { MenuItems.parentMenuId eq menuId }
@@ -246,7 +246,7 @@ class MenuDaoImpl : MenuDao {
      * 将除了给定的菜单 ID 以外的主菜单设为非主菜单
      * @param menuId 菜单 ID
      */
-    private fun setMainMenu(menuId: Int): Int {
+    private fun setMainMenu(menuId: Long): Int {
         return Menus.update({
             Menus.menuId neq menuId
         }) {

@@ -5,7 +5,7 @@ package cc.loac.data.requests
  */
 data class LinkRequest(
     /** 友情链接 ID **/
-    val linkId: Int?,
+    val linkId: Long?,
     /** 链接名称 **/
     val displayName: String,
     /** 链接地址 **/

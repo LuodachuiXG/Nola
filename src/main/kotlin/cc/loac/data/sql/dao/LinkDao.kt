@@ -20,7 +20,7 @@ interface LinkDao {
      * 删除友情链接
      * @param ids 友情链接 ID 集合
      */
-    suspend fun deleteLinks(ids: List<Int>): Boolean
+    suspend fun deleteLinks(ids: List<Long>): Boolean
 
     /**
      * 修改友情链接

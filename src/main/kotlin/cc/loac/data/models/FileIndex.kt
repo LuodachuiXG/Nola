@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class FileIndex(
-    val fileId: Int? = null,
+    val fileId: Long? = null,
     val name: String,
     val storageMode: FileStorageModeEnum
 )

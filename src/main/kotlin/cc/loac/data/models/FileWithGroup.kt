@@ -14,8 +14,8 @@ import cc.loac.data.models.enums.FileStorageModeEnum
  * @param createTime    文件创建时间
  */
 data class FileWithGroup(
-    val fileId: Int,
-    val fileGroupId: Int?,
+    val fileId: Long,
+    val fileGroupId: Long?,
     val fileName: String,
     val fileGroupName: String?,
     val fileGroupPath: String?,

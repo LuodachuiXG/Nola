@@ -48,7 +48,7 @@ class AccessLogDaoImpl : AccessLogDao {
      * 删除访问日志
      * @param accessLogId 访问日志 ID
      */
-    override suspend fun deleteLog(accessLogId: Int): Boolean = dbQuery {
+    override suspend fun deleteLog(accessLogId: Long): Boolean = dbQuery {
         AccessLogs.deleteWhere {
             AccessLogs.accessLogId eq accessLogId
         } > 0
@@ -74,7 +74,7 @@ class AccessLogDaoImpl : AccessLogDao {
      * 获取访问日志
      * @param accessLogId 访问日志 ID
      */
-    override suspend fun accessLog(accessLogId: Int): AccessLog? = dbQuery {
+    override suspend fun accessLog(accessLogId: Long): AccessLog? = dbQuery {
         AccessLogs
             .selectAll()
             .where { AccessLogs.accessLogId eq accessLogId }

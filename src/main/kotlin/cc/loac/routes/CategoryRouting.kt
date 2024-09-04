@@ -29,7 +29,7 @@ fun Route.categoryAdminRouting() {
             /** 删除分类 - 根据分类 ID **/
             delete {
                 // 获取 ID 集合
-                val ids = call.receiveByDataClass<List<Int>>()
+                val ids = call.receiveByDataClass<List<Long>>()
                 // 分类 ID 列表为空
                 if (ids.isEmpty()) call.respondSuccess(false)
                 // 删除分类
@@ -55,7 +55,7 @@ fun Route.categoryAdminRouting() {
 
             /** 获取分类 - 根据分类 ID**/
             get("/{categoryId}") {
-                val categoryId = call.receiveIntPathParam("categoryId")
+                val categoryId = call.receiveIntPathParam("categoryId").toLong()
                 call.respondSuccess(categoryService.category(categoryId))
             }
 
