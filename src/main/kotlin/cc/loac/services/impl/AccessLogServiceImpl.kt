@@ -39,7 +39,7 @@ class AccessLogServiceImpl : AccessLogService {
      * 删除访问日志
      * @param accessLogId 访问日志 ID
      */
-    override suspend fun deleteLog(accessLogId: Int): Boolean {
+    override suspend fun deleteLog(accessLogId: Long): Boolean {
         return accessLogDao.deleteLog(accessLogId)
     }
 
@@ -55,7 +55,7 @@ class AccessLogServiceImpl : AccessLogService {
      * 获取访问日志
      * @param accessLogId 访问日志 ID
      */
-    override suspend fun accessLog(accessLogId: Int): AccessLog? {
+    override suspend fun accessLog(accessLogId: Long): AccessLog? {
         return accessLogDao.accessLog(accessLogId)
     }
 

@@ -26,7 +26,7 @@ fun Route.menuAdminRouting() {
 
             /** 删除菜单 **/
             delete {
-                val menuIds = call.receiveByDataClass<List<Int>>()
+                val menuIds = call.receiveByDataClass<List<Long>>()
                 call.respondSuccess(menuService.deleteMenu(menuIds))
             }
 
@@ -59,7 +59,7 @@ fun Route.menuAdminRouting() {
 
             /** 删除菜单项 **/
             delete("/item") {
-                val menuItemIds = call.receiveByDataClass<List<Int>>()
+                val menuItemIds = call.receiveByDataClass<List<Long>>()
                 call.respondSuccess(menuService.deleteMenus(menuItemIds))
             }
 
@@ -74,7 +74,7 @@ fun Route.menuAdminRouting() {
             /** 获取菜单项 **/
             get("/item/{menuId}") {
                 // 获取菜单 ID
-                val menuId = call.receiveIntPathParam("menuId")
+                val menuId = call.receiveIntPathParam("menuId").toLong()
                 // 是否构建树，默认为 true，构建菜单项树
                 val isBuildTree =
                     call.receiveNullableBooleanPathParam("tree", true)

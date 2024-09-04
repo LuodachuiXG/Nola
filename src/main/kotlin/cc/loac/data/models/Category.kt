@@ -10,7 +10,7 @@ package cc.loac.data.models
  * @param postCount 文章数量
  */
 data class Category(
-    val categoryId: Int,
+    val categoryId: Long,
     val displayName: String,
     val slug: String,
     val cover: String?,

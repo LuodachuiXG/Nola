@@ -6,6 +6,6 @@ package cc.loac.data.requests
  * @param newFileGroupId 新的文件组 ID
  */
 data class FileMoveRequest(
-    val fileIds: List<Int>,
-    val newFileGroupId: Int?
+    val fileIds: List<Long>,
+    val newFileGroupId: Long?
 )

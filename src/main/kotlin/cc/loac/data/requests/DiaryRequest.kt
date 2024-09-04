@@ -6,6 +6,6 @@ package cc.loac.data.requests
  * @param content 日记内容
  */
 data class DiaryRequest(
-    val diaryId: Int?,
+    val diaryId: Long?,
     val content: String
 )

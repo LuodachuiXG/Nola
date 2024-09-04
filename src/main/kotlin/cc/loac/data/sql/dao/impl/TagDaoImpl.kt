@@ -46,7 +46,7 @@ class TagDaoImpl : TagDao {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    override suspend fun deleteTags(tagIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deleteTags(tagIds: List<Long>): Boolean = dbQuery {
         // 先删除与标签对应的文章关联
         PostTags.deleteWhere {
             tagId inList tagIds
@@ -103,7 +103,7 @@ class TagDaoImpl : TagDao {
     /**
      * 根据文章 ID 获取标签
      */
-    override suspend fun tags(postId: Int): List<Tag> = dbQuery {
+    override suspend fun tags(postId: Long): List<Tag> = dbQuery {
         sqlSelectTag()
             .where { PostTags.postId eq postId }
             .map(::resultRowToTag)
@@ -114,7 +114,7 @@ class TagDaoImpl : TagDao {
      * 根据标签 ID 获取标签
      * @param tagId 标签 ID
      */
-    override suspend fun tag(tagId: Int): Tag? = dbQuery {
+    override suspend fun tag(tagId: Long): Tag? = dbQuery {
         sqlSelectTag()
             .where { Tags.tagId eq tagId }
             .map(::resultRowToTag)
@@ -125,7 +125,7 @@ class TagDaoImpl : TagDao {
      * 根据标签 ID 集合获取标签
      * @param tagIds 标签 ID 集合
      */
-    override suspend fun tags(tagIds: List<Int>): List<Tag> = dbQuery {
+    override suspend fun tags(tagIds: List<Long>): List<Tag> = dbQuery {
         sqlSelectTag()
             .where { Tags.tagId inList tagIds }
             .map(::resultRowToTag)

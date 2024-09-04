@@ -44,7 +44,7 @@ interface FileDao {
      * 获取指定的文件组下的文件数量
      * @param fileGroupId 文件组 ID
      */
-    suspend fun getFileCount(fileGroupId: Int): Long
+    suspend fun getFileCount(fileGroupId: Long): Long
 
     /**
      * 获取总文件数量
@@ -66,7 +66,7 @@ interface FileDao {
      * 删除文件组
      * @param fileGroupId 文件组 ID
      */
-    suspend fun deleteFileGroup(fileGroupId: Int): Boolean
+    suspend fun deleteFileGroup(fileGroupId: Long): Boolean
 
     /**
      * 修改文件组
@@ -79,7 +79,7 @@ interface FileDao {
      * 根据文件组 ID 获取文件组
      * @param fileGroupId 文件组 ID
      */
-    suspend fun getFileGroup(fileGroupId: Int): FileGroup?
+    suspend fun getFileGroup(fileGroupId: Long): FileGroup?
 
     /**
      * 根据文件存储方式获取文件组
@@ -97,7 +97,7 @@ interface FileDao {
      * 删除文件
      * @param fileId 文件 ID
      */
-    suspend fun deleteFile(fileId: Int): Boolean
+    suspend fun deleteFile(fileId: Long): Boolean
 
     /**
      * 根据文件名数组和文件存储方式批量删除文件
@@ -110,7 +110,7 @@ interface FileDao {
      * 根据文件 ID 数组批量删除文件
      * @param fileIds 文件 ID 集合
      */
-    suspend fun deleteFile(fileIds: List<Int>): Boolean
+    suspend fun deleteFile(fileIds: List<Long>): Boolean
 
     /**
      * 修改文件
@@ -132,7 +132,7 @@ interface FileDao {
      */
     suspend fun getFile(
         fileName: String,
-        fileGroupId: Int?,
+        fileGroupId: Long?,
         storageMode: FileStorageModeEnum
     ): MFile?
 
@@ -141,7 +141,7 @@ interface FileDao {
      * @param ids 文件 ID 集合
      */
     suspend fun getFileWithGroups(
-        ids: List<Int>
+        ids: List<Long>
     ): List<FileWithGroup>
 
     /**
@@ -158,7 +158,7 @@ interface FileDao {
         size: Int,
         sort: FileSort?,
         mode: FileStorageModeEnum?,
-        groupId: Int?,
+        groupId: Long?,
         key: String?
     ): Pager<FileWithGroup>
 
@@ -166,6 +166,6 @@ interface FileDao {
      * 获取所有文件
      * @param fileIds 文件 ID 集合
      */
-    suspend fun getFiles(fileIds: List<Int>): List<MFile>
+    suspend fun getFiles(fileIds: List<Long>): List<MFile>
 
 }

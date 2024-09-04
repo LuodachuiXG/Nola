@@ -10,7 +10,7 @@ import cc.loac.data.models.enums.FileStorageModeEnum
  * @param storageMode 文件存储方式
  */
 data class FileGroup(
-    val fileGroupId: Int,
+    val fileGroupId: Long,
     val displayName: String,
     val path: String,
     val storageMode: FileStorageModeEnum

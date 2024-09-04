@@ -18,7 +18,7 @@ interface TagService {
      * 删除标签
      * @param tagIds 标签 ID 集合
      */
-    suspend fun deleteTags(tagIds: List<Int>): Boolean
+    suspend fun deleteTags(tagIds: List<Long>): Boolean
 
     /**
      * 根据别名删除标签
@@ -48,7 +48,7 @@ interface TagService {
      * 根据标签 ID 获取标签
      * @param tagId 标签 ID
      */
-    suspend fun tag(tagId: Int): Tag?
+    suspend fun tag(tagId: Long): Tag?
 
     /**
      * 根据标签名称获取标签
@@ -73,5 +73,5 @@ interface TagService {
      * @param tagIds 标签 ID 集合
      * @return 如果标签都存在返回空集合，否则返回不存在的 ID 集合
      */
-    suspend fun isIdsExist(tagIds: List<Int>): List<Int>
+    suspend fun isIdsExist(tagIds: List<Long>): List<Long>
 }

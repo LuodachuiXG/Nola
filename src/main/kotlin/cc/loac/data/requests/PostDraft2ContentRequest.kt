@@ -6,7 +6,7 @@ package cc.loac.data.requests
  */
 data class PostDraft2ContentRequest(
     /** 文章 ID */
-    val postId: Int,
+    val postId: Long,
     /** 草稿名 */
     val draftName: String,
     /** 是否删除原来的正文 **/

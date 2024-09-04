@@ -39,20 +39,20 @@ interface PostService {
      * 删除文章
      * @param postIds 文章 ID 集合
      */
-    suspend fun deletePosts(postIds: List<Int>): Boolean
+    suspend fun deletePosts(postIds: List<Long>): Boolean
 
     /**
      * 修改文章为删除状态
      * @param postIds 文章 ID 集合
      */
-    suspend fun updatePostStatusToDeleted(postIds: List<Int>): Boolean
+    suspend fun updatePostStatusToDeleted(postIds: List<Long>): Boolean
 
     /**
      * 将文章转为指定状态
      * @param postIds 文章 ID 集合
      * @param status 文章状态
      */
-    suspend fun updatePostStatusTo(postIds: List<Int>, status: PostStatus): Boolean
+    suspend fun updatePostStatusTo(postIds: List<Long>, status: PostStatus): Boolean
 
     /**
      * 修改文章
@@ -72,19 +72,19 @@ interface PostService {
      * @param postId 文章 ID
      * @param excerpt 摘要
      */
-    suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean
+    suspend fun updatePostExcerpt(postId: Long, excerpt: String): Boolean
 
     /**
      * 尝试通过文章正文修改文章摘要
      * @param postId 文章 ID
      */
-    suspend fun tryUpdatePostExcerptByPostContent(postId: Int): Boolean
+    suspend fun tryUpdatePostExcerptByPostContent(postId: Long): Boolean
 
     /**
      * 增加文章访问量
      * @param postId 文章 ID
      */
-    suspend fun addPostVisit(postId: Int): Boolean
+    suspend fun addPostVisit(postId: Long): Boolean
 
     /**
      * 获取文章总数
@@ -102,7 +102,7 @@ interface PostService {
      * @param postIds 文章 ID 集合
      * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean = false): List<Post>
+    suspend fun posts(postIds: List<Long>, includeTagAndCategory: Boolean = false): List<Post>
 
     /**
      * 分页获取所有文章
@@ -111,8 +111,8 @@ interface PostService {
      * @param status 文章状态
      * @param visible 文章可见性
      * @param key 关键字
-     * @param tag 文章标签
-     * @param category 文章分类
+     * @param tagId 文章标签 ID
+     * @param categoryId 文章分类 ID
      * @param sort 文章排序
      */
     suspend fun posts(
@@ -121,8 +121,8 @@ interface PostService {
         status: PostStatus? = null,
         visible: PostVisible? = null,
         key: String? = null,
-        tag: Int? = null,
-        category: Int? = null,
+        tagId: Long? = null,
+        categoryId: Long? = null,
         sort: PostSort? = null
     ): Pager<Post>
 
@@ -153,8 +153,8 @@ interface PostService {
         page: Int,
         size: Int,
         key: String?,
-        tagId: Int?,
-        categoryId: Int?,
+        tagId: Long?,
+        categoryId: Long?,
         tag: String?,
         category: String?
     ): Pager<ApiPostResponse>
@@ -164,7 +164,7 @@ interface PostService {
      * 包括文章正文和文章所有草稿
      * @param postId 文章 ID
      */
-    suspend fun postContents(postId: Int): List<PostContentResponse>
+    suspend fun postContents(postId: Long): List<PostContentResponse>
 
     /**
      * 获取文章内容
@@ -173,7 +173,7 @@ interface PostService {
      * @param draftName 草稿名
      */
     suspend fun postContent(
-        postId: Int,
+        postId: Long,
         status: PostContentStatus = PostContentStatus.PUBLISHED,
         draftName: String? = null
     ): PostContent?
@@ -185,7 +185,7 @@ interface PostService {
      * @param slug 文章别名
      * @param password 密码
      */
-    suspend fun apiPostContent(postId: Int?, slug: String?, password: String?): ApiPostContentResponse?
+    suspend fun apiPostContent(postId: Long?, slug: String?, password: String?): ApiPostContentResponse?
 
     /**
      * 添加文章草稿
@@ -193,7 +193,7 @@ interface PostService {
      * @param content 文章内容
      * @param draftName 草稿名
      */
-    suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent?
+    suspend fun addPostDraft(postId: Long, content: String, draftName: String): PostContent?
 
     /**
      * 删除文章内容
@@ -202,7 +202,7 @@ interface PostService {
      * @param draftNames 草稿名集合
      */
     suspend fun deletePostContent(
-        postId: Int,
+        postId: Long,
         status: PostContentStatus = PostContentStatus.PUBLISHED,
         draftNames: List<String>? = null
     ): Boolean
@@ -223,7 +223,7 @@ interface PostService {
      * @param oldName 老草稿名
      * @param newName 新草稿名
      */
-    suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean
+    suspend fun updatePostDraftName(postId: Long, oldName: String, newName: String): Boolean
 
     /**
      * 将文章草稿转换为文章正文
@@ -233,7 +233,7 @@ interface PostService {
      * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
      */
     suspend fun updatePostDraft2Content(
-        postId: Int,
+        postId: Long,
         draftName: String,
         deleteContent: Boolean,
         contentName: String?
@@ -244,7 +244,7 @@ interface PostService {
      * @param postId 文章 ID
      * @param password 密码
      */
-    suspend fun isPostPasswordValid(postId: Int, password: String): Boolean
+    suspend fun isPostPasswordValid(postId: Long, password: String): Boolean
 
     /**
      * 导出所有文章

@@ -18,7 +18,7 @@ import java.util.Date
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class User(
-    val userId: Int = -1,
+    val userId: Long = -1,
     val username: String,
     val email: String,
     val displayName: String,

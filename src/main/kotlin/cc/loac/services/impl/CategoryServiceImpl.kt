@@ -30,7 +30,7 @@ class CategoryServiceImpl : CategoryService {
      * 删除分类
      * @param ids 分类 ID 集合
      */
-    override suspend fun deleteCategories(ids: List<Int>): Boolean {
+    override suspend fun deleteCategories(ids: List<Long>): Boolean {
         return categoryDao.deleteCategories(ids)
     }
 
@@ -79,7 +79,7 @@ class CategoryServiceImpl : CategoryService {
      * 根据分类 ID 获取分类
      * @param id 分类 ID
      */
-    override suspend fun category(id: Int): Category? {
+    override suspend fun category(id: Long): Category? {
         return categoryDao.category(id)
     }
 

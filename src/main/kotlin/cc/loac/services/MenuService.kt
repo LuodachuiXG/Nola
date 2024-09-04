@@ -22,7 +22,7 @@ interface MenuService {
      * 删除菜单
      * @param menuIds 菜单 ID 集合
      */
-    suspend fun deleteMenu(menuIds: List<Int>): Boolean
+    suspend fun deleteMenu(menuIds: List<Long>): Boolean
 
     /**
      * 修改菜单
@@ -39,7 +39,7 @@ interface MenuService {
      * 获取菜单
      * @param menuId 菜单 ID
      */
-    suspend fun menu(menuId: Int): Menu?
+    suspend fun menu(menuId: Long): Menu?
 
     /**
      * 获取菜单
@@ -69,7 +69,7 @@ interface MenuService {
      * 删除菜单项
      * @param menuItemIds 菜单项 ID 集合
      */
-    suspend fun deleteMenus(menuItemIds: List<Int>): Boolean
+    suspend fun deleteMenus(menuItemIds: List<Long>): Boolean
 
     /**
      * 修改菜单项
@@ -81,14 +81,14 @@ interface MenuService {
      * 获取菜单项
      * @param menuItemId 菜单项 ID
      */
-    suspend fun menuItem(menuItemId: Int): MenuItem?
+    suspend fun menuItem(menuItemId: Long): MenuItem?
 
     /**
      * 获取菜单项（平铺，不构建菜单项树）
      * @param menuId 菜单 ID
      * @param buildTree 是否构建菜单项树
      */
-    suspend fun menuItems(menuId: Int, buildTree: Boolean = true): List<MenuItemResponse>
+    suspend fun menuItems(menuId: Long, buildTree: Boolean = true): List<MenuItemResponse>
 
     /**
      * 获取主菜单的菜单项

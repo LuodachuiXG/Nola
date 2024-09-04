@@ -30,27 +30,27 @@ interface UserService {
      * 根据用户 ID 获取用户
      * @param userId 用户 ID
      */
-    suspend fun user(userId: Int): User?
+    suspend fun user(userId: Long): User?
 
     /**
      * 根据用户 ID 修改最后登录时间
      * @param userId 用户 ID
      */
-    suspend fun updateLastLoginTime(userId: Int): Boolean
+    suspend fun updateLastLoginTime(userId: Long): Boolean
 
     /**
      * 修改用户信息
      * @param userId 用户 ID
      * @param userInfo 用户信息
      */
-    suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean
+    suspend fun updateUser(userId: Long, userInfo: UserInfoRequest): Boolean
 
     /**
      * 修改用户密码
      * @param userId 用户 ID
      * @param password 新密码
      */
-    suspend fun updatePassword(userId: Int, password: String): Boolean
+    suspend fun updatePassword(userId: Long, password: String): Boolean
 
     /**
      * 用户登录

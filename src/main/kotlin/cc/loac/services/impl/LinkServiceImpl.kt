@@ -27,7 +27,7 @@ class LinkServiceImpl : LinkService {
      * 删除友情链接
      * @param ids 友情链接 ID 集合
      */
-    override suspend fun deleteLinks(ids: List<Int>): Boolean {
+    override suspend fun deleteLinks(ids: List<Long>): Boolean {
         return linkDao.deleteLinks(ids)
     }
 

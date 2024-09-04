@@ -33,7 +33,7 @@ fun Route.tagAdminRouting() {
             /** 删除标签 - 根据标签 ID **/
             delete {
                 // 获取 ID 集合
-                val ids = call.receiveByDataClass<List<Int>>()
+                val ids = call.receiveByDataClass<List<Long>>()
                 // 标签 ID 列表为空
                 if (ids.isEmpty()) call.respondSuccess(false)
                 // 删除标签
@@ -62,7 +62,7 @@ fun Route.tagAdminRouting() {
 
             /** 获取标签 - 根据标签 ID **/
             get("/{tagId}") {
-                val tagId = call.receiveIntPathParam("tagId");
+                val tagId = call.receiveIntPathParam("tagId").toLong()
                 call.respondSuccess(tagService.tag(tagId))
             }
 

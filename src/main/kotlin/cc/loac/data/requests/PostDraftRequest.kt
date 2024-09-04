@@ -5,7 +5,7 @@ package cc.loac.data.requests
  */
 data class PostDraftRequest(
     /** 文章 ID **/
-    val postId: Int,
+    val postId: Long,
     /** 草稿名 **/
     val draftName: String,
     /** 草稿内容 **/

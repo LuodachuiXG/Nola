@@ -161,7 +161,7 @@ class UserServiceImpl : UserService {
      * 根据用户 ID 获取用户
      * @param userId 用户 ID
      */
-    override suspend fun user(userId: Int): User? {
+    override suspend fun user(userId: Long): User? {
         return userDao.user(userId)
     }
 
@@ -169,7 +169,7 @@ class UserServiceImpl : UserService {
      * 根据用户 ID 修改最后登录时间
      * @param userId 用户 ID
      */
-    override suspend fun updateLastLoginTime(userId: Int): Boolean {
+    override suspend fun updateLastLoginTime(userId: Long): Boolean {
         return userDao.updateUserLastLoginTime(userId)
     }
 
@@ -178,7 +178,7 @@ class UserServiceImpl : UserService {
      * @param userId 用户 ID
      * @param userInfo 用户信息
      */
-    override suspend fun updateUser(userId: Int, userInfo: UserInfoRequest): Boolean {
+    override suspend fun updateUser(userId: Long, userInfo: UserInfoRequest): Boolean {
         if (!userInfo.email.isEmail()) throw MyException("邮箱格式错误")
         if (!userInfo.username.isAlphaAndNumeric()) throw MyException("用户名只支持英文和数字")
         if (userInfo.username.length < 4) throw MyException("用户名不能小于 4 位")
@@ -190,7 +190,7 @@ class UserServiceImpl : UserService {
      * @param userId 用户 ID
      * @param password 新密码
      */
-    override suspend fun updatePassword(userId: Int, password: String): Boolean {
+    override suspend fun updatePassword(userId: Long, password: String): Boolean {
         if (password.length < 8) throw MyException("密码长度不能小于 8 位")
         // 对密码生成加盐哈希
         val saltHash = hashingService.generatedSaltedHash(password)

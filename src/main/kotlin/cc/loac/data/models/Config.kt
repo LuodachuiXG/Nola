@@ -8,7 +8,7 @@ import cc.loac.data.models.enums.ConfigKey
  * @param value 配置数据
  */
 data class Config(
-    val configId: Int = -1,
+    val configId: Long = -1,
     val key: ConfigKey,
     val value: String
 )

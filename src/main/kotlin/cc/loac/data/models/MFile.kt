@@ -12,8 +12,8 @@ import cc.loac.data.models.enums.FileStorageModeEnum
  * @param createTime 创建时间戳
  */
 data class MFile(
-    val fileId: Int,
-    val fileGroupId: Int?,
+    val fileId: Long,
+    val fileGroupId: Long?,
     val displayName: String,
     val size: Long,
     val storageMode: FileStorageModeEnum,

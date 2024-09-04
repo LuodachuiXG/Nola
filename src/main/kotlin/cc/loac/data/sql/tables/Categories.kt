@@ -7,10 +7,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object Categories : Table("category") {
     /** 分类 ID **/
-    val categoryId = long("categoryId").autoIncrement()
+    val categoryId = long("category_id").autoIncrement()
 
     /** 分类名 **/
-    val displayName = varchar("displayName", 256)
+    val displayName = varchar("display_name", 256)
 
     /** 分类别名 **/
     val slug = varchar("slug", 64, "utf8mb4_general_ci").uniqueIndex()
@@ -19,7 +19,7 @@ object Categories : Table("category") {
     val cover = varchar("cover", 256).nullable()
 
     /** 是否统一封面（未单独设置封面的文章，使用分类的封面）**/
-    val unifiedCover = bool("unifiedCover")
+    val unifiedCover = bool("unified_cover")
 
     override val primaryKey = PrimaryKey(categoryId)
 }

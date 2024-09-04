@@ -9,7 +9,7 @@ import cc.loac.utils.postName2Slug
  */
 data class PostRequest(
     /** 文章 ID **/
-    val postId: Int?,
+    val postId: Long?,
     /** 标题 **/
     val title: String,
     /** 是否自动生成摘要 **/
@@ -27,9 +27,9 @@ data class PostRequest(
     /** 文章内容（Markdown 或普通文本） **/
     val content: String?,
     /** 分类 ID **/
-    val categoryId: Int?,
+    val categoryId: Long?,
     /** 标签 ID 集合 **/
-    val tagIds: List<Int>?,
+    val tagIds: List<Long>?,
     /** 封面（优先级高于分类封面） **/
     val cover: String?,
     /** 是否置顶 **/

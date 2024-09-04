@@ -17,7 +17,7 @@ interface CategoryDao {
      * 删除分类
      * @param ids 分类 ID 集合
      */
-    suspend fun deleteCategories(ids: List<Int>): Boolean
+    suspend fun deleteCategories(ids: List<Long>): Boolean
 
     /**
      * 根据别名删除分类
@@ -40,7 +40,7 @@ interface CategoryDao {
      * 根据文章 ID 获取文章分类
      * @param postId 文章 ID
      */
-    suspend fun categoryByPostId(postId: Int): Category?
+    suspend fun categoryByPostId(postId: Long): Category?
 
     /**
      * 分页获取所有分类
@@ -53,7 +53,7 @@ interface CategoryDao {
      * 根据分类 ID 获取分类
      * @param id 分类 ID
      */
-    suspend fun category(id: Int): Category?
+    suspend fun category(id: Long): Category?
 
     /**
      * 根据分类名称获取分类

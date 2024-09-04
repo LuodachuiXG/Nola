@@ -163,7 +163,7 @@ class PostDaoImpl : PostDao {
      * 删除文章
      * @param postIds 文章 ID 集合
      */
-    override suspend fun deletePosts(postIds: List<Int>): Boolean = dbQuery {
+    override suspend fun deletePosts(postIds: List<Long>): Boolean = dbQuery {
         // 删除文章内容
         PostContents.deleteWhere { postId inList postIds } > 0
         // 删除文章分类
@@ -178,7 +178,7 @@ class PostDaoImpl : PostDao {
      * 修改文章为删除状态
      * @param postIds 文章 ID 集合
      */
-    override suspend fun updatePostStatusToDeleted(postIds: List<Int>): Boolean = dbQuery {
+    override suspend fun updatePostStatusToDeleted(postIds: List<Long>): Boolean = dbQuery {
         Posts.update({
             Posts.postId inList postIds
         }) {
@@ -191,7 +191,7 @@ class PostDaoImpl : PostDao {
      * @param postIds 文章 ID 集合
      * @param status 文章状态
      */
-    override suspend fun updatePostStatusTo(postIds: List<Int>, status: PostStatus): Boolean = dbQuery {
+    override suspend fun updatePostStatusTo(postIds: List<Long>, status: PostStatus): Boolean = dbQuery {
         Posts.update({
             Posts.postId inList postIds
         }) {
@@ -272,7 +272,7 @@ class PostDaoImpl : PostDao {
      * @param postId 文章 ID
      * @param excerpt 摘要
      */
-    override suspend fun updatePostExcerpt(postId: Int, excerpt: String): Boolean = dbQuery {
+    override suspend fun updatePostExcerpt(postId: Long, excerpt: String): Boolean = dbQuery {
         Posts.update({
             Posts.postId eq postId
         }) {
@@ -285,7 +285,7 @@ class PostDaoImpl : PostDao {
      * @param postId 文章 ID
      * @param time 最后修改时间
      */
-    override suspend fun updatePostLastModifyTime(postId: Int, time: Long?): Boolean = dbQuery {
+    override suspend fun updatePostLastModifyTime(postId: Long, time: Long?): Boolean = dbQuery {
         Posts.update({
             Posts.postId eq postId
         }) {
@@ -297,7 +297,7 @@ class PostDaoImpl : PostDao {
      * 增加文章访问量
      * @param postId 文章 ID
      */
-    override suspend fun addPostVisit(postId: Int): Boolean = dbQuery {
+    override suspend fun addPostVisit(postId: Long): Boolean = dbQuery {
         Posts.update({
             Posts.postId eq postId
         }) {
@@ -332,7 +332,7 @@ class PostDaoImpl : PostDao {
      * @param postIds 文章 ID 集合
      * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
-    override suspend fun posts(postIds: List<Int>, includeTagAndCategory: Boolean): List<Post> = dbQuery {
+    override suspend fun posts(postIds: List<Long>, includeTagAndCategory: Boolean): List<Post> = dbQuery {
         val posts = Posts
             .selectAll()
             .where { Posts.postId inList postIds }
@@ -349,8 +349,8 @@ class PostDaoImpl : PostDao {
      * @param status 文章状态
      * @param visible 文章可见性
      * @param key 关键字
-     * @param tag 文章标签
-     * @param category 文章分类
+     * @param tagId 文章标签
+     * @param categoryId 文章分类
      * @param sort 文章排序
      */
     override suspend fun posts(
@@ -359,8 +359,8 @@ class PostDaoImpl : PostDao {
         status: PostStatus?,
         visible: PostVisible?,
         key: String?,
-        tag: Int?,
-        category: Int?,
+        tagId: Long?,
+        categoryId: Long?,
         sort: PostSort?
     ): Pager<Post> {
         // 构造查询语句
@@ -368,8 +368,8 @@ class PostDaoImpl : PostDao {
             status = status,
             visible = visible,
             key = key,
-            tagId = tag,
-            categoryId = category,
+            tagId = tagId,
+            categoryId = categoryId,
             sort = sort,
             tag = null,
             category = null
@@ -436,8 +436,8 @@ class PostDaoImpl : PostDao {
         page: Int,
         size: Int,
         key: String?,
-        tagId: Int?,
-        categoryId: Int?,
+        tagId: Long?,
+        categoryId: Long?,
         tag: String?,
         category: String?
     ): Pager<ApiPostResponse> {
@@ -477,7 +477,7 @@ class PostDaoImpl : PostDao {
      * 包括文章正文和文章所有草稿
      * @param postId 文章 ID
      */
-    override suspend fun postContents(postId: Int): List<PostContentResponse> = dbQuery {
+    override suspend fun postContents(postId: Long): List<PostContentResponse> = dbQuery {
         PostContents
             .select(
                 PostContents.postContentId,
@@ -496,7 +496,7 @@ class PostDaoImpl : PostDao {
      * @param draftName 草稿名
      */
     override suspend fun postContent(
-        postId: Int,
+        postId: Long,
         status: PostContentStatus,
         draftName: String?
     ): PostContent? = dbQuery {
@@ -520,7 +520,7 @@ class PostDaoImpl : PostDao {
      * @param content 文章内容
      * @param draftName 草稿名
      */
-    override suspend fun addPostDraft(postId: Int, content: String, draftName: String): PostContent? = dbQuery {
+    override suspend fun addPostDraft(postId: Long, content: String, draftName: String): PostContent? = dbQuery {
         PostContents.insert {
             it[PostContents.postId] = postId
             it[PostContents.content] = content
@@ -538,7 +538,7 @@ class PostDaoImpl : PostDao {
      * @param draftNames 草稿名集合
      */
     override suspend fun deletePostContent(
-        postId: Int,
+        postId: Long,
         status: PostContentStatus,
         draftNames: List<String>?
     ): Boolean = dbQuery {
@@ -586,7 +586,7 @@ class PostDaoImpl : PostDao {
      * @param oldName 老草稿名
      * @param newName 新草稿名
      */
-    override suspend fun updatePostDraftName(postId: Int, oldName: String, newName: String): Boolean = dbQuery {
+    override suspend fun updatePostDraftName(postId: Long, oldName: String, newName: String): Boolean = dbQuery {
         PostContents.update({
             PostContents.postId eq postId and (PostContents.draftName eq oldName)
         }) {
@@ -602,7 +602,7 @@ class PostDaoImpl : PostDao {
      * @param contentName 文章正文名，留空将默认使用被转换为正文的旧草稿名。
      */
     override suspend fun updatePostDraft2Content(
-        postId: Int,
+        postId: Long,
         draftName: String,
         deleteContent: Boolean,
         contentName: String?
@@ -655,7 +655,7 @@ class PostDaoImpl : PostDao {
      * @param postId 文章 ID
      * @param password 密码
      */
-    override suspend fun isPostPasswordValid(postId: Int, password: String): Boolean = dbQuery {
+    override suspend fun isPostPasswordValid(postId: Long, password: String): Boolean = dbQuery {
         Posts
             .selectAll()
             .where {
@@ -733,8 +733,8 @@ class PostDaoImpl : PostDao {
         status: PostStatus?,
         visible: PostVisible?,
         key: String?,
-        tagId: Int?,
-        categoryId: Int?,
+        tagId: Long?,
+        categoryId: Long?,
         tag: String?,
         category: String?,
         sort: PostSort?,

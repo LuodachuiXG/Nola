@@ -20,7 +20,7 @@ interface DiaryService {
      * 删除日记
      * @param diaryIds 日记 ID 数组
      */
-    suspend fun deleteDiaries(diaryIds: List<Int>): Boolean
+    suspend fun deleteDiaries(diaryIds: List<Long>): Boolean
 
     /**
      * 更新日记
