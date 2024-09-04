@@ -1,13 +1,11 @@
 package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.FileGroup
-import cc.loac.data.models.FileIndex
 import cc.loac.data.models.FileWithGroup
 import cc.loac.data.models.MFile
 import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
-import cc.loac.data.responses.FileResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.FileDao
