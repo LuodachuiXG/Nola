@@ -69,4 +69,8 @@ val appModule = module {
     // 访问日志服务
     single<AccessLogService> { AccessLogServiceImpl() }
     single<AccessLogDao> { AccessLogDaoImpl() }
+
+    // 评论服务
+    single<CommentService> { CommentServiceImpl() }
+    single<CommentDao> { CommentDaoImpl() }
 }

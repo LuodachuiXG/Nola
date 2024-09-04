@@ -20,7 +20,7 @@ import cc.loac.services.PostService
 import cc.loac.services.UserService
 import cc.loac.utils.isAlphaAndNumeric
 import cc.loac.utils.isEmail
-import cc.loac.utils.launchCoroutine
+import cc.loac.utils.launchIO
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -69,7 +69,7 @@ class UserServiceImpl : UserService {
         // 添加用户
         val result = userDao.addUser(u) != null
         if (result) {
-            launchCoroutine {
+            launchIO {
                 // 管理员初始化完成，判断是否有文章，没有的话就插入默认文章
                 if (postService.postCount() == 0L) {
                     val postRequest = firstPost()
@@ -232,7 +232,7 @@ class UserServiceImpl : UserService {
             )
         )
 
-        launchCoroutine {
+        launchIO {
             // 修改最后登录时间
             updateLastLoginTime(user.userId)
         }

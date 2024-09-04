@@ -8,17 +8,25 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
+private val ioScope = CoroutineScope(Dispatchers.IO)
+private val mainScope = CoroutineScope(Dispatchers.Main)
+
 /**
- * 启动协程
+ * 启动 IO 协程
  * @param block 协程体
- * @param scope 协程上下文
  */
-fun launchCoroutine(
-    scope: CoroutineContext = Dispatchers.IO,
-    block: suspend () -> Unit
-) {
-    CoroutineScope(scope).launch { block() }
+fun launchIO(block: suspend () -> Unit) {
+    ioScope.launch { block() }
 }
+
+/**
+ * 启动主线程协程
+ * @param block 协程体
+ */
+fun launchMain(block: suspend () -> Unit) {
+    mainScope.launch { block() }
+}
+
 
 /**
  * 生成指定长度的随机字符

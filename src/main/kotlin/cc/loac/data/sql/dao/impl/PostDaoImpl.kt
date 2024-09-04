@@ -19,7 +19,7 @@ import cc.loac.data.sql.dao.PostDao
 import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
-import cc.loac.utils.launchCoroutine
+import cc.loac.utils.launchIO
 import cc.loac.utils.markdownToHtml
 import cc.loac.utils.sha256Hex
 import org.jetbrains.exposed.sql.*
@@ -572,7 +572,7 @@ class PostDaoImpl : PostDao {
 
         if (result && status == PostContentStatus.PUBLISHED) {
             // 文章内容修改成功，并且修改的是正文内容
-            launchCoroutine {
+            launchIO {
                 // 修改文章最后修改时间
                 updatePostLastModifyTime(postContent.postId, currentTime)
             }
