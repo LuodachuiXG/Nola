@@ -35,11 +35,12 @@ object DatabaseSingleton {
             if (!SchemaUtils.listDatabases().contains(databaseName)) {
                 // 数据库不存在，创建数据库
                 SchemaUtils.createDatabase(databaseName)
-                // 连接到新创建的数据库
-                database = Database.connect(
-                    createHikariDataSource(jdbcURL, driverClassName, username, password)
-                )
             }
+
+            // 连接到新创建的数据库
+            database = Database.connect(
+                createHikariDataSource(jdbcURL, driverClassName, username, password)
+            )
 
             // 开启事物，要么全部成功，要么回滚
             transaction(database) {

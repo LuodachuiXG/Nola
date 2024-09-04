@@ -69,6 +69,8 @@ fun Application.configureRouting(
             fileAdminRouting()
             // backup 备份路由
             backupRouting()
+            // 评论路由
+            commentAdminRouting()
         }
 
         /** 博客接口 **/
@@ -89,6 +91,8 @@ fun Application.configureRouting(
             menuApiRouting()
             // diary 日记 API 路由
             diaryApiRouting()
+            // 评论 API 路由
+            commentApiRouting()
         }
     }
 }

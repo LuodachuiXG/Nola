@@ -2,11 +2,9 @@ package cc.loac.plugins
 
 import cc.loac.data.models.AccessLog
 import cc.loac.data.models.enums.AccessLogType
-import cc.loac.data.sql.dao.AccessLogDao
 import cc.loac.services.AccessLogService
-import cc.loac.utils.error
 import cc.loac.utils.info
-import cc.loac.utils.launchCoroutine
+import cc.loac.utils.launchIO
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import org.koin.java.KoinJavaComponent.inject
@@ -63,7 +61,7 @@ fun Application.configureMonitorPlugin() {
     install(MonitorPlugin) {
         ignoreStartWith = listOf("/assets", "/upload", "/console/assets")
         handleUri { call, uri ->
-            launchCoroutine {
+            launchIO {
                 // X-Real-IP 是 Nginx 反向代理设置的客户端真实 IP 头
                 val ip = call.request.headers["X-Real-IP"]
 

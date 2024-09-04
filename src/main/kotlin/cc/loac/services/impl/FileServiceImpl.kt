@@ -44,7 +44,7 @@ class FileServiceImpl : FileService {
 
     init {
         // 尝试初始化腾讯云对象存储
-        launchCoroutine {
+        launchIO {
             initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
         }
     }
