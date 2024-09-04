@@ -7,13 +7,13 @@ import org.jetbrains.exposed.sql.Table
  */
 object PostCategories : Table("post_category") {
     /** 文章分类 ID **/
-    val postCategoryId = integer("postCategoryId").autoIncrement()
+    val postCategoryId = long("post_category_id").autoIncrement()
 
     /** 文章 ID **/
-    val postId = integer("postId").references(Posts.postId).uniqueIndex()
+    val postId = long("post_id").references(Posts.postId)
 
     /** 分类 ID **/
-    val categoryId = integer("categoryId").references(Categories.categoryId)
+    val categoryId = long("category_id").references(Categories.categoryId)
 
     override val primaryKey = PrimaryKey(postCategoryId)
 }

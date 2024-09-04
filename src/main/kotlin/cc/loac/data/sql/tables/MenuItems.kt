@@ -9,10 +9,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object MenuItems : Table("menu_item") {
     /** 菜单项 ID **/
-    val menuItemId = integer("menuItemId").autoIncrement()
+    val menuItemId = long("menu_item_id").autoIncrement()
 
     /** 菜单项名称 **/
-    val displayName = varchar("displayName", 128)
+    val displayName = varchar("display_name", 128)
 
     /** 菜单项地址 **/
     val href = varchar("href", 512)
@@ -21,19 +21,19 @@ object MenuItems : Table("menu_item") {
     val target = enumerationByName<MenuItemTarget>("target", 12)
 
     /** 父菜单 ID **/
-    val parentMenuId = integer("parentMenuId").references(Menus.menuId)
+    val parentMenuId = long("parent_menuId")
 
     /** 父菜单项 ID **/
-    val parentMenuItemId = integer("parentMenuItemId").nullable()
+    val parentMenuItemId = long("parent_menu_item_id").nullable()
 
     /** 菜单项排序索引 **/
     val index = integer("index")
 
     /** 创建时间 **/
-    val createTime = long("createTime")
+    val createTime = long("create_time")
 
     /** 最后修改时间 **/
-    val lastModifyTime = long("lastModifyTime").nullable()
+    val lastModifyTime = long("last_modify_time").nullable()
 
     override val primaryKey = PrimaryKey(menuItemId)
 }

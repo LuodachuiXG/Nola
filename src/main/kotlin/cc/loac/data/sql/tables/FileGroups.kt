@@ -10,16 +10,16 @@ import org.jetbrains.exposed.sql.Table
 object FileGroups : Table("file_group") {
 
     /** 文件组 ID **/
-    val fileGroupId = integer("fileGroupId").autoIncrement()
+    val fileGroupId = long("file_group_id").autoIncrement()
 
     /** 文件组名 **/
-    val displayName = varchar("displayName", 128)
+    val displayName = varchar("display_name", 128)
 
     /** 文件组路径 **/
     val path = varchar("path", 128)
 
     /** 文件存储方式 **/
-    val storageMode = enumerationByName("storageMode", 48, FileStorageModeEnum::class)
+    val storageMode = enumerationByName("storage_mode", 48, FileStorageModeEnum::class)
 
     override val primaryKey = PrimaryKey(fileGroupId)
 }

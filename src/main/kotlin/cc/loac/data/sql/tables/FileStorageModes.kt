@@ -8,10 +8,10 @@ import org.jetbrains.exposed.sql.Table
  */
 object FileStorageModes : Table("file_storage_mode") {
     /** 文件存储方式 ID **/
-    val fileStorageModeId = integer("fileStorageModeId").autoIncrement()
+    val fileStorageModeId = long("file_storage_mode_id").autoIncrement()
 
     /** 文件存储方式 **/
-    val storageMode = enumerationByName("storageMode", 24, FileStorageModeEnum::class)
+    val storageMode = enumerationByName("storage_mode", 24, FileStorageModeEnum::class)
 
     /** 配置 **/
     val config = text("config")

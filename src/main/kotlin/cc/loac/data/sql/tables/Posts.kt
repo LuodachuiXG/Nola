@@ -9,13 +9,13 @@ import org.jetbrains.exposed.sql.Table
  */
 object Posts : Table("post") {
     /** 文章 ID **/
-    val postId = integer("postId").autoIncrement()
+    val postId = long("post_id").autoIncrement()
 
     /** 标题 **/
     val title = varchar("title", 256)
 
     /** 是否自动生成摘要 **/
-    val autoGenerateExcerpt = bool("autoGenerateExcerpt")
+    val autoGenerateExcerpt = bool("auto_generate_excerpt")
 
     /** 摘要 **/
     val excerpt = varchar("excerpt", 1024, "utf8mb4_general_ci")
@@ -27,7 +27,7 @@ object Posts : Table("post") {
     val cover = varchar("cover", 512).nullable()
 
     /** 是否允许评论 **/
-    val allowComment = bool("allowComment")
+    val allowComment = bool("allow_comment")
 
     /** 是否置顶 **/
     val pinned = bool("pinned")
@@ -45,10 +45,10 @@ object Posts : Table("post") {
     val visit = integer("visit").default(0)
 
     /** 创建时间 **/
-    val createTime = long("createTime")
+    val createTime = long("create_time")
 
     /** 最后修改时间 **/
-    val lastModifyTime = long("lastModifyTime").nullable()
+    val lastModifyTime = long("last_modify_time").nullable()
 
     override val primaryKey = PrimaryKey(postId)
 }

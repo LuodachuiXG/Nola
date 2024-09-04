@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.Table
 object Users : Table("user") {
 
     /** 用户 ID **/
-    val userId = integer("userId").autoIncrement()
+    val userId = long("user_id").autoIncrement()
 
     /** 用户名 **/
     val username = varchar("username", 64, "utf8mb4_general_ci").uniqueIndex()
