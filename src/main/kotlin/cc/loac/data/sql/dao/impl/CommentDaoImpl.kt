@@ -1,12 +1,16 @@
 package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.Comment
-import cc.loac.data.models.Config
 import cc.loac.data.models.enums.CommentSort
 import cc.loac.data.responses.Pager
+import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CommentDao
+import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Comments
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import java.util.Date
 
 /**
  * 评论操作接口实现类
@@ -30,48 +34,152 @@ class CommentDaoImpl: CommentDao {
         isPass = row[Comments.isPass]
     )
 
-    override suspend fun addComment(comment: Comment): Comment? {
-        TODO("Not yet implemented")
+    /**
+     * 添加评论
+     * @param comment 评论数据类
+     */
+    override suspend fun addComment(comment: Comment): Comment? = dbQuery {
+        val result = Comments.insert {
+            it[postId] = comment.postId
+            it[parentCommentId] = comment.parentCommentId
+            it[replyCommentId] = comment.replayCommentId
+            it[replyDisplayName] = comment.replayDisplayName
+            it[content] = comment.content
+            it[site] = comment.site
+            it[displayName] = comment.displayName
+            it[email] = comment.email
+            it[createTime] = Date().time
+            it[isPass] = comment.isPass
+        }
+        result.resultedValues?.singleOrNull()?.let {
+            resultRowToComment(it)
+        }
     }
 
-    override suspend fun deleteCommentById(id: Long): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * 根据评论 ID 删除评论
+     * @param id 评论 ID
+     */
+    override suspend fun deleteCommentById(id: Long): Boolean = dbQuery {
+        Comments.deleteWhere {
+            commentId eq id
+        } > 0
     }
 
-    override suspend fun deleteCommentByIds(ids: List<Long>): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * 根据评论 ID 数组删除评论
+     * @param ids 评论 ID 数组
+     */
+    override suspend fun deleteCommentByIds(ids: List<Long>): Boolean = dbQuery {
+        Comments.deleteWhere {
+            commentId inList ids
+        } > 0
     }
 
-    override suspend fun deleteCommentByPostId(postId: Long): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * 根据文章 ID 删除评论
+     * @param postId 文章 ID
+     */
+    override suspend fun deleteCommentByPostId(postId: Long): Boolean = dbQuery {
+        Comments.deleteWhere {
+            Comments.postId eq postId
+        } > 0
     }
 
-    override suspend fun deleteCommentByParentId(parentId: Long): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * 根据父评论 ID 数组删除评论
+     * @param ids 父评论 ID
+     */
+    override suspend fun deleteCommentByParentIds(ids: List<Long>): Boolean = dbQuery {
+        Comments.deleteWhere {
+            parentCommentId inList ids
+        } > 0
     }
 
-    override suspend fun updateComment(comment: Comment): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * 修改评论
+     * 仅可修改以下字段：content、site、displayName、email、isPass
+     * @param comment 评论数据类
+     */
+    override suspend fun updateComment(comment: Comment): Boolean = dbQuery {
+        Comments.update({
+            Comments.commentId eq comment.commentId
+        }) {
+            it[content] = comment.content
+            it[site] = comment.site
+            it[displayName] = comment.displayName
+            it[email] = comment.email
+            it[isPass] = comment.isPass
+        } > 0
     }
 
-    override suspend fun setCommentPass(ids: List<Long>, isPass: Boolean): Boolean {
-        TODO("Not yet implemented")
+    /**
+     * 批量设置评论是否通过审核
+     * @param ids 评论 ID 数组
+     */
+    override suspend fun setCommentPass(ids: List<Long>, isPass: Boolean): Boolean = dbQuery {
+        Comments.update({
+            Comments.commentId inList ids
+        }) {
+            it[Comments.isPass] = isPass
+        } > 0
     }
 
+    /**
+     * 根据评论 ID 获取所有评论
+     * @param ids 评论 ID 数组
+     */
+    override suspend fun comments(ids: List<Long>): List<Comment> = dbQuery {
+        Comments
+            .selectAll()
+            .where { Comments.commentId inList ids }
+            .map(::resultRowToComment)
+    }
+
+    /**
+     * 分页获取所有评论
+     * @param postId 文章 ID
+     * @param parentId 父评论 ID
+     * @param email 评论者邮箱
+     * @param displayName 评论者昵称
+     * @param isPass 是否通过审核
+     * @param sort 排序方式（默认时间降序）
+     * @param page 当前页数
+     * @param size 每页条数
+     */
     override suspend fun comments(
         postId: Long?,
         parentId: Long?,
         email: String?,
         displayName: String?,
         isPass: Boolean?,
-        sort: CommentSort,
+        sort: CommentSort?,
         page: Int,
         size: Int
     ): Pager<Comment> {
-        TODO("Not yet implemented")
+        val query = Comments.selectAll()
+        postId?.let { query.where { Comments.postId eq it } }
+        parentId?.let { query.where { Comments.parentCommentId eq it } }
+        email?.let { query.where { Comments.email eq it } }
+        displayName?.let { query.where { Comments.displayName eq it } }
+        isPass?.let { query.where { Comments.isPass eq it } }
+        when(sort) {
+            CommentSort.CREATE_TIME_DESC -> query.orderBy(Comments.createTime, SortOrder.DESC)
+            CommentSort.CREATE_TIME_ASC -> query.orderBy(Comments.createTime, SortOrder.ASC)
+            else -> query.orderBy(Comments.createTime, SortOrder.DESC)
+        }
+        return Comments.startPage(page, size, ::resultRowToComment) { query }
     }
 
-    override suspend fun commentById(id: Long): Comment? {
-        TODO("Not yet implemented")
+    /**
+     * 根据评论 ID 获取评论
+     * @param id 评论 ID
+     */
+    override suspend fun commentById(id: Long): Comment? = dbQuery {
+        Comments
+            .selectAll()
+            .where { Comments.commentId eq id }
+            .map(::resultRowToComment)
+            .singleOrNull()
     }
 }

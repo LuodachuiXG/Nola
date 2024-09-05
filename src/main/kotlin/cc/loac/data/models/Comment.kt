@@ -1,5 +1,7 @@
 package cc.loac.data.models
 
+import java.util.LinkedList
+
 /**
  * 评论数据类
  * @param commentId 评论 ID
@@ -13,6 +15,7 @@ package cc.loac.data.models
  * @param email 评论人邮箱
  * @param createTime 评论时间
  * @param isPass 是否通过审核
+ * @param children 子评论集合
  */
 data class Comment(
     val commentId: Long = -1,
@@ -25,5 +28,6 @@ data class Comment(
     val displayName: String,
     val email: String? = null,
     val createTime: Long,
-    val isPass: Boolean = false
+    val isPass: Boolean = false,
+    var children: LinkedList<Comment>? = null
 )

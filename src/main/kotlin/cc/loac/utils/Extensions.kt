@@ -40,6 +40,15 @@ fun String.error() {
 
 /**
  * String 扩展函数
+ * 判断文本是否是合法的 URL
+ */
+fun String.isUrl(): Boolean {
+    // 判断标准为 http:// 或 https:// 开头，并且最少存在一个 .
+    return this.matches("^(http|https)://[^.]+\\.[^/]*\$")
+}
+
+/**
+ * String 扩展函数
  * 将字符串转为 JsonNode 对象
  */
 fun String.toJSON(): JsonNode {
