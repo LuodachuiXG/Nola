@@ -18,7 +18,6 @@ import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 import java.io.InputStream
-import kotlin.math.log
 
 private val fileService: FileService by inject(FileService::class.java)
 

@@ -89,6 +89,7 @@ fun Any.toJSONString(): String {
  * @param find 是否是查找模式
  */
 fun String.matches(regex: String, find: Boolean = false): Boolean {
+    if (this.isEmpty()) return false
     val pattern = Pattern.compile(regex)
     val matcher = pattern.matcher(this)
     return if (find) {

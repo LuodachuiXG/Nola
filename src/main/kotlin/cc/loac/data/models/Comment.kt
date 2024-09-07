@@ -1,6 +1,6 @@
 package cc.loac.data.models
 
-import java.util.LinkedList
+import java.util.*
 
 /**
  * 评论数据类
@@ -26,8 +26,8 @@ data class Comment(
     val content: String,
     val site: String? = null,
     val displayName: String,
-    val email: String? = null,
-    val createTime: Long,
+    val email: String,
+    val createTime: Long = Date().time,
     val isPass: Boolean = false,
     var children: LinkedList<Comment>? = null
 )

@@ -15,7 +15,7 @@ import java.util.Date
 /**
  * 评论操作接口实现类
  */
-class CommentDaoImpl: CommentDao {
+class CommentDaoImpl : CommentDao {
 
     /**
      * 将数据库检索结果转为 [Comment] 评论数据类
@@ -116,6 +116,7 @@ class CommentDaoImpl: CommentDao {
     /**
      * 批量设置评论是否通过审核
      * @param ids 评论 ID 数组
+     * @param isPass 是否通过审核
      */
     override suspend fun setCommentPass(ids: List<Long>, isPass: Boolean): Boolean = dbQuery {
         Comments.update({
@@ -138,37 +139,52 @@ class CommentDaoImpl: CommentDao {
 
     /**
      * 分页获取所有评论
+     * @param page 当前页数
+     * @param size 每页条数
      * @param postId 文章 ID
+     * @param commentId 评论 ID
      * @param parentId 父评论 ID
      * @param email 评论者邮箱
      * @param displayName 评论者昵称
      * @param isPass 是否通过审核
+     * @param key 关键字
      * @param sort 排序方式（默认时间降序）
-     * @param page 当前页数
-     * @param size 每页条数
      */
     override suspend fun comments(
+        page: Int,
+        size: Int,
         postId: Long?,
+        commentId: Long?,
         parentId: Long?,
         email: String?,
         displayName: String?,
         isPass: Boolean?,
-        sort: CommentSort?,
-        page: Int,
-        size: Int
+        key: String?,
+        sort: CommentSort?
     ): Pager<Comment> {
         val query = Comments.selectAll()
-        postId?.let { query.where { Comments.postId eq it } }
-        parentId?.let { query.where { Comments.parentCommentId eq it } }
-        email?.let { query.where { Comments.email eq it } }
-        displayName?.let { query.where { Comments.displayName eq it } }
-        isPass?.let { query.where { Comments.isPass eq it } }
-        when(sort) {
+        postId?.let { query.andWhere { Comments.postId eq it } }
+        commentId?.let { query.andWhere { Comments.commentId eq it } }
+        parentId?.let { query.andWhere { Comments.parentCommentId eq it } }
+        email?.let { query.andWhere { Comments.email eq it } }
+        displayName?.let { query.andWhere { Comments.displayName eq it } }
+        isPass?.let { query.andWhere { Comments.isPass eq it } }
+        key?.let { query.andWhere { Comments.content like "%$it%" } }
+        when (sort) {
             CommentSort.CREATE_TIME_DESC -> query.orderBy(Comments.createTime, SortOrder.DESC)
             CommentSort.CREATE_TIME_ASC -> query.orderBy(Comments.createTime, SortOrder.ASC)
             else -> query.orderBy(Comments.createTime, SortOrder.DESC)
         }
-        return Comments.startPage(page, size, ::resultRowToComment) { query }
+
+        return if (page == 0) {
+            dbQuery {
+                val comments = query.map(::resultRowToComment)
+                // 不分页
+                Pager(0, 0, comments, comments.size.toLong(), 1)
+            }
+        } else {
+            Comments.startPage(page, size, ::resultRowToComment) { query }
+        }
     }
 
     /**
