@@ -7,6 +7,7 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CommentDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Comments
+import cc.loac.utils.error
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList

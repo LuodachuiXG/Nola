@@ -5,10 +5,12 @@ import cc.loac.data.models.enums.CommentSort
 import cc.loac.data.requests.CommentPassRequest
 import cc.loac.data.requests.CommentRequest
 import cc.loac.data.requests.CommentUpdateRequest
+import cc.loac.plugins.LIMITER_ADD_COMMENT
 import cc.loac.services.CommentService
 import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -144,6 +146,43 @@ fun Route.commentAdminRouting() {
  */
 fun Route.commentApiRouting() {
     route("/comment") {
+        rateLimit(LIMITER_ADD_COMMENT) {
+            /** 添加评论（每 30 秒仅能调用 2 次） **/
+            post {
+                val newComment = call.receiveByDataClass<CommentRequest> {
+                    it.postId != -1L
+                }
+                call.respondSuccess(
+                    commentService.addComment(
+                        Comment(
+                            postId = newComment.postId,
+                            parentCommentId = newComment.parentCommentId,
+                            replayCommentId = newComment.replayCommentId,
+                            content = newComment.content,
+                            site = newComment.site,
+                            displayName = newComment.displayName,
+                            email = newComment.email,
+                            isPass = false
+                        )
+                    )
+                )
+            }
+        }
 
+        /** 根据文章 ID 获取评论 **/
+        get("/{id}") {
+            call.receivePageAndSize { page, size ->
+                val id = call.receiveIntPathParam("id").toLong()
+                call.respondSuccess(
+                    commentService.comments(
+                        page = page,
+                        size = size,
+                        postId = id,
+                        isPass = true,
+                        tree = true
+                    )
+                )
+            }
+        }
     }
 }

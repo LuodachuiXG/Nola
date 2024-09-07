@@ -158,7 +158,7 @@ class CommentServiceImpl : CommentService {
      * @param key 关键字
      * @param sort 排序方式（默认时间降序）
      * @param tree 是否将子评论放置到父评论的 children 字段中（默认 false）
-     *             此项为 true 时，commentId、parentId、email、displayName、isPass、key 参数无效
+     *             此项为 true 时，commentId、parentId、email、displayName、key 参数无效
      */
     override suspend fun comments(
         page: Int,
@@ -175,7 +175,18 @@ class CommentServiceImpl : CommentService {
     ): Pager<Comment> {
         if (tree) {
             // 需要把子评论放到父评论的 children 字段中
-            val pager = commentDao.comments(page, size, postId, null, null, null, null, null, null, sort)
+            val pager = commentDao.comments(
+                page = page,
+                size = size,
+                postId = postId,
+                commentId = null,
+                parentId = null,
+                email = null,
+                displayName = null,
+                isPass = isPass,
+                key = null,
+                sort = sort
+            )
             val idToComment = pager.data.associateBy { it.commentId }
             // pager.data 是所有平铺的评论 List，parentCommentId 为 null 的评论认为是顶层评论（父评论）
             // 将子评论放到对应的父评论的 children 字段中
@@ -193,7 +204,18 @@ class CommentServiceImpl : CommentService {
                 data = pager.data.filter { it.parentCommentId == null }
             )
         } else {
-            return commentDao.comments(page, size, postId, commentId, parentId, email, displayName, isPass, key, sort)
+            return commentDao.comments(
+                page = page,
+                size = size,
+                postId = postId,
+                commentId = commentId,
+                parentId = parentId,
+                email = email,
+                displayName = displayName,
+                isPass = isPass,
+                key = key,
+                sort = sort
+            )
         }
     }
 
