@@ -168,7 +168,7 @@ fun ApplicationCall.receiveNullableBooleanPathParam(
  * 如果对应参数不为整数，就抛出参数不匹配异常
  * @param paramName 请求参数名
  */
-suspend fun ApplicationCall.receiveIntPathParam(
+fun ApplicationCall.receiveIntPathParam(
     paramName: String
 ): Int {
     val value = receivePathParam(paramName)

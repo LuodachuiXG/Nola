@@ -65,7 +65,7 @@ interface CommentService {
      * @param key 关键字
      * @param sort 排序方式（默认时间降序）
      * @param tree 是否将子评论放置到父评论的 children 字段中（默认 false）
-     *             此项为 true 时，commentId、parentId、email、displayName、isPass、key 参数无效
+     *             此项为 true 时，commentId、parentId、email、displayName、key 参数无效
      */
     suspend fun comments(
         page: Int,

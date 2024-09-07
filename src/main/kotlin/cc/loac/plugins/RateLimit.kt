@@ -33,7 +33,7 @@ fun Application.configureRateLimit() {
 
         // 添加评论限速器
         register(LIMITER_ADD_COMMENT) {
-            rateLimiter(limit = 1, refillPeriod = 30.seconds)
+            rateLimiter(limit = 2, refillPeriod = 30.seconds)
         }
     }
 }
