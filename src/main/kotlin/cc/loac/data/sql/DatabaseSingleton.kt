@@ -47,7 +47,7 @@ object DatabaseSingleton {
                 // 所有表
                 val tables = listOf(
                     Users, Configs, Posts, Tags, Categories, PostTags,
-                    PostCategories, Links, Menus, MenuItems, FileStorageModes,
+                    PostCategories, PostContents, Links, Menus, MenuItems, FileStorageModes,
                     FileGroups, Files, Diaries, AccessLogs, Comments
                 )
                 // 创建表

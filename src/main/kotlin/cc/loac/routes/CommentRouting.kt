@@ -1,6 +1,7 @@
 package cc.loac.routes
 
 import cc.loac.services.CommentService
+import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -11,7 +12,10 @@ private val commentService: CommentService by inject(CommentService::class.java)
  */
 fun Route.commentAdminRouting() {
     route("/comment") {
+        /** 添加评论 **/
+        post {
 
+        }
     }
 }
 
