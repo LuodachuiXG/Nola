@@ -23,7 +23,7 @@ object Comments: Table("comment") {
     /** 评论人名称 **/
     val displayName = varchar("display_name", 128)
     /** 评论人邮箱 **/
-    val email = varchar("email", 128).nullable()
+    val email = varchar("email", 128)
     /** 评论时间  **/
     val createTime = long("create_time")
     /** 是否通过审核 **/

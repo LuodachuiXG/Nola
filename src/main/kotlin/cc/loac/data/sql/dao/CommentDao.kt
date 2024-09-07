@@ -50,6 +50,7 @@ interface CommentDao {
     /**
      * 批量设置评论是否通过审核
      * @param ids 评论 ID 数组
+     * @param isPass 是否通过审核
      */
     suspend fun setCommentPass(ids: List<Long>, isPass: Boolean): Boolean
 
@@ -61,24 +62,28 @@ interface CommentDao {
 
     /**
      * 分页获取所有评论
+     * @param page 当前页数
+     * @param size 每页条数
      * @param postId 文章 ID
+     * @param commentId 评论 ID
      * @param parentId 父评论 ID
      * @param email 评论者邮箱
      * @param displayName 评论者昵称
      * @param isPass 是否通过审核
+     * @param key 关键字
      * @param sort 排序方式（默认时间降序）
-     * @param page 当前页数
-     * @param size 每页条数
      */
     suspend fun comments(
+        page: Int,
+        size: Int,
         postId: Long? = null,
+        commentId: Long? = null,
         parentId: Long? = null,
         email: String? = null,
         displayName: String? = null,
         isPass: Boolean? = null,
-        sort: CommentSort? = null,
-        page: Int,
-        size: Int
+        key: String? = null,
+        sort: CommentSort? = null
     ): Pager<Comment>
 
 
