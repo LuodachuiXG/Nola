@@ -40,12 +40,15 @@ fun Application.configureRouting(
             useResources = true
         }
 
+        // 模板引擎路由
+//        templateRouting()
+
         // Vue 前台单页应用路由
-        singlePageApplication {
-            vue("static")
-            applicationRoute = "/"
-            useResources = true
-        }
+//        singlePageApplication {
+//            vue("static")
+//            applicationRoute = "/"
+//            useResources = true
+//        }
 
         /** 后台接口 **/
         route("/admin") {
