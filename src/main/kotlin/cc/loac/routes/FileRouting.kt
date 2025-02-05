@@ -14,8 +14,12 @@ import cc.loac.utils.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
+import io.ktor.utils.io.*
+import io.ktor.utils.io.jvm.javaio.*
+import io.ktor.utils.io.streams.*
 import org.koin.java.KoinJavaComponent.inject
 import java.io.InputStream
 
@@ -68,11 +72,12 @@ private fun Route.fileRouting() {
                     }
                 }
                 is PartData.FileItem -> {
-                    inputStream = part.streamProvider()
+                    inputStream = part.provider().readRemaining().inputStream()
                     originName = part.originalFileName
                 }
                 else -> {}
             }
+            part.dispose()
         }
         // 如果文件流为空，则不执行任何操作
         inputStream ?: return@post call.respondSuccess(false)
