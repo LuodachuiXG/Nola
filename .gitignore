@@ -7,6 +7,7 @@ build/
 !**/src/test/**/build/
 gradle
 src/main/resources/static
+**/.DS_Store
 
 ### STS ###
 .apt_generated
@@ -21,7 +22,6 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
 *.iws
 *.iml
 *.ipr

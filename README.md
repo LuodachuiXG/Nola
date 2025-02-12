@@ -2,6 +2,8 @@
 
 ### Nola，一个基于 Ktor(Kotlin) 的博客系统。
 
+博客预览（开发中）：[loac.cc](https://loac.cc)
+
 正在开发中...
 
 [API 接口文档](https://apifox.com/apidoc/shared-82cab87c-63f3-4613-9264-69f4b68528ce)
