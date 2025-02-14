@@ -1,4 +1,3 @@
-
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -8,6 +7,10 @@ val h2_version: String by project
 val koin_version: String by project
 val hikaricp_version: String by project
 val ehcache_version: String by project
+
+val lettuce_version: String by project
+
+val kotlinx_coroutines_version: String by project
 
 plugins {
     kotlin("jvm") version "2.0.21"
@@ -56,7 +59,12 @@ dependencies {
 
     // 数据库连接池和缓存
     implementation("com.zaxxer:HikariCP:$hikaricp_version")
-    implementation("org.ehcache:ehcache:$ehcache_version")
+//    implementation("org.ehcache:ehcache:$ehcache_version")
+
+    // Redis Lettuce
+    // https://mvnrepository.com/artifact/io.lettuce/lettuce-core
+    implementation("io.lettuce:lettuce-core:$lettuce_version")
+
 
     // 根据异常返回指定的页面
     implementation("io.ktor:ktor-server-status-pages:$ktor_version")
@@ -74,7 +82,7 @@ dependencies {
 
 
     implementation("io.ktor:ktor-server-netty-jvm")
-    testImplementation("io.ktor:ktor-server-tests-jvm")
+//    testImplementation("io.ktor:ktor-server-tests-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
@@ -89,5 +97,13 @@ dependencies {
 
     // 接口访问速率限制
     implementation("io.ktor:ktor-server-rate-limit:$ktor_version")
+
+
+    // 用于处理 Redis Lettuce Kotlin 相关异步操作
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
+    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinx_coroutines_version}")
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-reactive
+    runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:${kotlinx_coroutines_version}")
+
 
 }

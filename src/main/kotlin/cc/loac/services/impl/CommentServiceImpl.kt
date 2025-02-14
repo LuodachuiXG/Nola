@@ -6,9 +6,9 @@ import cc.loac.data.models.enums.CommentSort
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.CommentDao
 import cc.loac.data.sql.dao.PostDao
+import cc.loac.extensions.isEmail
+import cc.loac.extensions.isUrl
 import cc.loac.services.CommentService
-import cc.loac.utils.isEmail
-import cc.loac.utils.isUrl
 import org.koin.java.KoinJavaComponent.inject
 import java.util.*
 

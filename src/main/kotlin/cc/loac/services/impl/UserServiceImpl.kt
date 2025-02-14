@@ -10,6 +10,8 @@ import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.requests.firstPost
 import cc.loac.data.responses.AuthResponse
 import cc.loac.data.sql.dao.UserDao
+import cc.loac.extensions.isAlphaAndNumeric
+import cc.loac.extensions.isEmail
 import cc.loac.security.hashing.HashingService
 import cc.loac.security.hashing.SaltedHash
 import cc.loac.security.token.TokenClaim
@@ -18,8 +20,6 @@ import cc.loac.security.token.TokenService
 import cc.loac.services.MenuService
 import cc.loac.services.PostService
 import cc.loac.services.UserService
-import cc.loac.utils.isAlphaAndNumeric
-import cc.loac.utils.isEmail
 import cc.loac.utils.launchIO
 import org.koin.java.KoinJavaComponent.inject
 

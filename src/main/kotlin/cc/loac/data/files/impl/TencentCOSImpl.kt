@@ -3,9 +3,7 @@ package cc.loac.data.files.impl
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.files.FileOption
 import cc.loac.data.files.config.TencentCOSConfig
-import cc.loac.utils.error
-import cc.loac.utils.formatSlash
-import cc.loac.utils.replaceDoubleSlash
+import cc.loac.extensions.formatSlash
 import com.qcloud.cos.COSClient
 import com.qcloud.cos.ClientConfig
 import com.qcloud.cos.auth.BasicCOSCredentials
@@ -15,7 +13,6 @@ import com.qcloud.cos.model.DeleteObjectsRequest
 import com.qcloud.cos.model.DeleteObjectsRequest.KeyVersion
 import com.qcloud.cos.model.ObjectMetadata
 import com.qcloud.cos.model.PutObjectRequest
-import com.qcloud.cos.model.RenameRequest
 import com.qcloud.cos.region.Region
 import java.io.InputStream
 

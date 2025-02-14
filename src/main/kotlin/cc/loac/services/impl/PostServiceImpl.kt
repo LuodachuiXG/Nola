@@ -13,6 +13,7 @@ import cc.loac.data.requests.PostStatusRequest
 import cc.loac.data.requests.newPostRequestByNameAndContent
 import cc.loac.data.responses.*
 import cc.loac.data.sql.dao.PostDao
+import cc.loac.extensions.markdownToPlainText
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService

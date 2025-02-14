@@ -9,6 +9,8 @@ import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.requests.*
 import cc.loac.data.responses.toApiPostResponse
+import cc.loac.extensions.isEnum
+import cc.loac.extensions.isInt
 import cc.loac.plugins.LIMITER_ENCRYPT_POST
 import cc.loac.services.PostService
 import cc.loac.utils.*

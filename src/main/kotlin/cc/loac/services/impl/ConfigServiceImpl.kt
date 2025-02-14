@@ -5,9 +5,9 @@ import cc.loac.data.models.Config
 import cc.loac.data.models.ICPFiling
 import cc.loac.data.models.enums.ConfigKey
 import cc.loac.data.sql.dao.ConfigDao
+import cc.loac.extensions.jsonToClass
+import cc.loac.extensions.toJSONString
 import cc.loac.services.ConfigService
-import cc.loac.utils.jsonToClass
-import cc.loac.utils.toJSONString
 import org.koin.java.KoinJavaComponent.inject
 
 

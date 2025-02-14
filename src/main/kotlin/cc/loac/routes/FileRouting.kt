@@ -9,6 +9,8 @@ import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
+import cc.loac.extensions.isEnum
+import cc.loac.extensions.isInt
 import cc.loac.services.FileService
 import cc.loac.utils.*
 import io.ktor.http.content.*

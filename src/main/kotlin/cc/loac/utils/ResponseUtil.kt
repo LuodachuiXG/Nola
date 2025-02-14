@@ -4,7 +4,6 @@ import cc.loac.data.responses.MyResponse
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import kotlinx.serialization.Serializable
 
 suspend fun ApplicationCall.respondFailure(
     status: HttpStatusCode = HttpStatusCode.Conflict

@@ -6,6 +6,7 @@ import cc.loac.data.models.enums.LinkSort
 import cc.loac.data.requests.LinkRequest
 import cc.loac.data.responses.ApiLinkResponse
 import cc.loac.data.responses.Pager
+import cc.loac.extensions.isEnum
 import cc.loac.services.LinkService
 import cc.loac.utils.*
 import io.ktor.server.application.*

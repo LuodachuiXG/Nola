@@ -1,6 +1,7 @@
 package cc.loac.utils
 
 import cc.loac.data.files.config.TencentCOSConfig
+import cc.loac.extensions.replaceDoubleSlash
 import com.qcloud.cos.model.Bucket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

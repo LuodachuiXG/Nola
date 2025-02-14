@@ -2,7 +2,7 @@ package cc.loac.data.requests
 
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
-import cc.loac.utils.postName2Slug
+import cc.loac.extensions.postName2Slug
 
 /**
  * 文章请求数据类

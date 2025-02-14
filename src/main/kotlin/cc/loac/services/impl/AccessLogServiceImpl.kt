@@ -3,9 +3,9 @@ package cc.loac.services.impl
 import cc.loac.data.models.AccessLog
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.AccessLogDao
+import cc.loac.extensions.isInt
 import cc.loac.globalEnvironment
 import cc.loac.services.AccessLogService
-import cc.loac.utils.isInt
 import org.koin.java.KoinJavaComponent.inject
 
 /**
