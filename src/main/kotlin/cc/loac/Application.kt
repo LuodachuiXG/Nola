@@ -1,5 +1,6 @@
 package cc.loac
 
+import cc.loac.data.redis.RedisSingleton
 import cc.loac.plugins.*
 import cc.loac.data.sql.DatabaseSingleton
 import cc.loac.security.token.TokenConfig
@@ -23,6 +24,8 @@ fun Application.module() {
 
     // 初始化数据库
     DatabaseSingleton.init(environment.config)
+    // 初始化 Redis
+    RedisSingleton.init(environment.config)
     // 模板引擎配置
     configureThymeleaf()
     // 接口访问速率限制配置

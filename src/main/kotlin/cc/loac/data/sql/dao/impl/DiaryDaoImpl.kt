@@ -8,7 +8,7 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.DiaryDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Diaries
-import cc.loac.utils.markdownToHtml
+import cc.loac.extensions.markdownToHtml
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.Date

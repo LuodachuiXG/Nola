@@ -27,7 +27,7 @@ suspend fun <T> FieldSet.startPage(
     val totalData = dbQuery { query().count() }
     // 检索数据、分页、将检索结果转为 T 类型集合
     val data = dbQuery {
-        this.query().limit(size, offset).map(transform)
+        this.query().limit(size).offset(offset).map(transform)
     }
     // 计算总页数
     val totalPage = if (totalData % size == 0L) totalData / size else totalData / size + 1

@@ -8,6 +8,7 @@ import io.ktor.server.plugins.cors.routing.*
  * 配置博客跨域
  */
 fun Application.configureCORS() {
+
     install(CORS) {
         anyHost()
         allowMethod(HttpMethod.Get)

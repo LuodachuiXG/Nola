@@ -1,9 +1,7 @@
-package cc.loac.utils
+package cc.loac.extensions
 
 import cc.loac.security.hashing.HashingService
-import cc.loac.security.hashing.SHA256HashingService
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import cc.loac.utils.randomString
 import net.sourceforge.pinyin4j.PinyinHelper
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat
@@ -15,28 +13,8 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
 import org.koin.java.KoinJavaComponent.inject
-
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.regex.Pattern
-
-val logger: Logger = LoggerFactory.getLogger("Ktor-Logger")
-
-/**
- * String 扩展函数
- * 打印 info 日志
- */
-fun String.info() {
-    logger.info(this)
-}
-
-/**
- * String 扩展函数
- * 打印 error 日志
- */
-fun String.error() {
-    logger.error(this)
-}
 
 /**
  * String 扩展函数
@@ -47,40 +25,6 @@ fun String.isUrl(): Boolean {
     return this.matches("^(http|https)://[^.]+\\.[^/]*\$")
 }
 
-/**
- * String 扩展函数
- * 将字符串转为 JsonNode 对象
- */
-fun String.toJSON(): JsonNode {
-    val om = jacksonObjectMapper()
-    return om.readTree(this)
-}
-
-/**
- * String 扩展函数
- * 将 JSON 字符串反序列化为具体类
- */
-inline fun <reified T> String.jsonToClass(): T {
-    val om = jacksonObjectMapper()
-    return om.readValue(this, T::class.java)
-}
-
-/**
- * Any 扩展函数
- * 将任意对象转为 JsonNode 对象
- */
-fun Any.toJSON(): JsonNode {
-    return this.toJSONString().toJSON()
-}
-
-/**
- * Any 扩展函数
- * 将任意对象转为 JSON 字符串
- */
-fun Any.toJSONString(): String {
-    val om = jacksonObjectMapper()
-    return om.writeValueAsString(this)
-}
 
 /**
  * String 扩展函数
@@ -232,21 +176,23 @@ fun String.addRandomSuffix(): String {
 
 /**
  * String 扩展函数
- * 将所有双正反斜杠替换为单斜杠
+ * 将所有双正反斜杠替换为当前系统的单斜杠
  */
 fun String.replaceDoubleSlash(): String {
+    val systemSlash = File.separator
     return this
-        .replace("//", "/")
-        .replace("\\\\", "/")
+        .replace("//", systemSlash)
+        .replace("\\\\", systemSlash)
 }
 
 /**
  * 格式化斜杠
- * 把所有反斜杠替换为正斜杠
+ * 把所有反斜杠替换为当前系统的单斜杠
  */
-fun String.formatSlash(): String =
-    this.replace("\\", "/")
-        .replaceDoubleSlash()
+fun String.formatSlash(): String {
+    val systemSlash = File.separator
+    return this.replace("\\", systemSlash).replaceDoubleSlash()
+}
 
 
 /**

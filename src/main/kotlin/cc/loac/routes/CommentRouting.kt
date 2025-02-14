@@ -5,6 +5,10 @@ import cc.loac.data.models.enums.CommentSort
 import cc.loac.data.requests.CommentPassRequest
 import cc.loac.data.requests.CommentRequest
 import cc.loac.data.requests.CommentUpdateRequest
+import cc.loac.extensions.isBoolean
+import cc.loac.extensions.isEmail
+import cc.loac.extensions.isEnum
+import cc.loac.extensions.isInt
 import cc.loac.plugins.LIMITER_ADD_COMMENT
 import cc.loac.services.CommentService
 import cc.loac.utils.*

@@ -2,12 +2,8 @@ package cc.loac.data.files.impl
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.files.FileOption
-import cc.loac.utils.error
-import cc.loac.utils.formatSlash
-import cc.loac.utils.replaceDoubleSlash
 import java.io.File
 import java.io.InputStream
-import java.util.LinkedList
 
 // URL 存储路径
 const val URL_STORAGE_PATH = "/upload"

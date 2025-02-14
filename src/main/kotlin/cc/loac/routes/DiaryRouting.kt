@@ -3,6 +3,7 @@ package cc.loac.routes
 import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.models.enums.DiarySort
 import cc.loac.data.requests.DiaryRequest
+import cc.loac.extensions.isEnum
 import cc.loac.services.DiaryService
 import cc.loac.utils.*
 import io.ktor.server.application.*

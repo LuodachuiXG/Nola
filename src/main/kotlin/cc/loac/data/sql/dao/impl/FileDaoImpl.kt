@@ -13,7 +13,7 @@ import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.FileGroups
 import cc.loac.data.sql.tables.FileStorageModes
 import cc.loac.data.sql.tables.Files
-import cc.loac.utils.formatSlash
+import cc.loac.extensions.formatSlash
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList

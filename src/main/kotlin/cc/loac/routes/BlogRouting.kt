@@ -2,8 +2,8 @@ package cc.loac.routes
 
 import cc.loac.data.models.BlogInfo
 import cc.loac.data.models.enums.ConfigKey
+import cc.loac.extensions.jsonToClass
 import cc.loac.services.ConfigService
-import cc.loac.utils.jsonToClass
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
