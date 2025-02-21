@@ -12,8 +12,9 @@ interface UserService {
     /**
      * 初始化博客管理员
      * @param user 用户数据类
+     * @param ip 客户端 IP
      */
-    suspend fun initAdmin(user: User): Boolean
+    suspend fun initAdmin(user: User, ip: String): Boolean
 
     /**
      * 获取所有用户
@@ -57,10 +58,12 @@ interface UserService {
      * @param tokenConfig Token 令牌配置
      * @param username 用户名
      * @param password 密码
+     * @param ip 请求的 IP 地址
      */
     suspend fun login(
         tokenConfig: TokenConfig,
         username: String,
-        password: String
+        password: String,
+        ip: String
     ): AuthResponse
 }

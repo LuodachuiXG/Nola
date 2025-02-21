@@ -22,12 +22,18 @@ class CommentServiceImpl : CommentService {
     /**
      * 添加评论
      * @param comment 评论数据类
+     * @param isApiRequest 是否是 API 请求（非管理员请求，即从博客前端提交的请求）
      */
-    override suspend fun addComment(comment: Comment): Comment? {
+    override suspend fun addComment(comment: Comment, isApiRequest: Boolean): Comment? {
         var newComment = comment
         // 检查评论对应的文章是否存在
-        postDao.posts(listOf(newComment.postId), false).let {
+        val post = postDao.posts(listOf(newComment.postId), false).also {
             if (it.isEmpty()) throw MyException("文章 [${newComment.postId}] 不存在")
+        }
+
+        if (isApiRequest && !post.first().allowComment) {
+            // 当前添加评论是博客前端用户提交的请求，并且当前文章禁止评论
+            throw MyException("文章 [${newComment.postId}] 禁止评论")
         }
 
         // 检查父评论是否存在
@@ -150,6 +156,7 @@ class CommentServiceImpl : CommentService {
      * @param page 当前页数
      * @param size 每页条数
      * @param postId 文章 ID
+     * @param slug 文章别名
      * @param commentId 评论 ID
      * @param parentId 父评论 ID
      * @param email 评论者邮箱
@@ -164,6 +171,7 @@ class CommentServiceImpl : CommentService {
         page: Int,
         size: Int,
         postId: Long?,
+        slug: String?,
         commentId: Long?,
         parentId: Long?,
         email: String?,
@@ -173,12 +181,22 @@ class CommentServiceImpl : CommentService {
         sort: CommentSort?,
         tree: Boolean
     ): Pager<Comment> {
+        var mPostId = postId
+        if (slug != null && mPostId == null) {
+            // 文章别名不为空，文章 ID 为空
+            // 先根据文章别名获取到文章，然后再填充文章 ID （此处为了博客前端可以通过文章别名获取评论）
+            postDao.postBySlug(slug)?.let {
+                mPostId = it.postId
+            }
+        }
+
+
         if (tree) {
             // 需要把子评论放到父评论的 children 字段中
             val pager = commentDao.comments(
                 page = page,
                 size = size,
-                postId = postId,
+                postId = mPostId,
                 commentId = null,
                 parentId = null,
                 email = null,
@@ -207,7 +225,7 @@ class CommentServiceImpl : CommentService {
             return commentDao.comments(
                 page = page,
                 size = size,
-                postId = postId,
+                postId = mPostId,
                 commentId = commentId,
                 parentId = parentId,
                 email = email,

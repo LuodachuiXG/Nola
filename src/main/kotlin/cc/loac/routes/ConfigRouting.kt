@@ -68,7 +68,7 @@ fun Route.configAdminRouting() {
                     salt = ""
                 )
                 // 初始化管理员
-                call.respondSuccess(userService.initAdmin(user))
+                call.respondSuccess(userService.initAdmin(user, call.ip()))
             }
 
             authenticate {

@@ -12,6 +12,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 
 /**
@@ -181,6 +182,20 @@ fun ApplicationCall.receiveIntPathParam(
     return value.toInt()
 }
 
+/**
+ * 接收路径 Long 类型传参
+ * 如果对应参数不为 Long，就抛出参数不匹配异常
+ * @param paramName 请求参数名
+ */
+fun ApplicationCall.receiveLongPathParam(
+    paramName: String
+): Long {
+    val value = receivePathParam(paramName)
+    // 如果不为非零正整数，就抛出参数不匹配异常
+    if (!value.isPositiveInt()) throw ParamMismatchException()
+    return value.toLong()
+}
+
 
 /**
  * 接收用于分页的页数和页面条数
@@ -215,6 +230,23 @@ fun ApplicationCall.getTokenClaim(tokenClaim: TokenClaimEnum): TokenClaim? {
     return principal?.getClaim(tokenClaim.toString(), String::class)?.let { value ->
         TokenClaim(name = tokenClaim, value = value)
     }
+}
+
+/**
+ * 从 Token 中获取用户 ID 和用户名
+ * @return Pair<用户 ID, 用户名>
+ */
+fun ApplicationCall.getUser(): Pair<Long, String> {
+    val userId = this.getTokenClaim(TokenClaimEnum.USER_ID)?.value?.toLongOrNull() ?: -1
+    val username = this.getTokenClaim(TokenClaimEnum.USERNAME)?.value ?: "未知用户"
+    return userId to username
+}
+
+/**
+ * 获取请求的用户的 IP 地址
+ */
+fun ApplicationCall.ip(): String {
+    return this.request.headers["X-Forwarded-For"] ?: this.request.origin.remoteAddress
 }
 
 /**

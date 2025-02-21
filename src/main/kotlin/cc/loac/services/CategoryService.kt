@@ -1,6 +1,7 @@
 package cc.loac.services
 
 import cc.loac.data.models.Category
+import cc.loac.data.models.User
 import cc.loac.data.responses.Pager
 
 /**
@@ -12,7 +13,9 @@ interface CategoryService {
      * 添加分类
      * @param category 分类数据类
      */
-    suspend fun addCategory(category: Category): Category?
+    suspend fun addCategory(
+        category: Category
+    ): Category?
 
     /**
      * 删除分类
@@ -60,7 +63,7 @@ interface CategoryService {
      * 根据分类别名获取分类
      * @param slug 分类别名
      */
-    suspend fun categoryBySlug(slug: String):Category?
+    suspend fun categoryBySlug(slug: String): Category?
 
     /**
      * 判断分类别名是否已经存在，并且不是当前分类
