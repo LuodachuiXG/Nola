@@ -10,9 +10,11 @@ import cc.loac.services.UserService
 import cc.loac.utils.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
+import kotlin.math.log
 
 private val userService: UserService by inject(UserService::class.java)
 
@@ -58,7 +60,14 @@ fun Route.userRouting(
             post("/login") {
                 val receive = call.receiveMapByName("username", "password")
                 // 返回登录响应数据类
-                call.respondSuccess(userService.login(tokenConfig, receive["username"]!!, receive["password"]!!))
+                call.respondSuccess(
+                    userService.login(
+                        tokenConfig,
+                        receive["username"]!!,
+                        receive["password"]!!,
+                        call.ip()
+                    )
+                )
             }
         }
     }

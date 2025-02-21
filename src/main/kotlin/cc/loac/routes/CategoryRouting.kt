@@ -3,6 +3,7 @@ package cc.loac.routes
 import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Category
+import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.services.CategoryService
 import cc.loac.utils.*
 import io.ktor.server.application.*
@@ -23,7 +24,16 @@ fun Route.categoryAdminRouting() {
             post {
                 val category = call.receiveByDataClass<Category>()
                 // 添加分类
-                call.respondSuccess(categoryService.addCategory(category) ?: throw AddFailedException())
+                call.respondSuccess(
+                    categoryService.addCategory(category).also {
+                        it?.let {
+                            operate(
+                                desc = "添加分类 [${it.displayName}]",
+                                call = call
+                            )
+                        }
+                    } ?: throw AddFailedException()
+                )
             }
 
             /** 删除分类 - 根据分类 ID **/
@@ -33,7 +43,14 @@ fun Route.categoryAdminRouting() {
                 // 分类 ID 列表为空
                 if (ids.isEmpty()) call.respondSuccess(false)
                 // 删除分类
-                call.respondSuccess(categoryService.deleteCategories(ids))
+                call.respondSuccess(categoryService.deleteCategories(ids).also {
+                    if (it) {
+                        operate(
+                            desc = "删除分类 ID $ids",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 删除分类 - 根据分类别名 **/
@@ -43,14 +60,28 @@ fun Route.categoryAdminRouting() {
                 // 分类别名列表为空
                 if (slugs.isEmpty()) call.respondSuccess(false)
                 // 删除分类
-                call.respondSuccess(categoryService.deleteCategoriesBySlugs(slugs))
+                call.respondSuccess(categoryService.deleteCategoriesBySlugs(slugs).also {
+                    if (it) {
+                        operate(
+                            desc = "删除分类别名 $slugs",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改分类 **/
             put {
                 val category = call.receiveByDataClass<Category> { it.categoryId > 0 }
                 // 修改分类
-                call.respondSuccess(categoryService.updateCategory(category))
+                call.respondSuccess(categoryService.updateCategory(category).also {
+                    if (it) {
+                        operate(
+                            desc = "修改分类 [${category.displayName}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 获取分类 - 根据分类 ID**/

@@ -72,8 +72,10 @@ fun Application.configureRouting(
             fileAdminRouting()
             // backup 备份路由
             backupRouting()
-            // 评论路由
+            // comment 评论路由
             commentAdminRouting()
+            // operation 操作记录管理员路由
+            operationAdminRouting()
         }
 
         /** 博客接口 **/

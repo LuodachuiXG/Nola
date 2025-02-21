@@ -73,4 +73,8 @@ val appModule = module {
     // 评论服务
     single<CommentService> { CommentServiceImpl() }
     single<CommentDao> { CommentDaoImpl() }
+
+    // 操作记录服务
+    single<OperationService> { OperationServiceImpl() }
+    single<OperationDao> { OperationDaoImpl() }
 }

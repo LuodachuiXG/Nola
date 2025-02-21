@@ -4,6 +4,7 @@ import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.utils.respondFailure
 import cc.loac.utils.error
+import cc.loac.utils.ip
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
@@ -36,7 +37,7 @@ fun Application.configureStatusPage() {
 
         /** MyException 异常 **/
         exception<MyException> { call, e ->
-            "${call.request.host()} - ${call.request.uri}: 自定义异常：${e.message}".error()
+            "${call.ip()} - ${call.request.uri}: 自定义异常：${e.message}".error()
             call.respondFailure(e.message ?: "Unknown Error")
         }
 

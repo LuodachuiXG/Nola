@@ -1,14 +1,17 @@
 package cc.loac.services.impl
 
 import cc.loac.data.exceptions.MyException
+import cc.loac.data.models.Operation
 import cc.loac.data.models.User
 import cc.loac.data.models.enums.MenuItemTarget
+import cc.loac.data.models.enums.OperationType
 import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.requests.firstPost
 import cc.loac.data.responses.AuthResponse
+import cc.loac.data.sql.dao.OperationDao
 import cc.loac.data.sql.dao.UserDao
 import cc.loac.extensions.isAlphaAndNumeric
 import cc.loac.extensions.isEmail
@@ -20,7 +23,13 @@ import cc.loac.security.token.TokenService
 import cc.loac.services.MenuService
 import cc.loac.services.PostService
 import cc.loac.services.UserService
+import cc.loac.utils.info
 import cc.loac.utils.launchIO
+import cc.loac.utils.operate
+import cc.loac.utils.operateSync
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -34,11 +43,16 @@ class UserServiceImpl : UserService {
     private val tokenService: TokenService by inject(TokenService::class.java)
     private val userDao: UserDao by inject(UserDao::class.java)
 
+    private val ioScope by lazy {
+        CoroutineScope(Dispatchers.IO)
+    }
+
     /**
      * 初始化博客管理员
      * @param user 用户数据类
+     * @param ip 客户端 IP
      */
-    override suspend fun initAdmin(user: User): Boolean {
+    override suspend fun initAdmin(user: User, ip: String): Boolean {
         // 判断是否已经初始了管理员
         if (allUsers().isNotEmpty()) {
             throw MyException("管理员已经创建")
@@ -69,7 +83,14 @@ class UserServiceImpl : UserService {
         // 添加用户
         val result = userDao.addUser(u) != null
         if (result) {
-            launchIO {
+            ioScope.launch {
+                operateSync(
+                    desc = "管理员 [${user.username}] 初始化完成，IP [$ip]",
+                    userId = user.userId,
+                    username = user.username,
+                )
+
+
                 // 管理员初始化完成，判断是否有文章，没有的话就插入默认文章
                 if (postService.postCount() == 0L) {
                     val postRequest = firstPost()
@@ -182,7 +203,15 @@ class UserServiceImpl : UserService {
         if (!userInfo.email.isEmail()) throw MyException("邮箱格式错误")
         if (!userInfo.username.isAlphaAndNumeric()) throw MyException("用户名只支持英文和数字")
         if (userInfo.username.length < 4) throw MyException("用户名不能小于 4 位")
-        return userDao.updateUser(userId, userInfo)
+        return userDao.updateUser(userId, userInfo).also {
+            if (it) {
+                operate(
+                    desc = "用户 [${userInfo.username}] 修改用户信息",
+                    userId = userId,
+                    username = userInfo.username
+                )
+            }
+        }
     }
 
     /**
@@ -192,9 +221,22 @@ class UserServiceImpl : UserService {
      */
     override suspend fun updatePassword(userId: Long, password: String): Boolean {
         if (password.length < 8) throw MyException("密码长度不能小于 8 位")
+
+        // 判断用户是否存在
+        val user = user(userId) ?: throw MyException("用户不存在")
+
         // 对密码生成加盐哈希
         val saltHash = hashingService.generatedSaltedHash(password)
-        return userDao.updatePassword(userId, saltHash)
+        return userDao.updatePassword(userId, saltHash).also {
+            if (it) {
+                operate(
+                    desc = "用户 [${user.username}] 修改登录密码",
+                    userId = userId,
+                    username = user.username,
+                    isHighRisk = true
+                )
+            }
+        }
     }
 
     /**
@@ -202,13 +244,29 @@ class UserServiceImpl : UserService {
      * @param tokenConfig Token 令牌配置
      * @param username 用户名
      * @param password 密码
+     * @param ip 请求的 IP 地址
      */
     override suspend fun login(
         tokenConfig: TokenConfig,
         username: String,
-        password: String
+        password: String,
+        ip: String
     ): AuthResponse {
-        val user = user(username) ?: throw MyException("非法用户名或密码")
+
+        /**
+         * 登录失败时记录
+         */
+        fun loginErrorOperate() {
+            // 添加登录操作记录
+            operate(
+                userId = -1,
+                username = username,
+                desc = "用户 [${username}] 登录失败，IP [${ip}]",
+                isHighRisk = false
+            )
+        }
+
+        val user = user(username) ?: throw MyException("非法用户名或密码").also { loginErrorOperate() }
         // 验证密码合法性
         val isValidPassword = hashingService.verify(
             value = password,
@@ -220,6 +278,7 @@ class UserServiceImpl : UserService {
 
         // 密码不合法
         if (!isValidPassword) {
+            loginErrorOperate()
             throw MyException("非法用户名或密码")
         }
 
@@ -229,12 +288,23 @@ class UserServiceImpl : UserService {
             TokenClaim(
                 name = TokenClaimEnum.USER_ID,
                 value = user.userId.toString()
+            ),
+            TokenClaim(
+                name = TokenClaimEnum.USERNAME,
+                value = user.username
             )
         )
 
         launchIO {
             // 修改最后登录时间
             updateLastLoginTime(user.userId)
+            // 添加登录操作记录
+            operateSync(
+                userId = user.userId,
+                username = username,
+                desc = "用户 [${user.username}] 登录成功，IP [${ip}]",
+                isHighRisk = false
+            )
         }
 
         // 封装登录响应数据类

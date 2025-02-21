@@ -47,7 +47,7 @@ object DatabaseSingleton {
                 val tables = listOf(
                     Users, Configs, Posts, Tags, Categories, PostTags,
                     PostCategories, PostContents, Links, Menus, MenuItems, FileStorageModes,
-                    FileGroups, Files, Diaries, AccessLogs, Comments
+                    FileGroups, Files, Diaries, AccessLogs, Comments, Operations
                 )
                 // 创建表
                 SchemaUtils.create(*tables.toTypedArray())

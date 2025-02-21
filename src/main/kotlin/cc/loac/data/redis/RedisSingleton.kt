@@ -53,6 +53,7 @@ object RedisSingleton {
      */
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     suspend fun setSync(key: String, value: String): String? {
+        checkInstance()
         return instance.set(key, value)
     }
 
@@ -68,6 +69,7 @@ object RedisSingleton {
         value: String,
         callback: (String?) -> Unit = {}
     ) {
+        checkInstance()
         scope.launch {
             callback(instance.set(key, value))
         }
@@ -79,6 +81,7 @@ object RedisSingleton {
      */
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     suspend fun getSync(key: String): String? {
+        checkInstance()
         return instance.get(key)
     }
 
@@ -89,6 +92,7 @@ object RedisSingleton {
      */
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     fun get(key: String, callback: (String?) -> Unit) {
+        checkInstance()
         scope.launch {
             callback(instance.get(key))
         }
@@ -100,6 +104,7 @@ object RedisSingleton {
      */
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     fun close(onFinish: () -> Unit = {}) {
+        checkInstance()
         scope.launch {
             instance.shutdown(false)
             onFinish()

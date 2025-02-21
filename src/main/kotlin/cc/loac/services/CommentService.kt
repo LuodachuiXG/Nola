@@ -11,8 +11,9 @@ interface CommentService {
     /**
      * 添加评论
      * @param comment 评论数据类
+     * @param isApiRequest 是否是 API 请求（非管理员请求，即从博客前端提交的请求）
      */
-    suspend fun addComment(comment: Comment): Comment?
+    suspend fun addComment(comment: Comment, isApiRequest: Boolean = false): Comment?
 
     /**
      * 根据评论 ID 删除评论
@@ -57,6 +58,7 @@ interface CommentService {
      * @param page 当前页数
      * @param size 每页条数
      * @param postId 文章 ID
+     * @param slug 文章别名
      * @param commentId 评论 ID
      * @param parentId 父评论 ID
      * @param email 评论者邮箱
@@ -71,6 +73,7 @@ interface CommentService {
         page: Int,
         size: Int,
         postId: Long? = null,
+        slug: String? = null,
         commentId: Long? = null,
         parentId: Long? = null,
         email: String? = null,

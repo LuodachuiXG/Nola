@@ -15,7 +15,6 @@ import cc.loac.plugins.LIMITER_ENCRYPT_POST
 import cc.loac.services.PostService
 import cc.loac.utils.*
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
@@ -271,7 +270,6 @@ fun Route.postApiRouting() {
 
                 // 可空分类名或别名
                 val category = call.receiveNullablePathParam("category")
-
                 call.respondSuccess(postService.apiPosts(page, size, key, tagId, categoryId, tag, category))
             }
         }

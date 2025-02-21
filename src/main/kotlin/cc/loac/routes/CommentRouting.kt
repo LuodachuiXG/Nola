@@ -1,5 +1,6 @@
 package cc.loac.routes
 
+import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Comment
 import cc.loac.data.models.enums.CommentSort
 import cc.loac.data.requests.CommentPassRequest
@@ -16,6 +17,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.delay
 import org.koin.java.KoinJavaComponent.inject
 
 private val commentService: CommentService by inject(CommentService::class.java)
@@ -156,9 +158,10 @@ fun Route.commentApiRouting() {
                 val newComment = call.receiveByDataClass<CommentRequest> {
                     it.postId != -1L
                 }
+
                 call.respondSuccess(
                     commentService.addComment(
-                        Comment(
+                        comment = Comment(
                             postId = newComment.postId,
                             parentCommentId = newComment.parentCommentId,
                             replayCommentId = newComment.replayCommentId,
@@ -167,21 +170,34 @@ fun Route.commentApiRouting() {
                             displayName = newComment.displayName,
                             email = newComment.email,
                             isPass = false
-                        )
+                        ),
+                        isApiRequest = true
                     )
                 )
             }
         }
 
         /** 根据文章 ID 获取评论 **/
-        get("/{id}") {
+        get {
             call.receivePageAndSize { page, size ->
-                val id = call.receiveIntPathParam("id").toLong()
+                // 可空参数，文章 ID
+                val postId = call.receiveNullablePathParam("id") {
+                    it?.isInt()
+                }?.toLongOrNull()
+
+                // 可空参数，文章别名
+                val slug = call.receiveNullablePathParam("slug")
+
+                if (postId == null && slug == null) {
+                    throw MyException("文章 ID 和文章别名至少提供一个")
+                }
+
                 call.respondSuccess(
                     commentService.comments(
                         page = page,
                         size = size,
-                        postId = id,
+                        postId = postId,
+                        slug = slug,
                         isPass = true,
                         tree = true
                     )
