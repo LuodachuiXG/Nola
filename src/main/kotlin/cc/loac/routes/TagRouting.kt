@@ -3,7 +3,6 @@ package cc.loac.routes
 import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.exceptions.ParamMismatchException
 import cc.loac.services.TagService
-import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import cc.loac.data.models.Tag
 import cc.loac.utils.*

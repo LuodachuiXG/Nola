@@ -1,12 +1,9 @@
 package cc.loac.routes
 
 import cc.loac.data.exceptions.AddFailedException
-import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.Category
-import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.services.CategoryService
 import cc.loac.utils.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
