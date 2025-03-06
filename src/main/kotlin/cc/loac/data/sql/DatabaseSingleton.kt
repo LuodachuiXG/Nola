@@ -74,7 +74,7 @@ object DatabaseSingleton {
         setUsername(username)
         setPassword(password)
         // 连接池最大大小
-        maximumPoolSize = 3
+        maximumPoolSize = 30
         // 与 Exposed 默认设置同步
         isAutoCommit = false
         transactionIsolation = "TRANSACTION_REPEATABLE_READ"

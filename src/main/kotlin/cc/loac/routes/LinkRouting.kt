@@ -9,7 +9,6 @@ import cc.loac.data.responses.Pager
 import cc.loac.extensions.isEnum
 import cc.loac.services.LinkService
 import cc.loac.utils.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject

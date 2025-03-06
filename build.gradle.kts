@@ -12,6 +12,21 @@ val lettuce_version: String by project
 
 val kotlinx_coroutines_version: String by project
 
+val mariadb_version: String by project
+val mysql_version: String by project
+
+val qcloud_version: String by project
+
+val pinyin4j_version: String by project
+
+val commons_codec_version: String by project
+
+val jackson_module_kotlin_version: String by project
+
+val jsoup_version: String by project
+
+val commonmark_version: String by project
+
 plugins {
     kotlin("jvm") version "2.0.21"
     id("io.ktor.plugin") version "3.0.1"
@@ -41,7 +56,7 @@ dependencies {
     implementation("io.ktor:ktor-server-cors-jvm")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("io.ktor:ktor-serialization-jackson:$ktor_version")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.16.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jackson_module_kotlin_version")
 
     implementation("io.ktor:ktor-server-thymeleaf:$ktor_version")
 
@@ -50,9 +65,9 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
 
     // MariaDB 驱动
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.2")
+    implementation("org.mariadb.jdbc:mariadb-java-client:$mariadb_version")
     // https://mvnrepository.com/artifact/com.mysql/mysql-connector-j
-    implementation("com.mysql:mysql-connector-j:8.3.0")
+    implementation("com.mysql:mysql-connector-j:$mysql_version")
 
     // H2 驱动
     implementation("com.h2database:h2:$h2_version")
@@ -74,10 +89,10 @@ dependencies {
     implementation("io.insert-koin:koin-logger-slf4j:$koin_version")
 
     // 腾讯云对象存储
-    implementation("com.qcloud:cos_api:5.6.205")
+    implementation("com.qcloud:cos_api:$qcloud_version")
 
     // https://mvnrepository.com/artifact/com.belerweb/pinyin4j
-    implementation("com.belerweb:pinyin4j:2.5.1")
+    implementation("com.belerweb:pinyin4j:$pinyin4j_version")
 
 
 
@@ -87,13 +102,13 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:$logback_version")
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
-    implementation("commons-codec:commons-codec:1.16.0")
-    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.8")
+    implementation("commons-codec:commons-codec:$commons_codec_version")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:$ktor_version")
 
     // Jsoup
-    implementation("org.jsoup:jsoup:1.17.2")
+    implementation("org.jsoup:jsoup:$jsoup_version")
     // 将 Markdown 转 HTML
-    implementation("org.commonmark:commonmark:0.21.0")
+    implementation("org.commonmark:commonmark:$commonmark_version")
 
     // 接口访问速率限制
     implementation("io.ktor:ktor-server-rate-limit:$ktor_version")

@@ -13,11 +13,9 @@ import cc.loac.extensions.isInt
 import cc.loac.plugins.LIMITER_ADD_COMMENT
 import cc.loac.services.CommentService
 import cc.loac.utils.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.delay
 import org.koin.java.KoinJavaComponent.inject
 
 private val commentService: CommentService by inject(CommentService::class.java)
