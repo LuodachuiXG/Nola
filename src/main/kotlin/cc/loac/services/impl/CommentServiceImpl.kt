@@ -41,18 +41,18 @@ class CommentServiceImpl : CommentService {
             commentById(it) ?: throw MyException("父评论 [${it}] 不存在")
         }
 
-        // 如果 replayCommentId 不为空，但是 parentCommentId 为空，则代表当前评论未指定父评论
+        // 如果 replyCommentId 不为空，但是 parentCommentId 为空，则代表当前评论未指定父评论
         // 如果是回复父评论下的某一个子评论，需要同时指定这两个字段
-        newComment.replayCommentId?.let {
+        newComment.replyCommentId?.let {
             if (newComment.parentCommentId == null) throw MyException("未指定父评论")
             // 回复的评论是否存在
             commentById(it)?.let { c ->
                 // 如果要回复的评论的父评论 ID 和新添加的评论的父评论 ID 不同，也任务回复的评论不存在
                 if (c.parentCommentId != newComment.parentCommentId) throw MyException("回复的评论 [${it}] 不存在")
 
-                // 设置 replayDisplayName
+                // 设置 replyDisplayName
                 newComment = newComment.copy(
-                    replayDisplayName = c.displayName
+                    replyDisplayName = c.displayName
                 )
             } ?: throw MyException("回复的评论 [${it}] 不存在")
         }

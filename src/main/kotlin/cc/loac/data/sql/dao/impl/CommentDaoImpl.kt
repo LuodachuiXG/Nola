@@ -7,7 +7,6 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CommentDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Comments
-import cc.loac.utils.error
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -25,8 +24,8 @@ class CommentDaoImpl : CommentDao {
         commentId = row[Comments.commentId],
         postId = row[Comments.postId],
         parentCommentId = row[Comments.parentCommentId],
-        replayCommentId = row[Comments.replyCommentId],
-        replayDisplayName = row[Comments.replyDisplayName],
+        replyCommentId = row[Comments.replyCommentId],
+        replyDisplayName = row[Comments.replyDisplayName],
         content = row[Comments.content],
         site = row[Comments.site],
         displayName = row[Comments.displayName],
@@ -43,8 +42,8 @@ class CommentDaoImpl : CommentDao {
         val result = Comments.insert {
             it[postId] = comment.postId
             it[parentCommentId] = comment.parentCommentId
-            it[replyCommentId] = comment.replayCommentId
-            it[replyDisplayName] = comment.replayDisplayName
+            it[replyCommentId] = comment.replyCommentId
+            it[replyDisplayName] = comment.replyDisplayName
             it[content] = comment.content
             it[site] = comment.site
             it[displayName] = comment.displayName
