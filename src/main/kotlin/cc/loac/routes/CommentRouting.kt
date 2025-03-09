@@ -36,7 +36,7 @@ fun Route.commentAdminRouting() {
                         Comment(
                             postId = newComment.postId,
                             parentCommentId = newComment.parentCommentId,
-                            replayCommentId = newComment.replayCommentId,
+                            replyCommentId = newComment.replyCommentId,
                             content = newComment.content,
                             site = newComment.site,
                             displayName = newComment.displayName,
@@ -162,7 +162,7 @@ fun Route.commentApiRouting() {
                         comment = Comment(
                             postId = newComment.postId,
                             parentCommentId = newComment.parentCommentId,
-                            replayCommentId = newComment.replayCommentId,
+                            replyCommentId = newComment.replyCommentId,
                             content = newComment.content,
                             site = newComment.site,
                             displayName = newComment.displayName,
