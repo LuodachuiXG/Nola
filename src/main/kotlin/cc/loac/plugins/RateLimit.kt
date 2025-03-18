@@ -23,7 +23,7 @@ fun Application.configureRateLimit() {
 
         // 加密文章获取速率限制器
         register(LIMITER_ENCRYPT_POST) {
-            rateLimiter(limit = 20, refillPeriod = 30.seconds)
+            rateLimiter(limit = 20, refillPeriod = 60.seconds)
         }
 
         // 注册管理员登录速率限制器

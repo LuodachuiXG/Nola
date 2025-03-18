@@ -28,6 +28,7 @@ class LinkDaoImpl : LinkDao {
         description = row[Links.description],
         priority = row[Links.priority],
         remark = row[Links.remark],
+        isLost = row[Links.isLost],
         createTime = row[Links.createTime],
         lastModifyTime = row[Links.lastModifyTime]
     )
@@ -45,6 +46,7 @@ class LinkDaoImpl : LinkDao {
             it[description] = if (link.description.isNullOrBlank()) null else link.description
             it[priority] = link.priority
             it[remark] = if (link.remark.isNullOrBlank()) null else link.remark
+            it[isLost] = link.isLost
             it[createTime] = Date().time
         }.resultedValues?.singleOrNull()?.let(::resultRowToLink)
     }
@@ -73,6 +75,7 @@ class LinkDaoImpl : LinkDao {
             it[description] = if (link.description.isNullOrBlank()) null else link.description
             it[priority] = link.priority
             it[remark] = if (link.remark.isNullOrBlank()) null else link.remark
+            it[isLost] = link.isLost
             it[lastModifyTime] = Date().time
         } > 0
     }

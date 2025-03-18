@@ -27,6 +27,9 @@ object Links : Table("link") {
     /** 备注 **/
     val remark = varchar("remark", 256).nullable()
 
+    /** 是否已失联 **/
+    val isLost = bool("is_lost").default(false)
+
     /** 创建时间戳 **/
     val createTime = long("create_time")
 

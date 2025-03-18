@@ -16,6 +16,8 @@ data class LinkRequest(
     val description: String?,
     /** 优先级（0默认，1 - 100） **/
     val priority: Int,
+    /** 是否已失联 **/
+    val isLost: Boolean = false,
     /** 备注 **/
     val remark: String?
 )
