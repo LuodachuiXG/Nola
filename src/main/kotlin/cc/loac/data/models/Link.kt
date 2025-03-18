@@ -9,6 +9,7 @@ package cc.loac.data.models
  * @param description 描述
  * @param priority 优先级（0默认，1 - 10）
  * @param remark 备注
+ * @param isLost 是否已经失联
  * @param createTime 创建时间戳
  * @param lastModifyTime 最后修改时间戳
  */
@@ -20,6 +21,7 @@ data class Link(
     val description: String?,
     val priority: Int = 0,
     val remark: String?,
+    val isLost: Boolean = false,
     val createTime: Long,
     val lastModifyTime: Long?
 )

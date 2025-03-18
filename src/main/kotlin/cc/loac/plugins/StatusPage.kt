@@ -19,19 +19,19 @@ fun Application.configureStatusPage() {
     install(StatusPages) {
         /** 404 Not Found 状态 **/
         status(HttpStatusCode.NotFound) { call, status ->
-            "${call.request.host()} - ${call.request.uri}: 404".error()
+            "${call.ip()} - ${call.request.uri}: 404 Not Found".error()
             call.respondFailure("404 Not Found.", status)
         }
 
         /** 429 TooManyRequests 请求太频繁状态 **/
         status(HttpStatusCode.TooManyRequests) { call, status ->
-            "${call.request.host()} - ${call.request.uri}: 429".error()
+            "${call.ip()} - ${call.request.uri}: 429 请求频繁，请稍后再试".error()
             call.respondFailure("请求频繁，请稍后再试", status)
         }
 
         /** 401 未授权状态 **/
         status(HttpStatusCode.Unauthorized) { call, status ->
-            "${call.request.host()} - ${call.request.uri}: 无权访问受保护资源".error()
+            "${call.ip()} - ${call.request.uri}: 401 无权访问受保护资源".error()
             call.respondFailure("无权访问受保护资源", status)
         }
 
@@ -43,14 +43,14 @@ fun Application.configureStatusPage() {
 
         /** Thymeleaf 异常 **/
         exception<TemplateInputException> { call, e ->
-            "${call.request.host()} - ${call.request.uri}: Thymeleaf异常：${e.message}".error()
+            "${call.ip()} - ${call.request.uri}: Thymeleaf异常：${e.message}".error()
             call.respondFailure("Thymeleaf 模板解析异常", HttpStatusCode.InternalServerError)
         }
 
 
         /** 参数不匹配异常 **/
         exception<ParamMismatchException> { call, e ->
-            "${call.request.host()} - ${call.request.uri}: 请求参数不匹配：${e.message}".error()
+            "${call.ip()} - ${call.request.uri}: 请求参数不匹配：${e.message}".error()
             call.respondFailure("请求参数不匹配", HttpStatusCode.Conflict)
         }
 
