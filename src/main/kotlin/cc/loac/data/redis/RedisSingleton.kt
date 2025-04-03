@@ -14,9 +14,7 @@ import kotlinx.coroutines.launch
  */
 object RedisSingleton {
 
-    private val scope by lazy {
-        CoroutineScope(Dispatchers.IO)
-    }
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     // Redis Lettuce 实例（支持 Kotlin 协程）
     @OptIn(ExperimentalLettuceCoroutinesApi::class)

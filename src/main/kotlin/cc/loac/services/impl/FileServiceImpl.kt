@@ -24,6 +24,9 @@ import cc.loac.extensions.jsonToClass
 import cc.loac.extensions.toJSONString
 import cc.loac.services.FileService
 import cc.loac.utils.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 import java.io.InputStream
 import java.util.*
@@ -32,6 +35,8 @@ import java.util.*
  * 文件服务接口实现类
  */
 class FileServiceImpl : FileService {
+
+    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     private val fileDao: FileDao by inject(FileDao::class.java)
 
@@ -48,7 +53,7 @@ class FileServiceImpl : FileService {
 
     init {
         // 尝试初始化腾讯云对象存储
-        launchIO {
+        ioScope.launch {
             initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
         }
     }

@@ -4,7 +4,7 @@ import org.apache.commons.codec.binary.Hex
 import org.apache.commons.codec.digest.DigestUtils
 import java.security.SecureRandom
 
-class SHA256HashingService: HashingService {
+class HashingServiceImpl: HashingService {
     /**
      * 生成加盐哈希
      * @param value 待哈希的原始字符串数据

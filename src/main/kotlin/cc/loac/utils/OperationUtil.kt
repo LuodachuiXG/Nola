@@ -11,9 +11,7 @@ import org.koin.java.KoinJavaComponent.inject
 
 private val operationService: OperationService by inject(OperationService::class.java)
 
-private val ioScope by lazy {
-    CoroutineScope(Dispatchers.IO)
-}
+private val ioScope = CoroutineScope(Dispatchers.IO)
 
 /**
  * 记录操作记录（同步）

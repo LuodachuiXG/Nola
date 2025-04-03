@@ -4,7 +4,6 @@ import cc.loac.data.models.BlogInfo
 import cc.loac.data.models.enums.ConfigKey
 import cc.loac.extensions.jsonToClass
 import cc.loac.services.ConfigService
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*

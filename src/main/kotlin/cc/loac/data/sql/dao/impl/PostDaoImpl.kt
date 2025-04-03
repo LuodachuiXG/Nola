@@ -21,7 +21,9 @@ import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
 import cc.loac.extensions.markdownToHtml
 import cc.loac.extensions.sha256Hex
-import cc.loac.utils.launchIO
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -37,6 +39,8 @@ class PostDaoImpl : PostDao {
 
     private val tagDao: TagDao by inject(TagDao::class.java)
     private val categoryDao: CategoryDao by inject(CategoryDao::class.java)
+
+    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     /**
      * 将数据库检索结果转为 [Post] 文章数据类
@@ -572,7 +576,7 @@ class PostDaoImpl : PostDao {
 
         if (result && status == PostContentStatus.PUBLISHED) {
             // 文章内容修改成功，并且修改的是正文内容
-            launchIO {
+            ioScope.launch {
                 // 修改文章最后修改时间
                 updatePostLastModifyTime(postContent.postId, currentTime)
             }

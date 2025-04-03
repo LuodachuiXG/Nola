@@ -26,6 +26,8 @@ fun Application.module() {
     DatabaseSingleton.init(environment.config)
     // 初始化 Redis
 //    RedisSingleton.init(environment.config)
+    // WebSocket 配置
+    configureWebSocket()
     // 模板引擎配置
     configureThymeleaf()
     // 接口访问速率限制配置
