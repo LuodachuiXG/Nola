@@ -4,7 +4,6 @@ import cc.loac.data.models.AccessLog
 import cc.loac.data.models.enums.AccessLogType
 import cc.loac.services.AccessLogService
 import cc.loac.utils.info
-import cc.loac.utils.launchIO
 import io.ktor.server.application.*
 import io.ktor.server.plugins.*
 import org.koin.java.KoinJavaComponent.inject
@@ -61,25 +60,23 @@ fun Application.configureMonitorPlugin() {
     install(MonitorPlugin) {
         ignoreStartWith = listOf("/assets", "/upload", "/console/assets")
         handleUri { call, uri ->
-            launchIO {
-                // X-Real-IP 是 Nginx 反向代理设置的客户端真实 IP 头
-                val ip = call.request.headers["X-Real-IP"]
+            // X-Real-IP 是 Nginx 反向代理设置的客户端真实 IP 头
+            val ip = call.request.headers["X-Real-IP"]
 
-                accessLogService.addAccessLog(
-                    AccessLog(
-                        accessLogId = -1,
-                        path = uri,
-                        ip = ip ?: "0.0.0.0",
-                        accessTime = Date().time,
-                        type = when {
-                            uri.startsWith("/api/post/content") -> AccessLogType.POST
-                            uri == "/" -> AccessLogType.BLOG
-                            else -> AccessLogType.URI
-                        },
-                        message = null
-                    )
+            accessLogService.addAccessLog(
+                AccessLog(
+                    accessLogId = -1,
+                    path = uri,
+                    ip = ip ?: "0.0.0.0",
+                    accessTime = Date().time,
+                    type = when {
+                        uri.startsWith("/api/post/content") -> AccessLogType.POST
+                        uri == "/" -> AccessLogType.BLOG
+                        else -> AccessLogType.URI
+                    },
+                    message = null
                 )
-            }
+            )
         }
     }
 }

@@ -250,6 +250,13 @@ fun ApplicationCall.ip(): String {
 }
 
 /**
+ * 从请求头中获取 Token
+ */
+fun ApplicationCall.getToken(): String? {
+    return this.request.headers["Authorization"]?.removePrefix("Bearer ")?.trim()
+}
+
+/**
  * 请求参数数据类
  * @param paramName 请求的参数名
  * @param nullable 参数是否可为空

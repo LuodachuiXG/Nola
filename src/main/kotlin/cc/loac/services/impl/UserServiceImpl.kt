@@ -1,17 +1,14 @@
 package cc.loac.services.impl
 
 import cc.loac.data.exceptions.MyException
-import cc.loac.data.models.Operation
 import cc.loac.data.models.User
 import cc.loac.data.models.enums.MenuItemTarget
-import cc.loac.data.models.enums.OperationType
 import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.data.requests.UserInfoRequest
 import cc.loac.data.requests.firstPost
 import cc.loac.data.responses.AuthResponse
-import cc.loac.data.sql.dao.OperationDao
 import cc.loac.data.sql.dao.UserDao
 import cc.loac.extensions.isAlphaAndNumeric
 import cc.loac.extensions.isEmail
@@ -23,8 +20,6 @@ import cc.loac.security.token.TokenService
 import cc.loac.services.MenuService
 import cc.loac.services.PostService
 import cc.loac.services.UserService
-import cc.loac.utils.info
-import cc.loac.utils.launchIO
 import cc.loac.utils.operate
 import cc.loac.utils.operateSync
 import kotlinx.coroutines.CoroutineScope
@@ -43,9 +38,7 @@ class UserServiceImpl : UserService {
     private val tokenService: TokenService by inject(TokenService::class.java)
     private val userDao: UserDao by inject(UserDao::class.java)
 
-    private val ioScope by lazy {
-        CoroutineScope(Dispatchers.IO)
-    }
+    private val ioScope = CoroutineScope(Dispatchers.IO)
 
     /**
      * 初始化博客管理员
@@ -285,17 +278,11 @@ class UserServiceImpl : UserService {
         // 生成 Token
         val token = tokenService.generate(
             config = tokenConfig,
-            TokenClaim(
-                name = TokenClaimEnum.USER_ID,
-                value = user.userId.toString()
-            ),
-            TokenClaim(
-                name = TokenClaimEnum.USERNAME,
-                value = user.username
-            )
+            userId = user.userId,
+            userName = user.username
         )
 
-        launchIO {
+        ioScope.launch {
             // 修改最后登录时间
             updateLastLoginTime(user.userId)
             // 添加登录操作记录

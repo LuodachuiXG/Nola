@@ -113,6 +113,9 @@ dependencies {
     // 接口访问速率限制
     implementation("io.ktor:ktor-server-rate-limit:$ktor_version")
 
+    // WebSocket
+    implementation("io.ktor:ktor-server-websockets:$ktor_version")
+
 
     // 用于处理 Redis Lettuce Kotlin 相关异步操作
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core

@@ -33,6 +33,8 @@ class PostServiceImpl : PostService {
     private val tagService: TagService by inject(TagService::class.java)
     private val categoryService: CategoryService by inject(CategoryService::class.java)
 
+    private val ioScope = CoroutineScope(Dispatchers.IO)
+
     /**
      * 添加文章
      * @param pr 添加文章请求数据类
@@ -335,7 +337,7 @@ class PostServiceImpl : PostService {
         // 获取文章正文
         val postContent = postContent(post.postId, PostContentStatus.PUBLISHED) ?: return null
 
-        launchIO {
+        ioScope.launch {
             // 文章浏览量加一
             addPostVisit(post.postId)
         }
@@ -396,9 +398,9 @@ class PostServiceImpl : PostService {
     ): Boolean {
         val result = postDao.updatePostContent(postContent, status, draftName)
         // 启动线程执行耗时操作
-        launchIO {
+        ioScope.launch {
             // 如果修改文章没有任何操作，就不执行下面的剩余操作
-            if (!result) return@launchIO
+            if (!result) return@launch
 
             // 如果修改的是正文内容
             if (status == PostContentStatus.PUBLISHED) {
@@ -443,7 +445,7 @@ class PostServiceImpl : PostService {
         // 是否修改成功
         if (result) {
             // 启动线程执行耗时操作
-            launchIO {
+            ioScope.launch {
                 // 尝试根据新的文章正文更新文章摘要
                 tryUpdatePostExcerptByPostContent(postId)
                 // 修改文章最后修改时间
