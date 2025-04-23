@@ -94,7 +94,8 @@ private fun transformLinkToApiForm(links: List<Link>): List<ApiLinkResponse> {
             displayName = link.displayName,
             url = link.url,
             logo = link.logo,
-            description = link.description
+            description = link.description,
+            isLost = link.isLost
         )
     }
 }

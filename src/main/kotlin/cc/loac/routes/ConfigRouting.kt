@@ -71,6 +71,15 @@ fun Route.configAdminRouting() {
                 call.respondSuccess(userService.initAdmin(user, call.ip()))
             }
 
+            /** 博客信息 **/
+            get {
+                // 获取博客信息
+                val blogInfo = configService.blogInfo()
+                // 检查是否存在管理员
+                val user = userService.allUsers().firstOrNull()
+                call.respondSuccess(blogInfo?.copy(blogger = user?.displayName))
+            }
+
             authenticate {
                 /** 修改博客信息 **/
                 put {
