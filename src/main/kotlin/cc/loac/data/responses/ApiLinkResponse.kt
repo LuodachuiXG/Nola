@@ -11,5 +11,6 @@ data class ApiLinkResponse(
     val displayName: String,
     val url: String,
     val logo: String?,
-    val description: String?
+    val description: String?,
+    val isLost: Boolean
 )

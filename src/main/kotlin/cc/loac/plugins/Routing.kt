@@ -32,6 +32,7 @@ fun Application.configureRouting(
         staticResources("/css", "/static/templates/css")
         staticResources("/js", "/static/templates/js")
 
+
         // 本地存储文件路由
         staticFiles("/upload", File(".nola/upload"))
         staticFiles("/backup", File(".nola/backup"))

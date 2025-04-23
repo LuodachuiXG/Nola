@@ -3,6 +3,7 @@ package cc.loac.data.sql.tables
 import cc.loac.data.models.enums.PostStatus
 import cc.loac.data.models.enums.PostVisible
 import org.jetbrains.exposed.sql.Table
+import java.util.Date
 
 /**
  * 文章表
@@ -45,7 +46,8 @@ object Posts : Table("post") {
     val visit = integer("visit").default(0)
 
     /** 创建时间 **/
-    val createTime = long("create_time")
+    val createTime = long("create_time").default(Date().time)
+
 
     /** 最后修改时间 **/
     val lastModifyTime = long("last_modify_time").nullable()
