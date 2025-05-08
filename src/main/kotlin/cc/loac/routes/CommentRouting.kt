@@ -43,14 +43,26 @@ fun Route.commentAdminRouting() {
                             email = newComment.email,
                             isPass = newComment.isPass
                         )
-                    )
+                    )?.also {
+                        operate(
+                            desc = "添加评论 ID: [${it.commentId}]，内容: [${it.content}]",
+                            call = call
+                        )
+                    }
                 )
             }
 
             /** 删除评论 **/
             delete {
                 val ids = call.receiveByDataClass<List<Long>>()
-                call.respondSuccess(commentService.deleteCommentByIds(ids))
+                call.respondSuccess(commentService.deleteCommentByIds(ids).also {
+                    if (it) {
+                        operate(
+                            desc = "删除评论 [${ids.joinToString(",")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改评论 **/
@@ -69,14 +81,30 @@ fun Route.commentAdminRouting() {
                             email = comment.email,
                             isPass = comment.isPass,
                         )
-                    )
+                    ).also {
+                        if (it) {
+                            operate(
+                                desc = "修改评论 ID: [${comment.commentId}]，内容: [${comment.content}]",
+                                call = call
+                            )
+                        }
+                    }
                 )
             }
 
             /** 修改评论是否通过审核 **/
             put("/pass") {
                 val request = call.receiveByDataClass<CommentPassRequest>()
-                call.respondSuccess(commentService.setCommentPass(request.ids, request.isPass))
+                call.respondSuccess(
+                    commentService.setCommentPass(request.ids, request.isPass).also {
+                        if (it) {
+                            operate(
+                                desc = "评论通过审核 isPass: [${request.isPass}] [${request.ids.joinToString(",")}]",
+                                call = call
+                            )
+                        }
+                    }
+                )
             }
 
             /** 获取评论 **/
@@ -157,6 +185,8 @@ fun Route.commentApiRouting() {
                     it.postId != -1L
                 }
 
+
+
                 call.respondSuccess(
                     commentService.addComment(
                         comment = Comment(
@@ -173,6 +203,7 @@ fun Route.commentApiRouting() {
                     )
                 )
             }
+
         }
 
         /** 根据文章 ID 获取评论 **/

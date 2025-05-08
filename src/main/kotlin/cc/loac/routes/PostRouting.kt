@@ -3,6 +3,7 @@ package cc.loac.routes
 import cc.loac.data.exceptions.AddFailedException
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.exceptions.ParamMismatchException
+import cc.loac.data.models.Post
 import cc.loac.data.models.enums.PostContentStatus
 import cc.loac.data.models.enums.PostSort
 import cc.loac.data.models.enums.PostStatus
@@ -39,14 +40,26 @@ fun Route.postAdminRouting() {
                 // 返回文章
                 call.respondSuccess(
                     postService.posts(listOf(post.postId), true)
-                        .firstOrNull() ?: throw AddFailedException()
+                        .firstOrNull()?.also {
+                            operate(
+                                desc = "添加文章 [${it.title}]",
+                                call = call
+                            )
+                        } ?: throw AddFailedException()
                 )
             }
 
             /** 回收文章 - 根据文章 ID **/
             put("/recycle") {
                 val postIds = call.receiveByDataClass<List<Long>>()
-                call.respondSuccess(postService.updatePostStatusToDeleted(postIds))
+                call.respondSuccess(postService.updatePostStatusToDeleted(postIds).also {
+                    if (it) {
+                        operate(
+                            desc = "回收文章 [${postIds.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 恢复文章 - 根据文章 ID **/
@@ -60,14 +73,28 @@ fun Route.postAdminRouting() {
                 // 状态不能为已删除
                 if (statusEnum == PostStatus.DELETED) throw ParamMismatchException()
 
-                call.respondSuccess(postService.updatePostStatusTo(postIds, statusEnum))
+                call.respondSuccess(postService.updatePostStatusTo(postIds, statusEnum).also {
+                    if (it) {
+                        operate(
+                            desc = "恢复文章 [${postIds.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 删除文章 - 根据文章 ID **/
             delete {
                 val postIds = call.receiveByDataClass<List<Long>>()
                 if (postIds.isEmpty()) call.respondSuccess(false)
-                call.respondSuccess(postService.deletePosts(postIds))
+                call.respondSuccess(postService.deletePosts(postIds).also {
+                    if (postIds.isNotEmpty()) {
+                        operate(
+                            desc = "删除文章 [${postIds.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改文章 **/
@@ -80,7 +107,14 @@ fun Route.postAdminRouting() {
                 if (postRequest.encrypted == true && postRequest.password.isNullOrEmpty()) {
                     throw MyException("文章设为加密需要提供密码")
                 }
-                call.respondSuccess(postService.updatePost(postRequest))
+                call.respondSuccess(postService.updatePost(postRequest).also {
+                    if (it) {
+                        operate(
+                            desc = "修改文章 [${postRequest.title}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改文章状态，如：文章状态、可见性、置顶 **/
@@ -88,7 +122,14 @@ fun Route.postAdminRouting() {
                 val postStatusRequest = call.receiveByDataClass<PostStatusRequest> {
                     it.postId != 0L && it.status != PostStatus.DELETED
                 }
-                call.respondSuccess(postService.updatePostStatus(postStatusRequest))
+                call.respondSuccess(postService.updatePostStatus(postStatusRequest).also {
+                    if (it) {
+                        operate(
+                            desc = "修改文章状态 [${postStatusRequest.postId}]，新状态: [${postStatusRequest.status}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 获取文章 **/
@@ -176,7 +217,12 @@ fun Route.postAdminRouting() {
                     )?.copy(
                         // 返回数据时把 content 置空
                         content = ""
-                    ) ?: throw AddFailedException()
+                    )?.also {
+                        operate(
+                            desc = "添加文章草稿，文章 ID: [${postDraft.postId}]，草稿名: [${postDraft.draftName}]",
+                            call = call
+                        )
+                    } ?: throw AddFailedException()
                 )
             }
 
@@ -185,7 +231,14 @@ fun Route.postAdminRouting() {
                 val postId = call.receiveIntPathParam("postId").toLong()
                 val draftNames = call.receiveByDataClass<List<String>>()
                 if (draftNames.isEmpty()) call.respondSuccess(false)
-                call.respondSuccess(postService.deletePostContent(postId, PostContentStatus.DRAFT, draftNames))
+                call.respondSuccess(postService.deletePostContent(postId, PostContentStatus.DRAFT, draftNames).also {
+                    if (it) {
+                        operate(
+                            desc = "删除文章草稿，文章 ID: [${postId}]，草稿名: [${draftNames}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改文章草稿 **/
@@ -200,7 +253,14 @@ fun Route.postAdminRouting() {
                         postContent,
                         PostContentStatus.DRAFT,
                         postDraft.draftName
-                    )
+                    ).also {
+                        if (it) {
+                            operate(
+                                desc = "修改文章草稿，文章 ID: [${postDraft.postId}]，草稿名: [${postDraft.draftName}]",
+                                call = call
+                            )
+                        }
+                    }
                 )
             }
 
@@ -210,7 +270,15 @@ fun Route.postAdminRouting() {
                     it.postId > 0
                 }
 
-                call.respondSuccess(postService.updatePostDraftName(params.postId, params.oldName, params.newName))
+                call.respondSuccess(
+                    postService.updatePostDraftName(params.postId, params.oldName, params.newName).also {
+                        if (it) {
+                            operate(
+                                desc = "修改文章草稿名，文章 ID: [${params.postId}]，旧草稿名: [${params.oldName}]，新草稿名: [${params.newName}]",
+                                call = call
+                            )
+                        }
+                    })
             }
 
             /** 将文章草稿转换为文章正文 **/
@@ -225,7 +293,14 @@ fun Route.postAdminRouting() {
                         params.draftName,
                         params.deleteContent,
                         params.contentName
-                    )
+                    ).also {
+                        if (it) {
+                            operate(
+                                desc = "将文章草稿转换为文章正文，文章 ID: [${params.postId}]，草稿名: [${params.draftName}]",
+                                call = call
+                            )
+                        }
+                    }
                 )
             }
 

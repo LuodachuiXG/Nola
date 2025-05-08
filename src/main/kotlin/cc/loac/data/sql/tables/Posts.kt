@@ -46,7 +46,7 @@ object Posts : Table("post") {
     val visit = integer("visit").default(0)
 
     /** 创建时间 **/
-    val createTime = long("create_time").default(Date().time)
+    val createTime = long("create_time")
 
 
     /** 最后修改时间 **/

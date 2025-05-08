@@ -40,14 +40,29 @@ fun Route.userRouting(
             put {
                 val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
                 val userInfo = call.receiveByDataClass<UserInfoRequest>()
-                call.respondSuccess(userService.updateUser(userId.toLong(), userInfo))
+                call.respondSuccess(userService.updateUser(userId.toLong(), userInfo).also {
+                    if (it) {
+                        operate(
+                            desc = "修改用户信息，用户 ID: [$userId]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改密码 **/
             put("/password") {
                 val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
                 val newPassword = call.receiveMapByName("password")["password"]!!
-                call.respondSuccess(userService.updatePassword(userId.toLong(), newPassword))
+                call.respondSuccess(userService.updatePassword(userId.toLong(), newPassword).also {
+                    if (it) {
+                        operate(
+                            desc = "修改用户密码，用户 ID: [$userId]",
+                            call = call,
+                            isHighRisk = true
+                        )
+                    }
+                })
             }
         }
 

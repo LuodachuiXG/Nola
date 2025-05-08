@@ -26,7 +26,12 @@ fun Route.tagAdminRouting() {
                     throw ParamMismatchException()
                 }
                 // 添加标签
-                call.respondSuccess(tagService.addTag(tag) ?: throw AddFailedException())
+                call.respondSuccess(tagService.addTag(tag)?.also {
+                    operate(
+                        desc = "添加标签：[${tag.displayName}]",
+                        call = call
+                    )
+                } ?: throw AddFailedException())
             }
 
             /** 删除标签 - 根据标签 ID **/
@@ -36,7 +41,14 @@ fun Route.tagAdminRouting() {
                 // 标签 ID 列表为空
                 if (ids.isEmpty()) call.respondSuccess(false)
                 // 删除标签
-                call.respondSuccess(tagService.deleteTags(ids))
+                call.respondSuccess(tagService.deleteTags(ids).also {
+                    if (it && ids.isNotEmpty()) {
+                        operate(
+                            desc = "删除标签：[${ids.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 删除标签 - 根据标签别名 **/
@@ -47,7 +59,14 @@ fun Route.tagAdminRouting() {
                 if (slugs.isEmpty()) call.respondSuccess(false)
 
                 // 删除标签
-                call.respondSuccess(tagService.deleteTagsBySlugs(slugs))
+                call.respondSuccess(tagService.deleteTagsBySlugs(slugs).also {
+                    if (it && slugs.isNotEmpty()) {
+                        operate(
+                            desc = "删除标签：[${slugs.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改标签 **/
@@ -56,7 +75,14 @@ fun Route.tagAdminRouting() {
                     it.tagId > 0
                 }
                 // 修改标签
-                call.respondSuccess(tagService.updateTag(tag))
+                call.respondSuccess(tagService.updateTag(tag).also {
+                    if (it) {
+                        operate(
+                            desc = "修改标签：[${tag.displayName}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 获取标签 - 根据标签 ID **/

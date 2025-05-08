@@ -43,7 +43,7 @@ fun Route.categoryAdminRouting() {
                 call.respondSuccess(categoryService.deleteCategories(ids).also {
                     if (it) {
                         operate(
-                            desc = "删除分类 ID $ids",
+                            desc = "删除分类，ID: [$ids]",
                             call = call
                         )
                     }
@@ -60,7 +60,7 @@ fun Route.categoryAdminRouting() {
                 call.respondSuccess(categoryService.deleteCategoriesBySlugs(slugs).also {
                     if (it) {
                         operate(
-                            desc = "删除分类别名 $slugs",
+                            desc = "删除分类，别名: [$slugs]",
                             call = call
                         )
                     }
