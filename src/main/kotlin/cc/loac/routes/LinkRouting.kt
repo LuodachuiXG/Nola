@@ -27,14 +27,26 @@ fun Route.linkAdminRouting() {
                     // 优先级范围 0 - 100
                     it.priority in (0..100)
                 }
-                call.respondSuccess(linkService.addLink(link) ?: throw AddFailedException())
+                call.respondSuccess(linkService.addLink(link)?.also {
+                    operate(
+                        desc = "添加友情链接 [${link.displayName}]",
+                        call = call
+                    )
+                } ?: throw AddFailedException())
             }
 
             /** 删除友情链接 **/
             delete {
                 val ids = call.receiveByDataClass<List<Long>>()
                 if (ids.isEmpty()) call.respondSuccess(false)
-                call.respondSuccess(linkService.deleteLinks(ids))
+                call.respondSuccess(linkService.deleteLinks(ids).also {
+                    if (it) {
+                        operate(
+                            desc = "删除友情链接 [${ids.joinToString(", ")}}",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改友情链接 **/
@@ -43,7 +55,14 @@ fun Route.linkAdminRouting() {
                     // 优先级范围 0 - 100
                     it.priority in (0..100) && it.linkId != null
                 }
-                call.respondSuccess(linkService.updateLink(link))
+                call.respondSuccess(linkService.updateLink(link).also {
+                    if (it) {
+                        operate(
+                            desc = "修改友情链接 [${link.displayName}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 获取友情链接 **/

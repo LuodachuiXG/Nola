@@ -3,7 +3,6 @@ package cc.loac.services.impl
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.User
 import cc.loac.data.models.enums.MenuItemTarget
-import cc.loac.data.models.enums.TokenClaimEnum
 import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.data.requests.UserInfoRequest
@@ -14,7 +13,6 @@ import cc.loac.extensions.isAlphaAndNumeric
 import cc.loac.extensions.isEmail
 import cc.loac.security.hashing.HashingService
 import cc.loac.security.hashing.SaltedHash
-import cc.loac.security.token.TokenClaim
 import cc.loac.security.token.TokenConfig
 import cc.loac.security.token.TokenService
 import cc.loac.services.MenuService
@@ -77,13 +75,6 @@ class UserServiceImpl : UserService {
         val result = userDao.addUser(u) != null
         if (result) {
             ioScope.launch {
-                operateSync(
-                    desc = "管理员 [${user.username}] 初始化完成，IP [$ip]",
-                    userId = user.userId,
-                    username = user.username,
-                )
-
-
                 // 管理员初始化完成，判断是否有文章，没有的话就插入默认文章
                 if (postService.postCount() == 0L) {
                     val postRequest = firstPost()
@@ -196,15 +187,7 @@ class UserServiceImpl : UserService {
         if (!userInfo.email.isEmail()) throw MyException("邮箱格式错误")
         if (!userInfo.username.isAlphaAndNumeric()) throw MyException("用户名只支持英文和数字")
         if (userInfo.username.length < 4) throw MyException("用户名不能小于 4 位")
-        return userDao.updateUser(userId, userInfo).also {
-            if (it) {
-                operate(
-                    desc = "用户 [${userInfo.username}] 修改用户信息",
-                    userId = userId,
-                    username = userInfo.username
-                )
-            }
-        }
+        return userDao.updateUser(userId, userInfo)
     }
 
     /**
@@ -220,16 +203,7 @@ class UserServiceImpl : UserService {
 
         // 对密码生成加盐哈希
         val saltHash = hashingService.generatedSaltedHash(password)
-        return userDao.updatePassword(userId, saltHash).also {
-            if (it) {
-                operate(
-                    desc = "用户 [${user.username}] 修改登录密码",
-                    userId = userId,
-                    username = user.username,
-                    isHighRisk = true
-                )
-            }
-        }
+        return userDao.updatePassword(userId, saltHash)
     }
 
     /**

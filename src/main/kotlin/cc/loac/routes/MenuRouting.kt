@@ -21,13 +21,25 @@ fun Route.menuAdminRouting() {
             /** 添加菜单 **/
             post {
                 val menu = call.receiveByDataClass<MenuRequest>()
-                call.respondSuccess(menuService.addMenu(menu) ?: throw AddFailedException())
+                call.respondSuccess(menuService.addMenu(menu)?.also {
+                    operate(
+                        desc = "添加菜单：[${menu.displayName}]",
+                        call = call
+                    )
+                } ?: throw AddFailedException())
             }
 
             /** 删除菜单 **/
             delete {
                 val menuIds = call.receiveByDataClass<List<Long>>()
-                call.respondSuccess(menuService.deleteMenu(menuIds))
+                call.respondSuccess(menuService.deleteMenu(menuIds).also {
+                    if (menuIds.isNotEmpty()) {
+                        operate(
+                            desc = "删除菜单：[${menuIds.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改菜单 **/
@@ -35,7 +47,12 @@ fun Route.menuAdminRouting() {
                 val menu = call.receiveByDataClass<MenuRequest> {
                     it.menuId != null
                 }
-                call.respondSuccess(menuService.updateMenu(menu))
+                call.respondSuccess(menuService.updateMenu(menu).also {
+                    operate(
+                        desc = "修改菜单：[${menu.displayName}]",
+                        call = call
+                    )
+                })
             }
 
             /** 获取菜单 **/
@@ -52,15 +69,26 @@ fun Route.menuAdminRouting() {
                     it.index >= 0
                 }
                 call.respondSuccess(
-                    menuService.addMenuItem(menuItem)
-                        ?: throw AddFailedException()
+                    menuService.addMenuItem(menuItem)?.also {
+                        operate(
+                            desc = "添加菜单项：[${menuItem.displayName}]",
+                            call = call
+                        )
+                    } ?: throw AddFailedException()
                 )
             }
 
             /** 删除菜单项 **/
             delete("/item") {
                 val menuItemIds = call.receiveByDataClass<List<Long>>()
-                call.respondSuccess(menuService.deleteMenus(menuItemIds))
+                call.respondSuccess(menuService.deleteMenus(menuItemIds).also {
+                    if (menuItemIds.isNotEmpty()) {
+                        operate(
+                            desc = "删除菜单项：[${menuItemIds.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改菜单项 **/
@@ -68,7 +96,14 @@ fun Route.menuAdminRouting() {
                 val menuItem = call.receiveByDataClass<MenuItemRequest> {
                     it.menuItemId != null && it.parentMenuId > 0 && it.index >= 0
                 }
-                call.respondSuccess(menuService.updateMenuItem(menuItem))
+                call.respondSuccess(menuService.updateMenuItem(menuItem).also {
+                    if (it) {
+                        operate(
+                            desc = "修改菜单项：[${menuItem.displayName}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 获取菜单项 **/

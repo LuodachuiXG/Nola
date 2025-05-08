@@ -23,14 +23,27 @@ fun Route.diaryAdminRouting() {
             /** 添加日记 **/
             post {
                 val diary = call.receiveByDataClass<DiaryRequest>()
-                call.respondSuccess(diaryService.addDiary(diary) ?: throw AddFailedException())
+                call.respondSuccess(diaryService.addDiary(diary)?.also {
+                    operate(
+                        // 只取前 20 个字符
+                        desc = "添加日记 [${diary.content.take(20)}]}",
+                        call = call
+                    )
+                } ?: throw AddFailedException())
             }
 
             /** 删除日记 **/
             delete {
                 val ids = call.receiveByDataClass<List<Long>>()
                 if (ids.isEmpty()) call.respondSuccess(false)
-                call.respondSuccess(diaryService.deleteDiaries(ids))
+                call.respondSuccess(diaryService.deleteDiaries(ids).also {
+                    if (it) {
+                        operate(
+                            desc = "删除日记 [${ids.joinToString(", ")}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 修改日记 **/
@@ -38,7 +51,14 @@ fun Route.diaryAdminRouting() {
                 val diary = call.receiveByDataClass<DiaryRequest> {
                     it.diaryId != null
                 }
-                call.respondSuccess(diaryService.updateDiary(diary))
+                call.respondSuccess(diaryService.updateDiary(diary).also {
+                    if (it) {
+                        operate(
+                            desc = "修改日记 [${diary.diaryId}]",
+                            call = call
+                        )
+                    }
+                })
             }
 
             /** 获取日志 **/

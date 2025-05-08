@@ -63,7 +63,7 @@ private fun Route.fileRouting() {
         // 文件存储方式
         var storageMode: FileStorageModeEnum? = null
         multipartData.forEachPart { part ->
-            when(part) {
+            when (part) {
                 is PartData.FormItem -> {
                     if (part.name == "fileGroupId" && part.value.isNotBlank()) {
                         if (part.value.isInt()) fileGroupId = part.value.toLong()
@@ -74,10 +74,12 @@ private fun Route.fileRouting() {
                         storageMode = FileStorageModeEnum.valueOf(part.value)
                     }
                 }
+
                 is PartData.FileItem -> {
                     inputStream = part.provider().readRemaining().inputStream()
                     originName = part.originalFileName
                 }
+
                 else -> {}
             }
             part.dispose()
@@ -90,31 +92,57 @@ private fun Route.fileRouting() {
         call.respondSuccess(
             // 上传文件
             fileService.uploadFile(
-                inputStream = inputStream!!,
+                inputStream = inputStream,
                 fileName = originName!!,
                 storageMode = storageMode ?: FileStorageModeEnum.LOCAL,
                 fileGroupId = fileGroupId,
                 fileLength = fileLength
-            )
+            )?.also {
+                operate(
+                    desc = "上传文件：[$originName]",
+                    call = call
+                )
+            }
         )
     }
 
     /** 根据文件 ID 集合删除文件 **/
     delete {
         val ids = call.receiveByDataClass<List<Long>>()
-        call.respondSuccess(fileService.deleteFiles(ids))
+        call.respondSuccess(fileService.deleteFiles(ids).also {
+            if (it.isNotEmpty()) {
+                operate(
+                    desc = "删除文件：[${ids.joinToString(", ")}]",
+                    call = call
+                )
+            }
+        })
     }
 
     /** 根据文件索引数据类集合删除文件 **/
     delete("/name") {
         val fileIndexes = call.receiveByDataClass<List<FileIndex>>()
-        call.respondSuccess(fileService.deleteFilesByFineIndexes(fileIndexes))
+        call.respondSuccess(fileService.deleteFilesByFineIndexes(fileIndexes).also {
+            if (it.isNotEmpty()) {
+                operate(
+                    desc = "删除文件：[${fileIndexes.joinToString(", ") { it -> it.name }}]",
+                    call = call
+                )
+            }
+        })
     }
 
     /** 移动文件 **/
     put {
         val fileMoveRequest = call.receiveByDataClass<FileMoveRequest>()
-        call.respondSuccess(fileService.moveFiles(fileMoveRequest))
+        call.respondSuccess(fileService.moveFiles(fileMoveRequest).also {
+            if (it.isNotEmpty()) {
+                operate(
+                    desc = "移动文件到新分组，文件 ID: [${fileMoveRequest.fileIds.joinToString(", ")}]，新分组 ID: [${fileMoveRequest.newFileGroupId}]",
+                    call = call
+                )
+            }
+        })
     }
 
     /** 获取文件 **/
@@ -144,13 +172,25 @@ private fun Route.fileGroupRouting() {
         /** 添加文件组 **/
         post {
             val fileGroup = call.receiveByDataClass<FileGroup>()
-            call.respondSuccess(fileService.addFileGroup(fileGroup) ?: throw AddFailedException())
+            call.respondSuccess(fileService.addFileGroup(fileGroup)?.also {
+                operate(
+                    desc = "添加文件组：[${fileGroup.displayName}]",
+                    call = call
+                )
+            } ?: throw AddFailedException())
         }
 
         /** 删除文件组 **/
         delete("/{fileGroupId}") {
             val fileGroupId = call.receiveIntPathParam("fileGroupId").toLong()
-            call.respondSuccess(fileService.deleteFileGroup(fileGroupId))
+            call.respondSuccess(fileService.deleteFileGroup(fileGroupId).also {
+                if (it) {
+                    operate(
+                        desc = "删除文件组：[${fileGroupId}]",
+                        call = call
+                    )
+                }
+            })
         }
 
         /** 修改文件组 **/
@@ -158,7 +198,14 @@ private fun Route.fileGroupRouting() {
             val fileGroup = call.receiveByDataClass<FileGroupUpdateRequest> {
                 it.fileGroupId >= 0
             }
-            call.respondSuccess(fileService.updateFileGroup(fileGroup))
+            call.respondSuccess(fileService.updateFileGroup(fileGroup).also {
+                if (it) {
+                    operate(
+                        desc = "修改文件组，ID: [${fileGroup.fileGroupId}]，新名称：[${fileGroup.displayName}]",
+                        call = call
+                    )
+                }
+            })
         }
 
         /** 根据文件组存储方式获取文件组 **/
@@ -175,8 +222,8 @@ private fun Route.fileGroupRouting() {
  * 文件存储方式相关路由
  */
 private fun Route.fileStorageModeRouting() {
-    /** 获取已经设置的所有存储方式 **/
     route("/mode") {
+        /** 获取已经设置的所有存储方式 **/
         get {
             call.respondSuccess(fileService.getModes())
         }
@@ -184,12 +231,26 @@ private fun Route.fileStorageModeRouting() {
         /** 设置腾讯云对象存储 */
         post("/tencent_cos") {
             val config = call.receiveByDataClass<TencentCOSConfig>()
-            call.respondSuccess(fileService.setTencentCOS(config))
+            call.respondSuccess(fileService.setTencentCOS(config).also {
+                if (it) {
+                    operate(
+                        desc = "设置腾讯云对象存储配置",
+                        call = call
+                    )
+                }
+            })
         }
 
         /** 删除腾讯云对象存储配置 **/
         delete("/tencent_cos") {
-            call.respondSuccess(fileService.deleteTencentCOS())
+            call.respondSuccess(fileService.deleteTencentCOS().also {
+                if (it) {
+                    operate(
+                        desc = "删除腾讯云对象存储配置",
+                        call = call
+                    )
+                }
+            })
         }
 
         /** 获取腾讯云对象存储配置 **/

@@ -41,7 +41,15 @@ fun Route.configAdminRouting() {
                     createDate = Date().time
                 )
                 // 设置博客配置信息
-                call.respondSuccess(configService.setBlogInfo(blogInfo))
+                call.respondSuccess(configService.setBlogInfo(blogInfo).also {
+                    if (it) {
+                        operate(
+                            desc = "初始化博客，标题：[${blogInfo.title}]，副标题：[${blogInfo.subtitle}]",
+                            call = call,
+                            isHighRisk = true
+                        )
+                    }
+                })
             }
 
             /** 初始化管理员 **/
@@ -68,7 +76,15 @@ fun Route.configAdminRouting() {
                     salt = ""
                 )
                 // 初始化管理员
-                call.respondSuccess(userService.initAdmin(user, call.ip()))
+                call.respondSuccess(userService.initAdmin(user, call.ip()).also {
+                    if (it) {
+                        operate(
+                            desc = "初始化管理员，用户名：[${user.username}]，邮箱：[${user.email}]，昵称：[${user.displayName}]",
+                            call = call,
+                            isHighRisk = true
+                        )
+                    }
+                })
             }
 
             /** 博客信息 **/
@@ -95,7 +111,15 @@ fun Route.configAdminRouting() {
                                 logo = blogInfoRequest.logo,
                                 favicon = blogInfoRequest.favicon
                             )
-                        )
+                        ).also {
+                            if (it) {
+                                operate(
+                                    desc = "修改博客信息，标题：[${blogInfoRequest.title}]，副标题：[${blogInfoRequest.subtitle}]",
+                                    call = call,
+                                    isHighRisk = true
+                                )
+                            }
+                        }
                     )
                 }
             }
@@ -108,7 +132,15 @@ fun Route.configAdminRouting() {
                     val icpRequest = call.receiveByDataClass<ICPFiling>()
                     // 不修改博客的创建时间
                     call.respondSuccess(
-                        configService.setICPFiling(icpRequest)
+                        configService.setICPFiling(icpRequest).also {
+                            if (it) {
+                                operate(
+                                    desc = "修改备案信息，ICP：[${icpRequest.icp}]，公网安备号：[${icpRequest.public}]",
+                                    call = call,
+                                    isHighRisk = true
+                                )
+                            }
+                        }
                     )
                 }
 
