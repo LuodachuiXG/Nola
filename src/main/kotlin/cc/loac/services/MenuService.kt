@@ -95,4 +95,10 @@ interface MenuService {
      * @param buildTree 是否构建菜单项树
      */
     suspend fun mainMenu(buildTree: Boolean): List<MenuItemResponse>
+
+
+    /**
+     * 获取主菜单的菜单项数量
+     */
+    suspend fun mainMenuItemCount(): Long
 }

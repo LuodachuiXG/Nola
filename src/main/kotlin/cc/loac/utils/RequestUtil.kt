@@ -227,7 +227,7 @@ suspend fun ApplicationCall.receivePageAndSize(
  */
 fun ApplicationCall.getTokenClaim(tokenClaim: TokenClaimEnum): TokenClaim? {
     val principal = this.principal<JWTPrincipal>()
-    return principal?.getClaim(tokenClaim.toString(), String::class)?.let { value ->
+    return principal?.getClaim(tokenClaim.key, String::class)?.let { value ->
         TokenClaim(name = tokenClaim, value = value)
     }
 }

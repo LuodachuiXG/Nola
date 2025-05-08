@@ -280,4 +280,12 @@ class UserServiceImpl : UserService {
             token = token
         )
     }
+
+    /**
+     * 获取最后登录时间
+     * @param id 用户 ID
+     */
+    override suspend fun lastLoginDate(id: Long): Long? {
+        return userDao.lastLoginDate(id)
+    }
 }

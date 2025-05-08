@@ -129,4 +129,11 @@ class TagServiceImpl : TagService {
         return nonExistIds
     }
 
+    /**
+     * 标签数量
+     */
+    override suspend fun tagCount(): Long {
+        return tagDao.tagCount()
+    }
+
 }

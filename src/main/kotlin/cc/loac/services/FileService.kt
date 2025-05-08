@@ -143,4 +143,10 @@ interface FileService {
         groupId: Long? = null,
         key: String? = null
     ): Pager<FileResponse>
+
+
+    /**
+     * 获取文件数量
+     */
+    suspend fun fileCount(): Long
 }

@@ -66,4 +66,9 @@ interface CategoryDao {
      * @param slug 分类别名
      */
     suspend fun categoryBySlug(slug: String): Category?
+
+    /**
+     * 分类数量
+     */
+    suspend fun categoryCount(): Long
 }

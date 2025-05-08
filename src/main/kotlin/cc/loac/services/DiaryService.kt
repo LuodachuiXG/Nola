@@ -41,4 +41,9 @@ interface DiaryService {
      * @param sort 日志排序
      */
     suspend fun diaries(page: Int, size: Int, sort: DiarySort? = null): Pager<Diary>
+
+    /**
+     * 日记数量
+     */
+    suspend fun diaryCount(): Long
 }

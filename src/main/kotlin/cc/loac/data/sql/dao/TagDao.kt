@@ -71,4 +71,9 @@ interface TagDao {
      * @param slug 标签别名
      */
     suspend fun tagBySlug(slug: String): Tag?
+
+    /**
+     * 标签数量
+     */
+    suspend fun tagCount(): Long
 }

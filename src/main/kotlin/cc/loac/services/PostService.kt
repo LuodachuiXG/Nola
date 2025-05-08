@@ -250,4 +250,9 @@ interface PostService {
      * 导出所有文章
      */
     suspend fun exportPosts(): ExportPostResponse
+
+    /**
+     * 获取浏览量最多的文章
+     */
+    suspend fun mostViewedPost(): Post?
 }

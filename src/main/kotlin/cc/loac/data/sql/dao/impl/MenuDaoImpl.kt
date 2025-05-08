@@ -243,6 +243,24 @@ class MenuDaoImpl : MenuDao {
     }
 
     /**
+     * 获取主菜单的菜单项数量
+     */
+    override suspend fun mainMenuItemCount(): Long = dbQuery {
+        // 先获取主菜单 ID
+        val mainMenuId = Menus.selectAll()
+            .where { Menus.isMain eq true }
+            .firstOrNull()?.get(Menus.menuId)
+        if (mainMenuId == null) {
+            0
+        } else {
+            // 获取主菜单的菜单项数量
+            MenuItems.selectAll().where {
+                MenuItems.parentMenuId eq mainMenuId
+            }.count()
+        }
+    }
+
+    /**
      * 将除了给定的菜单 ID 以外的主菜单设为非主菜单
      * @param menuId 菜单 ID
      */

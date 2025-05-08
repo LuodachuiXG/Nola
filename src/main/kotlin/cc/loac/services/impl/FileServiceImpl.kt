@@ -561,6 +561,13 @@ class FileServiceImpl : FileService {
     }
 
     /**
+     * 获取文件数量
+     */
+    override suspend fun fileCount(): Long {
+        return fileDao.getFileCount()
+    }
+
+    /**
      * 根据文件索引数据类删除数据库中总的文件记录
      * @param fileIndexes 文件索引数据类集合
      */

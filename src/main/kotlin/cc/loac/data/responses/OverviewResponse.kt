@@ -1,6 +1,8 @@
 package cc.loac.data.responses
 
+import cc.loac.data.models.Category
 import cc.loac.data.models.Post
+import cc.loac.data.models.Tag
 
 /**
  * 概述响应数据类
@@ -16,10 +18,10 @@ data class OverviewResponse(
     val count: OverviewCount,
     val tags: List<OverviewTag>,
     val categories: List<OverviewCategory>,
-    val mostViewedPost: Post,
-    val lastOperation: String,
-    val lastLoginDate: Long,
-    val createDate: Long
+    val mostViewedPost: Post?,
+    val lastOperation: String?,
+    val lastLoginDate: Long?,
+    val createDate: Long?
 )
 
 /**
@@ -34,14 +36,14 @@ data class OverviewResponse(
  * @param menu 菜单数量
  */
 data class OverviewCount(
-    val post: Int,
-    val tag: Int,
-    val category: Int,
-    val comment: Int,
-    val diary: Int,
-    val file: Int,
-    val link: Int,
-    val menu: Int
+    val post: Long,
+    val tag: Long,
+    val category: Long,
+    val comment: Long,
+    val diary: Long,
+    val file: Long,
+    val link: Long,
+    val menu: Long
 )
 
 /**
@@ -53,8 +55,22 @@ data class OverviewCount(
 data class OverviewTag(
     val tagId: Long,
     val displayName: String,
-    val postCount: Int
-)
+    val postCount: Long
+) {
+    companion object {
+
+        /**
+         * 将 [Tag] 转为 [OverviewTag]
+         */
+        fun valueOf(tag: Tag): OverviewTag {
+            return OverviewTag(
+                tagId = tag.tagId,
+                displayName = tag.displayName,
+                postCount = tag.postCount ?: 0
+            )
+        }
+    }
+}
 
 /**
  * 概述分类数据
@@ -62,5 +78,19 @@ data class OverviewTag(
 data class OverviewCategory(
     val categoryId: Long,
     val displayName: String,
-    val postCount: Int
-)
+    val postCount: Long
+) {
+    companion object {
+
+        /**
+         * 将 [Category] 转为 [OverviewCategory]
+         */
+        fun valueOf(category: Category): OverviewCategory {
+            return OverviewCategory(
+                categoryId = category.categoryId,
+                displayName = category.displayName,
+                postCount = category.postCount ?: 0
+            )
+        }
+    }
+}

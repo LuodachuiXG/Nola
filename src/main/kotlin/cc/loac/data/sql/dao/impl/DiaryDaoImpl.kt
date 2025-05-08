@@ -87,6 +87,13 @@ class DiaryDaoImpl : DiaryDao {
     }
 
     /**
+     * 日记数量
+     */
+    override suspend fun diaryCount(): Long = dbQuery {
+        Diaries.selectAll().count()
+    }
+
+    /**
      * SQL 语句
      * 查询日记
      * @param sort 日记排序

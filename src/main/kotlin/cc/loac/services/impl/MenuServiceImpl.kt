@@ -252,6 +252,13 @@ class MenuServiceImpl : MenuService {
     }
 
     /**
+     * 获取主菜单的菜单项数量
+     */
+    override suspend fun mainMenuItemCount(): Long {
+        return menuDao.mainMenuItemCount()
+    }
+
+    /**
      * 递归函数，查找并构建子菜单项
      * @param parentMenuItemId 父菜单项 ID
      * @param items 菜单项列表

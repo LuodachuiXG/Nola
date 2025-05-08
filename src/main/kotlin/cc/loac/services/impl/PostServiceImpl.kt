@@ -545,6 +545,13 @@ class PostServiceImpl : PostService {
         )
     }
 
+    /**
+     * 获取浏览量最多的文章
+     */
+    override suspend fun mostViewedPost(): Post? {
+        return postDao.mostViewedPost()
+    }
+
 
     /**
      * 将文章内容写入临时文件夹

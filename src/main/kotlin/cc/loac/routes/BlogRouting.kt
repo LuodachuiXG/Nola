@@ -7,9 +7,9 @@ import cc.loac.services.ConfigService
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.thymeleaf.*
-import org.koin.java.KoinJavaComponent
+import org.koin.java.KoinJavaComponent.inject
 
-private val configService: ConfigService by KoinJavaComponent.inject(ConfigService::class.java)
+private val configService: ConfigService by inject(ConfigService::class.java)
 
 /**
  * 博客页面路由

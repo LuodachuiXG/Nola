@@ -60,4 +60,11 @@ class DiaryServiceImpl : DiaryService {
         }
         return diaryDao.diaries(page, size, sort)
     }
+
+    /**
+     * 日记数量
+     */
+    override suspend fun diaryCount(): Long {
+        return diaryDao.diaryCount()
+    }
 }

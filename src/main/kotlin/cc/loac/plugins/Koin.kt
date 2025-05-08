@@ -77,4 +77,7 @@ val appModule = module {
     // 操作记录服务
     single<OperationService> { OperationServiceImpl() }
     single<OperationDao> { OperationDaoImpl() }
+
+    // 概述服务
+    single<OverviewService> { OverviewServiceImpl() }
 }

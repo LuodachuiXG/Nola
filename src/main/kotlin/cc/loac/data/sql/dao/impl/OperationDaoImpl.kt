@@ -95,6 +95,17 @@ class OperationDaoImpl : OperationDao {
     }
 
     /**
+     * 获取最近的操作记录
+     */
+    override suspend fun lastOperation(): Operation? = dbQuery {
+        val query = Operations
+            .selectAll()
+            .orderBy(Operations.createTime, SortOrder.DESC)
+            .limit(1)
+        query.map(::resultRowToOperation).firstOrNull()
+    }
+
+    /**
      * SQL 语句
      * 查询操作记录
      * @param sort 操作记录排序

@@ -221,4 +221,9 @@ interface PostDao {
      */
     suspend fun isPostPasswordValid(postId: Long, password: String): Boolean
 
+    /**
+     * 获取浏览量最多的文章
+     */
+    suspend fun mostViewedPost(): Post?
+
 }

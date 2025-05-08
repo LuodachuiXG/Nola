@@ -66,4 +66,10 @@ interface UserService {
         password: String,
         ip: String
     ): AuthResponse
+
+    /**
+     * 获取最后登录时间
+     * @param id 用户 ID
+     */
+    suspend fun lastLoginDate(id: Long): Long?
 }

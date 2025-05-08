@@ -97,4 +97,9 @@ interface MenuDao {
      * 获取菜单项数量
      */
     suspend fun menuCount(): Long
+
+    /**
+     * 获取主菜单的菜单项数量
+     */
+    suspend fun mainMenuItemCount(): Long
 }

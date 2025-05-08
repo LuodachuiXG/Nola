@@ -74,4 +74,9 @@ interface TagService {
      * @return 如果标签都存在返回空集合，否则返回不存在的 ID 集合
      */
     suspend fun isIdsExist(tagIds: List<Long>): List<Long>
+
+    /**
+     * 标签数量
+     */
+    suspend fun tagCount(): Long
 }
