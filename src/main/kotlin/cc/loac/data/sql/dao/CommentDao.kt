@@ -93,4 +93,9 @@ interface CommentDao {
      */
     suspend fun commentById(id: Long): Comment?
 
+    /**
+     * 获取评论数量
+     */
+    suspend fun commentCount(): Long
+
 }

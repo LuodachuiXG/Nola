@@ -127,4 +127,14 @@ class UserDaoImpl : UserDao {
     override suspend fun deleteUser(id: Long): Boolean = dbQuery {
         Users.deleteWhere { userId eq id } > 0
     }
+
+    /**
+     * 获取最后登录时间
+     */
+    override suspend fun lastLoginDate(userId: Long): Long? = dbQuery {
+        Users.select(Users.lastLoginDate)
+            .where { Users.userId eq userId }
+            .map { it[Users.lastLoginDate] }
+            .singleOrNull()
+    }
 }

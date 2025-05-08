@@ -101,6 +101,13 @@ class LinkDaoImpl : LinkDao {
     }
 
     /**
+     * 获取友情链接数量
+     */
+    override suspend fun linkCount(): Long = dbQuery {
+        Links.selectAll().count()
+    }
+
+    /**
      * SQL 语句
      * 查询友情链接
      * @param sort 友情链接排序

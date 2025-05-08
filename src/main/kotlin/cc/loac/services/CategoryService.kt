@@ -69,4 +69,9 @@ interface CategoryService {
      * 判断分类别名是否已经存在，并且不是当前分类
      */
     suspend fun isSlugExist(category: Category): Boolean
+
+    /**
+     * 分类数量
+     */
+    suspend fun categoryCount(): Long
 }

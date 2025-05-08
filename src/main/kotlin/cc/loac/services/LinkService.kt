@@ -42,4 +42,10 @@ interface LinkService {
      * @param sort 友情链接排序
      */
     suspend fun links(page: Int, size: Int, sort: LinkSort? = null): Pager<Link>
+
+
+    /**
+     * 获取友情链接数量
+     */
+    suspend fun linkCount(): Long
 }

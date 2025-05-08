@@ -106,4 +106,11 @@ class CategoryServiceImpl : CategoryService {
         val c = categoryBySlug(category.slug)
         return c != null && c.categoryId != category.categoryId
     }
+
+    /**
+     * 分类数量
+     */
+    override suspend fun categoryCount(): Long {
+        return categoryDao.categoryCount()
+    }
 }

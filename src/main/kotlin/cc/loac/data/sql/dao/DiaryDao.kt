@@ -42,4 +42,9 @@ interface DiaryDao {
      */
     suspend fun diaries(page: Int, size: Int, sort: DiarySort?): Pager<Diary>
 
+    /**
+     * 日记数量
+     */
+    suspend fun diaryCount(): Long
+
 }

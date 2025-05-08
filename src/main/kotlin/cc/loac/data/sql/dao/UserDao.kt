@@ -56,4 +56,10 @@ interface UserDao {
      * @param id 用户 ID
      */
     suspend fun deleteUser(id: Long): Boolean
+
+    /**
+     * 获取最后登录时间
+     * @param id 用户 ID
+     */
+    suspend fun lastLoginDate(id: Long): Long?
 }

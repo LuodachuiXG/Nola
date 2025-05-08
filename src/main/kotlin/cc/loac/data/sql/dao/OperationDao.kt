@@ -49,4 +49,9 @@ interface OperationDao {
         size: Int,
         sort: CommentSort?
     ): Pager<Operation>
+
+    /**
+     * 获取最近的操作记录
+     */
+    suspend fun lastOperation(): Operation?
 }

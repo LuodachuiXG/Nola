@@ -66,4 +66,11 @@ class OperationServiceImpl : OperationService {
         }
         return operationDao.operations(page, size, sort)
     }
+
+    /**
+     * 获取最近的操作记录
+     */
+    override suspend fun lastOperation(): Operation? {
+        return operationDao.lastOperation()
+    }
 }

@@ -20,6 +20,9 @@ import org.koin.java.KoinJavaComponent.inject
 
 private val commentService: CommentService by inject(CommentService::class.java)
 
+// 操作记录中的评论内容长度限制
+private const val OPERATION_COMMENT_MAX_LENGTH = 20
+
 /**
  * 评论，管理员路由
  */
@@ -45,7 +48,9 @@ fun Route.commentAdminRouting() {
                         )
                     )?.also {
                         operate(
-                            desc = "添加评论 ID: [${it.commentId}]，内容: [${it.content}]",
+                            desc = "添加评论 ID: [${it.commentId}]，内容: [${
+                                it.content.take(OPERATION_COMMENT_MAX_LENGTH)
+                            }]",
                             call = call
                         )
                     }
@@ -84,7 +89,9 @@ fun Route.commentAdminRouting() {
                     ).also {
                         if (it) {
                             operate(
-                                desc = "修改评论 ID: [${comment.commentId}]，内容: [${comment.content}]",
+                                desc = "修改评论 ID: [${comment.commentId}]，内容: [${
+                                    comment.content.take(OPERATION_COMMENT_MAX_LENGTH)
+                                }]",
                                 call = call
                             )
                         }
@@ -184,8 +191,6 @@ fun Route.commentApiRouting() {
                 val newComment = call.receiveByDataClass<CommentRequest> {
                     it.postId != -1L
                 }
-
-
 
                 call.respondSuccess(
                     commentService.addComment(

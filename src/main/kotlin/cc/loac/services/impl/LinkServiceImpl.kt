@@ -61,4 +61,11 @@ class LinkServiceImpl : LinkService {
         }
         return linkDao.links(page, size, sort)
     }
+
+    /**
+     * 获取友情链接数量
+     */
+    override suspend fun linkCount(): Long {
+        return linkDao.linkCount()
+    }
 }

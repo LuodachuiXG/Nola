@@ -147,6 +147,13 @@ class CategoryDaoImpl : CategoryDao {
     }
 
     /**
+     * 分类数量
+     */
+    override suspend fun categoryCount(): Long = dbQuery {
+        Categories.selectAll().count()
+    }
+
+    /**
      * SQL 语句
      * 获取分类和对应的文章数量
      */

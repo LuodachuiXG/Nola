@@ -42,4 +42,9 @@ interface LinkDao {
      */
     suspend fun links(page: Int, size: Int, sort: LinkSort?): Pager<Link>
 
+    /**
+     * 获取友情链接数量
+     */
+    suspend fun linkCount(): Long
+
 }

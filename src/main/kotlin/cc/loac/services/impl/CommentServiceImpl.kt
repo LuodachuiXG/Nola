@@ -244,4 +244,11 @@ class CommentServiceImpl : CommentService {
     override suspend fun commentById(id: Long): Comment? {
         return commentDao.commentById(id)
     }
+
+    /**
+     * 获取评论数量
+     */
+    override suspend fun commentCount(): Long {
+        return commentDao.commentCount()
+    }
 }

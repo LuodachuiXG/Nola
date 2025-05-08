@@ -670,6 +670,21 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 获取浏览量最多的文章
+     */
+    override suspend fun mostViewedPost(): Post? = dbQuery {
+        val post = Posts
+            .selectAll()
+            .where { Posts.visit greaterEq 0 }
+            .orderBy(Posts.visit, SortOrder.DESC)
+            .limit(1)
+            .map { resultRowToPost(it) }
+            .firstOrNull() ?: return@dbQuery null
+        getPostTagAndCategory(listOf(post))
+        post
+    }
+
+    /**
      * 给列表中的文章填充分类和标签
      * @param posts 文章列表
      */

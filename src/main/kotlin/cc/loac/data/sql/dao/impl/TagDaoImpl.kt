@@ -154,6 +154,13 @@ class TagDaoImpl : TagDao {
     }
 
     /**
+     * 标签数量
+     */
+    override suspend fun tagCount(): Long = dbQuery {
+        Tags.selectAll().count()
+    }
+
+    /**
      * SQL 语句
      * 获取标签和对应的文章数量
      */

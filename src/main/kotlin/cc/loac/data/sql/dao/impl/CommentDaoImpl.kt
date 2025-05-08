@@ -198,4 +198,11 @@ class CommentDaoImpl : CommentDao {
             .map(::resultRowToComment)
             .singleOrNull()
     }
+
+    /**
+     * 获取评论数量
+     */
+    override suspend fun commentCount(): Long = dbQuery {
+        Comments.selectAll().count()
+    }
 }
