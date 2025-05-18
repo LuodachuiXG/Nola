@@ -13,7 +13,7 @@ import org.koin.java.KoinJavaComponent.inject
 private val overviewService: OverviewService by inject(OverviewService::class.java)
 
 /**
- * 概述，管理员路由
+ * 概览，管理员路由
  */
 fun Route.overviewAdminRouting() {
     route("/overview") {
@@ -31,7 +31,7 @@ fun Route.overviewAdminRouting() {
 }
 
 /**
- * 概述，API 路由
+ * 概览，API 路由
  */
 fun Route.overviewApiRouting() {
     route("/overview") {
