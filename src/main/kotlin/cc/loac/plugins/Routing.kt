@@ -83,7 +83,7 @@ fun Application.configureRouting(
             commentAdminRouting()
             // operation 操作记录管理员路由
             operationAdminRouting()
-            // overview 概述管理员路由
+            // overview 概览管理员路由
             overviewAdminRouting()
         }
 
@@ -107,7 +107,7 @@ fun Application.configureRouting(
             diaryApiRouting()
             // 评论 API 路由
             commentApiRouting()
-            // overview 概述 API 路由
+            // overview 概览 API 路由
             overviewApiRouting()
         }
     }

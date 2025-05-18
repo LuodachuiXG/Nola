@@ -13,7 +13,7 @@ import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
 
 /**
- * 概述服务接口实现类
+ * 概览服务接口实现类
  */
 class OverviewServiceImpl : OverviewService {
 
@@ -33,7 +33,7 @@ class OverviewServiceImpl : OverviewService {
 
 
     /**
-     * 获取概述信息
+     * 获取概览信息
      * @param userId 用户ID
      */
     override suspend fun getOverview(userId: Long): OverviewResponse = coroutineScope {
@@ -79,7 +79,7 @@ class OverviewServiceImpl : OverviewService {
         val mostViewedPost = otherResult[2] as Post?
         val lastOperation = otherResult[3] as Operation?
 
-        // 概述项目数量
+        // 概览项目数量
         val overviewCount = OverviewCount(
             post = countResult[0] ?: 0L,
             tag = tags.size.toLong(),

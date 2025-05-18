@@ -5,7 +5,7 @@ import cc.loac.data.models.Post
 import cc.loac.data.models.Tag
 
 /**
- * 概述响应数据类
+ * 概览响应数据类
  * @param count 项目数量
  * @param tags 标签列表
  * @param categories 分类列表
@@ -25,7 +25,7 @@ data class OverviewResponse(
 )
 
 /**
- * 概述项目数量
+ * 概览项目数量
  * @param post 文章数量
  * @param tag 标签数量
  * @param category 分类数量
@@ -47,7 +47,7 @@ data class OverviewCount(
 )
 
 /**
- * 概述标签数据
+ * 概览标签数据
  * @param tagId 标签 ID
  * @param displayName 标签名
  * @param postCount 文章数量
@@ -73,7 +73,7 @@ data class OverviewTag(
 }
 
 /**
- * 概述分类数据
+ * 概览分类数据
  */
 data class OverviewCategory(
     val categoryId: Long,
