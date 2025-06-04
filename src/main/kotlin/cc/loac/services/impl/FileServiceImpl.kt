@@ -15,6 +15,7 @@ import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
+import cc.loac.data.requests.FileRecordRequest
 import cc.loac.data.responses.FileResponse
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.dao.FileDao
@@ -245,7 +246,7 @@ class FileServiceImpl : FileService {
         if (fileGroupId != null) {
             // 先尝试获取文件组
             fileGroup = getFileGroup(fileGroupId)
-            if (fileGroup?.storageMode == null || fileGroup.storageMode != storageMode) {
+            if (fileGroup == null || fileGroup.storageMode != storageMode) {
                 throw MyException("文件组 [$fileGroupId] 不存在")
             }
         }
@@ -326,6 +327,67 @@ class FileServiceImpl : FileService {
     }
 
     /**
+     * 添加上传文件记录
+     * @param fileRecord 文件记录请求类
+     */
+    override suspend fun uploadFileRecord(fileRecord: FileRecordRequest): FileResponse? {
+        val currentStorageMode = fileRecord.storageMode ?: FileStorageModeEnum.LOCAL
+
+        var fileGroup: FileGroup? = null
+        // 文件组 ID 不为空
+        if (fileRecord.fileGroupId != null) {
+            // 先尝试获取文件组
+            fileGroup = getFileGroup(fileRecord.fileGroupId)
+            if (fileGroup == null || fileGroup.storageMode != currentStorageMode) {
+                throw MyException("文件组 [${fileRecord.fileGroupId}] 不存在")
+            }
+        }
+
+        // 如果存储方式不为本地存储，就先查看对应的存储方式是否已经配置
+        if (currentStorageMode != FileStorageModeEnum.LOCAL) {
+            // 先尝试初始化存储方式
+            initFileStorageMode(FileStorageModeEnum.TENCENT_COS) ?: throw FileStorageNotConfiguredException(
+                FileStorageModeEnum.TENCENT_COS
+            )
+        }
+
+        // 查看当前文件名是否已经存在
+        val file = fileDao.getFile(fileRecord.name, fileRecord.fileGroupId, currentStorageMode)
+        if (file != null) {
+            // 文件已经存在，抛出异常
+            // 这里和上面的上传接口此处处理逻辑不一样，是因为此接口是针对已经上传过的文件，添加文件记录
+            // 所以这里如果文件名重复，直接抛出异常即可
+            throw MyException("文件名 [${fileRecord.name}] 已经存在")
+        }
+
+        // 将文件信息添加到数据库
+        val newFileResult = fileDao.addFile(
+            MFile(
+                fileId = -1,
+                fileGroupId = fileRecord.fileGroupId,
+                displayName = fileRecord.name,
+                size = fileRecord.size,
+                storageMode = currentStorageMode,
+                createTime = Date().time
+            )
+        )
+        return FileResponse(
+            fileId = newFileResult?.fileId ?: -1,
+            fileGroupId = fileRecord.fileGroupId,
+            fileGroupName = fileGroup?.displayName,
+            displayName = fileRecord.name,
+            url = if (currentStorageMode == FileStorageModeEnum.LOCAL) {
+                ("/upload/" + (fileGroup?.path ?: "") + "/${fileRecord.name}").formatSlash()
+            } else {
+                tencentCOSUrl(tencentConfig!!, fileRecord.name, fileGroup?.displayName)
+            },
+            size = fileRecord.size,
+            storageMode = currentStorageMode,
+            createTime = newFileResult?.createTime ?: Date().time
+        )
+    }
+
+    /**
      * 根据文件 ID 删除文件
      * @param ids 文件 ID 集合
      * @return 删除成功的文件 ID 集合
@@ -345,13 +407,14 @@ class FileServiceImpl : FileService {
         }
         // 删除文件，获取成功删除的文件索引数据类
         val deletedResult = deleteFilesByFineIndexes(fileIndexes)
+
         // 返回删除成功的文件 ID
         return if (deletedResult.size == ids.size) {
             // 成功删除的文件数量和要删除的文件数量相同，返回要删除的文件 ID 集合
             ids
         } else {
             // 返回删除成功的文件 ID
-            fileIndexes.map { it.fileId!! }
+            deletedResult.map { it.fileId!! }
         }
     }
 

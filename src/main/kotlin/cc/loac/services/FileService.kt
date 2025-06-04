@@ -7,6 +7,7 @@ import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
+import cc.loac.data.requests.FileRecordRequest
 import cc.loac.data.responses.FileResponse
 import cc.loac.data.responses.Pager
 import java.io.InputStream
@@ -103,6 +104,14 @@ interface FileService {
         storageMode: FileStorageModeEnum,
         fileGroupId: Long?,
         fileLength: Long?
+    ): FileResponse?
+
+    /**
+     * 添加上传文件记录
+     * @param fileRecord 文件记录请求类
+     */
+    suspend fun uploadFileRecord(
+        fileRecord: FileRecordRequest
     ): FileResponse?
 
     /**

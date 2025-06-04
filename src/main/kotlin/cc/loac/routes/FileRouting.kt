@@ -9,6 +9,7 @@ import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
 import cc.loac.data.requests.FileMoveRequest
+import cc.loac.data.requests.FileRecordRequest
 import cc.loac.extensions.isEnum
 import cc.loac.extensions.isInt
 import cc.loac.services.FileService
@@ -104,6 +105,18 @@ private fun Route.fileRouting() {
                 )
             }
         )
+    }
+
+
+    /** 添加文件记录 **/
+    post("/record") {
+        val request = call.receiveByDataClass<FileRecordRequest>()
+        call.respondSuccess(fileService.uploadFileRecord(request)?.also {
+            operate(
+                desc = "添加文件记录：[${it.displayName}]",
+                call = call
+            )
+        })
     }
 
     /** 根据文件 ID 集合删除文件 **/
