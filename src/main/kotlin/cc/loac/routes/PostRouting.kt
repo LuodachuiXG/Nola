@@ -120,7 +120,7 @@ fun Route.postAdminRouting() {
             /** 修改文章状态，如：文章状态、可见性、置顶 **/
             put("/status") {
                 val postStatusRequest = call.receiveByDataClass<PostStatusRequest> {
-                    it.postId != 0L && it.status != PostStatus.DELETED
+                    it.postId != 0L
                 }
                 call.respondSuccess(postService.updatePostStatus(postStatusRequest).also {
                     if (it) {
