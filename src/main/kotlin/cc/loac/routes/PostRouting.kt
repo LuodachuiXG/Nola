@@ -100,8 +100,8 @@ fun Route.postAdminRouting() {
             /** 修改文章 **/
             put {
                 val postRequest = call.receiveByDataClass<PostRequest> {
-                    // 如果 postId 等于 0 证明没传参，并且文章状态不能设置为已删除
-                    it.postId != null && it.postId > 0 && it.status != PostStatus.DELETED
+                    // 如果 postId 等于 0 证明没传参
+                    it.postId != null && it.postId > 0
                 }
                 // 文章设为加密，但是没有提供密码
                 if (postRequest.encrypted == true && postRequest.password.isNullOrEmpty()) {
