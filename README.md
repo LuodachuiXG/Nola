@@ -83,9 +83,9 @@ Nola 有详细的 API 文档，使用 Apifox 进行编写，API 文档地址：[
 
 #### 3.Nola Apple 端
 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-<img src="./img/nola_ios_1.png" alt="nola_ios_1"  width=240/>
-<img src="./img/nola_ios_2.png" alt="nola_ios_2"  width=240/>
-<img src="./img/nola_ios_3.png" alt="nola_ios_3"  width=240/>
-<img src="./img/nola_ios_4.png" alt="nola_ios_4"  width=240/>
-<img src="./img/nola_ios_5.png" alt="nola_ios_5"  width=240/>
+<img src="./img/nola_ios_1.PNG" alt="nola_ios_1"  width=240/>
+<img src="./img/nola_ios_2.PNG" alt="nola_ios_2"  width=240/>
+<img src="./img/nola_ios_3.PNG" alt="nola_ios_3"  width=240/>
+<img src="./img/nola_ios_4.PNG" alt="nola_ios_4"  width=240/>
+<img src="./img/nola_ios_5.PNG" alt="nola_ios_5"  width=240/>
 </div>
