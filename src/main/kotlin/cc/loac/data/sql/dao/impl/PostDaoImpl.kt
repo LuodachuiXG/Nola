@@ -242,7 +242,7 @@ class PostDaoImpl : PostDao {
             it[visible] = pr.visible
             it[cover] = pr.cover
             it[pinned] = pr.pinned
-            if (pr.encrypted != null && pr.encrypted == true) {
+            if (pr.encrypted != null && pr.encrypted) {
                 it[password] = pr.password.sha256Hex()
             } else if (pr.encrypted == false) {
                 it[password] = ""
