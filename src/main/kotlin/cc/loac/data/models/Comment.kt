@@ -6,6 +6,7 @@ import java.util.*
  * 评论数据类
  * @param commentId 评论 ID
  * @param postId 文章 ID
+ * @param postTitle 文章标题
  * @param parentCommentId 父评论 ID
  * @param replyCommentId 回复评论 ID
  * @param replyDisplayName 回复评论用户名
@@ -20,6 +21,7 @@ import java.util.*
 data class Comment(
     val commentId: Long = -1,
     val postId: Long,
+    val postTitle: String? = null,
     val parentCommentId: Long? = null,
     val replyCommentId: Long? = null,
     val replyDisplayName: String? = null,

@@ -61,10 +61,8 @@ interface CommentService {
      * @param slug 文章别名
      * @param commentId 评论 ID
      * @param parentId 父评论 ID
-     * @param email 评论者邮箱
-     * @param displayName 评论者昵称
      * @param isPass 是否通过审核
-     * @param key 关键字
+     * @param key 关键字（内容、名称、邮箱）
      * @param sort 排序方式（默认时间降序）
      * @param tree 是否将子评论放置到父评论的 children 字段中（默认 false）
      *             此项为 true 时，commentId、parentId、email、displayName、key 参数无效
@@ -76,8 +74,6 @@ interface CommentService {
         slug: String? = null,
         commentId: Long? = null,
         parentId: Long? = null,
-        email: String? = null,
-        displayName: String? = null,
         isPass: Boolean? = null,
         key: String? = null,
         sort: CommentSort? = null,

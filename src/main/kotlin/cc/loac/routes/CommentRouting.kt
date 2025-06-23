@@ -132,14 +132,6 @@ fun Route.commentAdminRouting() {
                         it?.isInt()
                     }?.toLong()
 
-                    // 可空邮箱
-                    val email = call.receiveNullablePathParam("email") {
-                        it?.isEmail()
-                    }
-
-                    // 可空名称
-                    val displayName = call.receiveNullablePathParam("displayName")
-
                     // 可空是否通过审核
                     val isPass = call.receiveNullablePathParam("isPass") {
                         it?.isBoolean()
@@ -165,8 +157,6 @@ fun Route.commentAdminRouting() {
                             postId = postId,
                             commentId = commentId,
                             parentId = parentId,
-                            email = email,
-                            displayName = displayName,
                             isPass = isPass,
                             key = key,
                             sort = sort,
