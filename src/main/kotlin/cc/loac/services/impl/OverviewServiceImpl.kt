@@ -4,10 +4,8 @@ import cc.loac.data.models.Category
 import cc.loac.data.models.Operation
 import cc.loac.data.models.Post
 import cc.loac.data.models.Tag
-import cc.loac.data.responses.OverviewCategory
 import cc.loac.data.responses.OverviewCount
 import cc.loac.data.responses.OverviewResponse
-import cc.loac.data.responses.OverviewTag
 import cc.loac.services.*
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
@@ -74,8 +72,8 @@ class OverviewServiceImpl : OverviewService {
         val countResult = countJob.awaitAll()
         val otherResult = listOf(tagJob, categoryJob, mostViewedPostJob, lastOperationJob).awaitAll()
 
-        val tags = otherResult[0] as List<*>
-        val categories = otherResult[1] as List<*>
+        val tags = (otherResult[0] as? List<*>)?.filterIsInstance<Tag>() ?: emptyList()
+        val categories = (otherResult[1] as? List<*>)?.filterIsInstance<Category>() ?: emptyList()
         val mostViewedPost = otherResult[2] as Post?
         val lastOperation = otherResult[3] as Operation?
 
@@ -93,8 +91,8 @@ class OverviewServiceImpl : OverviewService {
 
         OverviewResponse(
             count = overviewCount,
-            tags = tags.map { OverviewTag.valueOf(it as Tag) },
-            categories = categories.map { OverviewCategory.valueOf(it as Category) },
+            tags = tags,
+            categories = categories,
             mostViewedPost = mostViewedPost,
             lastOperation = lastOperation?.operationDesc,
             lastLoginDate = countResult[6],
