@@ -7,6 +7,7 @@ import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CommentDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.Comments
+import cc.loac.data.sql.tables.Posts
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
@@ -23,6 +24,7 @@ class CommentDaoImpl : CommentDao {
     private fun resultRowToComment(row: ResultRow) = Comment(
         commentId = row[Comments.commentId],
         postId = row[Comments.postId],
+        postTitle = if (row.hasValue(Posts.title)) row[Posts.title] else null,
         parentCommentId = row[Comments.parentCommentId],
         replyCommentId = row[Comments.replyCommentId],
         replyDisplayName = row[Comments.replyDisplayName],
@@ -144,8 +146,6 @@ class CommentDaoImpl : CommentDao {
      * @param postId 文章 ID
      * @param commentId 评论 ID
      * @param parentId 父评论 ID
-     * @param email 评论者邮箱
-     * @param displayName 评论者昵称
      * @param isPass 是否通过审核
      * @param key 关键字
      * @param sort 排序方式（默认时间降序）
@@ -156,20 +156,21 @@ class CommentDaoImpl : CommentDao {
         postId: Long?,
         commentId: Long?,
         parentId: Long?,
-        email: String?,
-        displayName: String?,
         isPass: Boolean?,
         key: String?,
         sort: CommentSort?
     ): Pager<Comment> {
-        val query = Comments.selectAll()
+        val query = Comments
+            .leftJoin(Posts, additionalConstraint = {
+                Posts.postId eq Comments.postId
+            })
+            .selectAll()
+
         postId?.let { query.andWhere { Comments.postId eq it } }
         commentId?.let { query.andWhere { Comments.commentId eq it } }
         parentId?.let { query.andWhere { Comments.parentCommentId eq it } }
-        email?.let { query.andWhere { Comments.email eq it } }
-        displayName?.let { query.andWhere { Comments.displayName eq it } }
         isPass?.let { query.andWhere { Comments.isPass eq it } }
-        key?.let { query.andWhere { Comments.content like "%$it%" } }
+        key?.let { query.andWhere { Comments.content like "%$it%" or (Comments.email like "%$it%") or (Comments.displayName like "%$it%") } }
         when (sort) {
             CommentSort.CREATE_TIME_DESC -> query.orderBy(Comments.createTime, SortOrder.DESC)
             CommentSort.CREATE_TIME_ASC -> query.orderBy(Comments.createTime, SortOrder.ASC)

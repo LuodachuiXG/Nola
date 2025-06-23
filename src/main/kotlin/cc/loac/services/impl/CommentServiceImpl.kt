@@ -159,10 +159,8 @@ class CommentServiceImpl : CommentService {
      * @param slug 文章别名
      * @param commentId 评论 ID
      * @param parentId 父评论 ID
-     * @param email 评论者邮箱
-     * @param displayName 评论者昵称
      * @param isPass 是否通过审核
-     * @param key 关键字
+     * @param key 关键字（内容、名称、邮箱）
      * @param sort 排序方式（默认时间降序）
      * @param tree 是否将子评论放置到父评论的 children 字段中（默认 false）
      *             此项为 true 时，commentId、parentId、email、displayName、key 参数无效
@@ -174,8 +172,6 @@ class CommentServiceImpl : CommentService {
         slug: String?,
         commentId: Long?,
         parentId: Long?,
-        email: String?,
-        displayName: String?,
         isPass: Boolean?,
         key: String?,
         sort: CommentSort?,
@@ -199,8 +195,6 @@ class CommentServiceImpl : CommentService {
                 postId = mPostId,
                 commentId = null,
                 parentId = null,
-                email = null,
-                displayName = null,
                 isPass = isPass,
                 key = null,
                 sort = sort
@@ -228,8 +222,6 @@ class CommentServiceImpl : CommentService {
                 postId = mPostId,
                 commentId = commentId,
                 parentId = parentId,
-                email = email,
-                displayName = displayName,
                 isPass = isPass,
                 key = key,
                 sort = sort

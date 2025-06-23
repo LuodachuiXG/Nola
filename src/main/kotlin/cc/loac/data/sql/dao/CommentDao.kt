@@ -67,10 +67,8 @@ interface CommentDao {
      * @param postId 文章 ID
      * @param commentId 评论 ID
      * @param parentId 父评论 ID
-     * @param email 评论者邮箱
-     * @param displayName 评论者昵称
      * @param isPass 是否通过审核
-     * @param key 关键字
+     * @param key 关键字（内容、名称、邮箱）
      * @param sort 排序方式（默认时间降序）
      */
     suspend fun comments(
@@ -79,8 +77,6 @@ interface CommentDao {
         postId: Long? = null,
         commentId: Long? = null,
         parentId: Long? = null,
-        email: String? = null,
-        displayName: String? = null,
         isPass: Boolean? = null,
         key: String? = null,
         sort: CommentSort? = null
