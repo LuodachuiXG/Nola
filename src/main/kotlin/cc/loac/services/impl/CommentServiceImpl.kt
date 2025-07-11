@@ -65,7 +65,7 @@ class CommentServiceImpl : CommentService {
 
         // 站点不合法
         newComment.site?.let {
-            if (!it.isUrl()) throw MyException("站点格式错误")
+            if (it != "/" && !it.isUrl()) throw MyException("站点格式错误")
         }
 
         // 邮箱不合法
