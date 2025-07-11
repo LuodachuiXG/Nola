@@ -12,7 +12,7 @@ package cc.loac.data.requests
 data class CommentUpdateRequest(
     val commentId: Long = -1,
     val content: String,
-    val site: String,
+    val site: String?,
     val displayName: String,
     val email: String,
     val isPass: Boolean
