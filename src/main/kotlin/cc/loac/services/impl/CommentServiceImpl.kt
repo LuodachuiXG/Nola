@@ -133,7 +133,7 @@ class CommentServiceImpl : CommentService {
     override suspend fun updateComment(comment: Comment): Boolean {
         if (comment.content.isBlank()) throw MyException("评论内容不能为空")
         comment.site?.let {
-            if (!it.isUrl()) throw MyException("站点格式错误")
+            if (it != "/" && !it.isUrl()) throw MyException("站点格式错误")
         }
         if (comment.displayName.isBlank()) throw MyException("名称不能为空")
         comment.email.let {
