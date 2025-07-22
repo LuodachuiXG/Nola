@@ -1,1 +1,0 @@
-import{d as e,h as a,c as o,a as t,bu as n,o as s}from"./index-CyEZChOx.js";const c={class:"container"},l=e({__name:"FileView",setup(r){return a(()=>{}),(_,i)=>(s(),o("div",c,[t(n)]))}});export{l as default};

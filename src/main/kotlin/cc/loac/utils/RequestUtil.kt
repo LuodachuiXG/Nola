@@ -14,6 +14,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.*
 import io.ktor.server.request.*
+import io.lettuce.core.dynamic.annotation.Param
 
 /**
  * 根据数据类获取请求的参数
@@ -58,14 +59,17 @@ suspend fun ApplicationCall.receiveByName(vararg names: String): Parameters {
  */
 suspend fun ApplicationCall.receiveMapByName(
     vararg names: RequestParam
-): Map<String, String> {
+): Map<String, String?> {
     val requestText = this.receiveText()
     val json = requestText.toJSON()
-    val map = mutableMapOf<String, String>()
+    json.error()
+    val map = mutableMapOf<String, String?>()
     names.forEach { name ->
-        val node = json[name.paramName]?.textValue() ?: throw ParamMismatchException()
+        val node = json[name.paramName]?.textValue()
         // 当前参数设置不可为空，但是实际传参为空
-        if (!name.nullable && node.isBlank()) throw ParamMismatchException()
+        if (!name.nullable && node == null) {
+            throw ParamMismatchException()
+        }
         map[name.paramName] = node
     }
     return map
@@ -78,7 +82,7 @@ suspend fun ApplicationCall.receiveMapByName(
  */
 suspend fun ApplicationCall.receiveMapByName(
     vararg names: String
-): Map<String, String> {
+): Map<String, String?> {
     val list = mutableListOf<RequestParam>()
     names.forEach { name ->
         list.add(name.nonNull())
