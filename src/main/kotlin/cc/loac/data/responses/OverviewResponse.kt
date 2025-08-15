@@ -7,8 +7,8 @@ import cc.loac.data.models.Tag
 /**
  * 概览响应数据类
  * @param count 项目数量
- * @param tags 标签列表
- * @param categories 分类列表
+ * @param tags 文章最多的 6 个标签
+ * @param categories 文章最多的 6 个分类
  * @param mostViewedPost 浏览量最多的文章
  * @param lastOperation 最近的一次操作
  * @param lastLoginDate 最后登录时间

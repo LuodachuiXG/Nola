@@ -62,7 +62,6 @@ suspend fun ApplicationCall.receiveMapByName(
 ): Map<String, String?> {
     val requestText = this.receiveText()
     val json = requestText.toJSON()
-    json.error()
     val map = mutableMapOf<String, String?>()
     names.forEach { name ->
         val node = json[name.paramName]?.textValue()

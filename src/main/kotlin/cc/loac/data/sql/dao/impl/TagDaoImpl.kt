@@ -132,6 +132,16 @@ class TagDaoImpl : TagDao {
     }
 
     /**
+     * 获取文章数量最多的 6 个标签
+     */
+    override suspend fun topTags(): List<Tag> = dbQuery {
+        sqlSelectTag()
+        .orderBy(PostTags.postTagId.count(), SortOrder.DESC)
+        .limit(6)
+        .map(::resultRowToTag)
+    }
+
+    /**
      * 根据标签名称获取标签
      * @param displayName 标签名称
      */

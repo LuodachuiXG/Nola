@@ -50,6 +50,11 @@ interface CategoryDao {
     suspend fun categories(page: Int, size: Int): Pager<Category>
 
     /**
+     * 获取文章数量最多的 6 个分类
+     */
+    suspend fun topCategories(): List<Category>
+
+    /**
      * 根据分类 ID 获取分类
      * @param id 分类 ID
      */

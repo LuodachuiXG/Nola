@@ -61,6 +61,11 @@ interface TagDao {
     suspend fun tags(tagIds: List<Long>): List<Tag>
 
     /**
+     * 获取文章数量最多的 6 个标签
+     */
+    suspend fun topTags(): List<Tag>
+
+    /**
      * 根据标签名称获取标签
      * @param displayName 标签名称
      */

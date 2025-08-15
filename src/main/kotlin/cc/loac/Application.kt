@@ -1,8 +1,7 @@
 package cc.loac
 
-import cc.loac.data.redis.RedisSingleton
-import cc.loac.plugins.*
 import cc.loac.data.sql.DatabaseSingleton
+import cc.loac.plugins.*
 import cc.loac.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
