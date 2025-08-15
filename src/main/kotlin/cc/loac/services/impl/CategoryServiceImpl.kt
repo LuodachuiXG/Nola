@@ -76,6 +76,13 @@ class CategoryServiceImpl : CategoryService {
     }
 
     /**
+     * 获取文章数量最多的 6 个分类
+     */
+    override suspend fun topCategories(): List<Category> {
+        return categoryDao.topCategories()
+    }
+
+    /**
      * 根据分类 ID 获取分类
      * @param id 分类 ID
      */

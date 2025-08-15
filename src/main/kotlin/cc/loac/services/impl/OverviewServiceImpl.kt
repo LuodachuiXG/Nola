@@ -49,14 +49,14 @@ class OverviewServiceImpl : OverviewService {
             ioScope.async { configService.blogInfo()?.createDate }
         )
 
-        // 所有标签
+        // 文章最多的 6 个标签
         val tagJob = ioScope.async {
-            tagService.tags()
+            tagService.topTags()
         }
 
-        // 所有分类
+        // 文章最多的 6 个分类
         val categoryJob = ioScope.async {
-            categoryService.categories()
+            categoryService.topCategories()
         }
 
         // 浏览量最多的文章

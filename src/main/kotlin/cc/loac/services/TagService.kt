@@ -38,6 +38,11 @@ interface TagService {
     suspend fun tags(): List<Tag>
 
     /**
+     * 获取文章数量最多的 6 个标签
+     */
+    suspend fun topTags(): List<Tag>
+
+    /**
      * 分页获取所有标签
      * @param page 当前页
      * @param size 每页条数

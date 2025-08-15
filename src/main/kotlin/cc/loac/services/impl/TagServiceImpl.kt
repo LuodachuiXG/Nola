@@ -61,6 +61,13 @@ class TagServiceImpl : TagService {
     }
 
     /**
+     * 获取文章数量最多的 6 个标签
+     */
+    override suspend fun topTags(): List<Tag> {
+        return tagDao.topTags()
+    }
+
+    /**
      * 分页获取所有标签
      * @param page 当前页
      * @param size 每页条数

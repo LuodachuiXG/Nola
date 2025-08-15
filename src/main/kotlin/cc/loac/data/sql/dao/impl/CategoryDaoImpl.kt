@@ -103,6 +103,16 @@ class CategoryDaoImpl : CategoryDao {
     }
 
     /**
+     * 获取文章数量最多的 6 个分类
+     */
+    override suspend fun topCategories(): List<Category> = dbQuery {
+        sqlSelectCategory()
+            .orderBy(PostCategories.categoryId.count(), SortOrder.DESC)
+            .limit(6)
+            .map(::resultRowToCategory)
+    }
+
+    /**
      * 根据文章 ID 获取文章分类
      * @param postId 文章 ID
      */
