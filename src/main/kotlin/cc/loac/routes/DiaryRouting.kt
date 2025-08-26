@@ -26,7 +26,7 @@ fun Route.diaryAdminRouting() {
                 call.respondSuccess(diaryService.addDiary(diary)?.also {
                     operate(
                         // 只取前 20 个字符
-                        desc = "添加日记 [${diary.content.take(20)}]}",
+                        desc = "添加日记 [${diary.content.take(20)}]",
                         call = call
                     )
                 } ?: throw AddFailedException())
