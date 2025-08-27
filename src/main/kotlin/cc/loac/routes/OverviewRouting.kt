@@ -36,6 +36,7 @@ private val overviewService: OverviewService by inject(OverviewService::class.ja
 fun Route.overviewAdminRouting() {
     route("/overview") {
         authenticate {
+            /** 获取博客概览数据 **/
             get {
                 val userId = call.getUser().first
                 call.respondSuccess(
@@ -75,6 +76,13 @@ fun Route.overviewAdminRouting() {
  */
 fun Route.overviewApiRouting() {
     route("/overview") {
+        /** 获取博客 API 概览数据 **/
+        get {
+            call.respondSuccess(
+                overviewService.getApiOverview()
+            )
+        }
+
         /** 当前博客页面在线人数 WebSocket **/
         rateLimit(LIMITER_ONLINE_COUNT_WB) {
             webSocket("online") {
