@@ -11,6 +11,7 @@ import cc.loac.data.models.Tag
  * @param categories 文章最多的 6 个分类
  * @param mostViewedPost 浏览量最多的文章
  * @param lastOperation 最近的一次操作
+ * @param blogOnlineCount 博客当前在线人数
  * @param lastLoginDate 最后登录时间
  * @param createDate 博客创建时间
  */
@@ -20,6 +21,7 @@ data class OverviewResponse(
     val categories: List<Category>,
     val mostViewedPost: Post?,
     val lastOperation: String?,
+    val blogOnlineCount: Int,
     val lastLoginDate: Long?,
     val createDate: Long?
 )
