@@ -109,6 +109,8 @@ fun Application.configureRouting(
             commentApiRouting()
             // overview 概览 API 路由
             overviewApiRouting()
+            // blog 博客 API 路由
+            blogRouting()
         }
     }
 }
