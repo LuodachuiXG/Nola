@@ -6,6 +6,7 @@ import cc.loac.data.models.Post
 import cc.loac.data.models.Tag
 import cc.loac.data.responses.OverviewCount
 import cc.loac.data.responses.OverviewResponse
+import cc.loac.manager.BlogOnlineManager
 import cc.loac.services.*
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
@@ -89,12 +90,16 @@ class OverviewServiceImpl : OverviewService {
             menu = countResult[5] ?: 0L
         )
 
+        // 博客当前在线人数
+        val onlineCount = BlogOnlineManager.getInstance().getCurrentCount()
+
         OverviewResponse(
             count = overviewCount,
             tags = tags,
             categories = categories,
             mostViewedPost = mostViewedPost,
             lastOperation = lastOperation?.operationDesc,
+            blogOnlineCount = onlineCount,
             lastLoginDate = countResult[6],
             createDate = countResult[7]
         )
