@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
  */
 object LogUtil {
     private val logger: Logger by lazy {
-        LoggerFactory.getLogger("Nola-Log")
+        LoggerFactory.getLogger("Nola")
     }
 
     /**

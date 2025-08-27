@@ -1,7 +1,9 @@
 package cc.loac.plugins
 
 import io.ktor.server.application.*
+import io.ktor.server.plugins.origin
 import io.ktor.server.plugins.ratelimit.*
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 /** 管理员登录速率限制器 */
@@ -10,6 +12,8 @@ val LIMITER_ADMIN_LOGIN = RateLimitName("LIMITER_ADMIN_LOGIN")
 val LIMITER_ENCRYPT_POST = RateLimitName("LIMITER_ENCRYPT_POST")
 /** 添加评论限速器 **/
 val LIMITER_ADD_COMMENT = RateLimitName("LIMITER_COMMENT")
+/** 在线人数 WebSocket 限速器 **/
+val LIMITER_ONLINE_COUNT_WB = RateLimitName("LIMITER_ONLINE_COUNT_WB")
 
 /**
  * 配置接口速率限制插件
@@ -34,6 +38,14 @@ fun Application.configureRateLimit() {
         // 添加评论限速器
         register(LIMITER_ADD_COMMENT) {
             rateLimiter(limit = 2, refillPeriod = 30.seconds)
+        }
+
+        // 在线人数 WebSocket 限速器
+        register(LIMITER_ONLINE_COUNT_WB) {
+            rateLimiter(limit = 10, refillPeriod = 1.minutes)
+            requestKey { call ->
+                call.request.origin.remoteHost
+            }
         }
     }
 }
