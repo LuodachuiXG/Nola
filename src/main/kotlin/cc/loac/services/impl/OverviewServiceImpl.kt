@@ -4,10 +4,14 @@ import cc.loac.data.models.Category
 import cc.loac.data.models.Operation
 import cc.loac.data.models.Post
 import cc.loac.data.models.Tag
+import cc.loac.data.responses.ApiOverviewCount
+import cc.loac.data.responses.ApiOverviewResponse
 import cc.loac.data.responses.OverviewCount
 import cc.loac.data.responses.OverviewResponse
+import cc.loac.data.responses.toApiPostResponse
 import cc.loac.manager.BlogOnlineManager
 import cc.loac.services.*
+import com.google.protobuf.Api
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -29,7 +33,6 @@ class OverviewServiceImpl : OverviewService {
     private val operationService: OperationService by inject(OperationService::class.java)
     private val userService: UserService by inject(UserService::class.java)
     private val configService: ConfigService by inject(ConfigService::class.java)
-
 
     /**
      * 获取概览信息
@@ -101,6 +104,63 @@ class OverviewServiceImpl : OverviewService {
             lastOperation = lastOperation?.operationDesc,
             lastLoginDate = countResult[6],
             createDate = countResult[7]
+        )
+    }
+
+    /**
+     * 获取博客 API 概览信息
+     */
+    override suspend fun getApiOverview(): ApiOverviewResponse {
+        // 统计数量
+        val countJob = listOf(
+            ioScope.async { postService.postCount() },
+            ioScope.async { commentService.commentCount() },
+            ioScope.async { diaryService.diaryCount() },
+            ioScope.async { linkService.linkCount() },
+            // 博客创建时间
+            ioScope.async { configService.blogInfo()?.createDate },
+            // 文章总浏览量
+            ioScope.async { postService.postVisitCount() }
+        )
+
+        // 文章最多的 6 个标签
+        val tagJob = ioScope.async {
+            tagService.topTags()
+        }
+
+        // 文章最多的 6 个分类
+        val categoryJob = ioScope.async {
+            categoryService.topCategories()
+        }
+
+        // 浏览量最多的文章
+        val mostViewedPostJob = ioScope.async {
+            postService.mostViewedPost()
+        }
+        val countResult = countJob.awaitAll()
+        val otherResult = listOf(tagJob, categoryJob, mostViewedPostJob).awaitAll()
+
+        val tags = (otherResult[0] as? List<*>)?.filterIsInstance<Tag>() ?: emptyList()
+        val categories = (otherResult[1] as? List<*>)?.filterIsInstance<Category>() ?: emptyList()
+        val mostViewedPost = otherResult[2] as Post?
+
+        // 概览项目数量
+        val overviewCount = ApiOverviewCount(
+            post = countResult[0] ?: 0L,
+            tag = tags.size.toLong(),
+            category = categories.size.toLong(),
+            comment = countResult[1] ?: 0L,
+            diary = countResult[2] ?: 0L,
+            link = countResult[3] ?: 0L,
+        )
+
+        return ApiOverviewResponse(
+            postVisitCount = countResult[5] ?: 0L,
+            count = overviewCount,
+            tags = tags,
+            categories = categories,
+            mostViewedPost = mostViewedPost?.toApiPostResponse(),
+            createDate = countResult[4]
         )
     }
 
