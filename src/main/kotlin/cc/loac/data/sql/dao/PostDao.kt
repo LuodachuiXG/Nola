@@ -226,4 +226,9 @@ interface PostDao {
      */
     suspend fun mostViewedPost(): Post?
 
+    /**
+     * 获取文章总浏览量
+     */
+    suspend fun postVisitCount(): Long
+
 }
