@@ -90,16 +90,12 @@ class OverviewServiceImpl : OverviewService {
             menu = countResult[5] ?: 0L
         )
 
-        // 博客当前在线人数
-        val onlineCount = BlogOnlineManager.getInstance().getCurrentCount()
-
         OverviewResponse(
             count = overviewCount,
             tags = tags,
             categories = categories,
             mostViewedPost = mostViewedPost,
             lastOperation = lastOperation?.operationDesc,
-            blogOnlineCount = onlineCount,
             lastLoginDate = countResult[6],
             createDate = countResult[7]
         )

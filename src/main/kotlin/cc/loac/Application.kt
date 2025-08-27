@@ -27,6 +27,8 @@ fun Application.module() {
 //    RedisSingleton.init(environment.config)
     // WebSocket 配置
     configureWebSocket()
+    // SSE 配置
+    configureSSE()
     // 模板引擎配置
     configureThymeleaf()
     // 接口访问速率限制配置

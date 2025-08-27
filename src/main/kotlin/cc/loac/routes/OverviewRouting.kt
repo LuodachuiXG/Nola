@@ -11,15 +11,21 @@ import io.ktor.server.plugins.origin
 import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.head
 import io.ktor.server.routing.route
+import io.ktor.server.sse.heartbeat
+import io.ktor.server.sse.sse
 import io.ktor.server.websocket.webSocket
+import io.ktor.sse.ServerSentEvent
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import org.koin.java.KoinJavaComponent.inject
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 
 private val overviewService: OverviewService by inject(OverviewService::class.java)
@@ -37,6 +43,28 @@ fun Route.overviewAdminRouting() {
                         userId = userId
                     )
                 )
+            }
+
+            /** 管理端 SSE 订阅当前博客现在人数 **/
+            sse("online") {
+
+                // 心跳包保持连接
+                heartbeat {
+                    period = 30.seconds
+                    event = ServerSentEvent("ping")
+                }
+
+                val sessionId = UUID.randomUUID().toString()
+                val manager = BlogOnlineManager.getInstance()
+
+                try {
+                    manager.addSseSubscriber(sessionId, this)
+                    // 保持连接直到断开
+                    awaitCancellation()
+                } catch (_: Exception) {
+                } finally {
+                    manager.removeSseSubscriber(sessionId)
+                }
             }
         }
     }
@@ -71,9 +99,11 @@ fun Route.overviewApiRouting() {
                                     send(Frame.Text("pong"))
                                 }
                             }
+
                             is Frame.Close -> {
                                 break
                             }
+
                             else -> {}
                         }
                     }

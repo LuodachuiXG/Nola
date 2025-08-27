@@ -1,6 +1,7 @@
 package cc.loac.manager
 
 import cc.loac.extensions.toJSONString
+import io.ktor.server.sse.ServerSSESession
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
@@ -66,6 +67,9 @@ class BlogOnlineManager private constructor() {
 
     // 每个 IP 最多只计算 5 个设备
     private val maxConnectionsPerIp = 5
+
+    // 当前管理端 SSE 订阅者
+    private val sseSubscribers = ConcurrentHashMap<String, ServerSSESession>()
 
     /**
      * 添加连接
@@ -138,12 +142,54 @@ class BlogOnlineManager private constructor() {
             connections.remove(sessionId)
             onlineCount.decrementAndGet()
         }
+
+        // 向管理端 SSE 广播消息
+        broadcastOnlineCountToSse(count)
+    }
+
+    /**
+     * 向管理端 SSE 广播人数
+     * @param count 在线人数
+     */
+    private suspend fun broadcastOnlineCountToSse(count: Int) {
+        val message = OnlineCount(
+            count = count,
+            timestamp = System.currentTimeMillis()
+        ).toJSONString()
+
+        sseSubscribers.forEach { (_, session) ->
+            try {
+                session.send(message)
+            } catch (_: Exception) {}
+        }
     }
 
     /**
      * 获取当前连接数量
      */
     fun getCurrentCount(): Int = onlineCount.get()
+
+    /**
+     * 添加管理端 SSE 订阅者
+     * @param sessionId Session ID
+     * @param session ServerSSESession
+     */
+    suspend fun addSseSubscriber(sessionId: String, session: ServerSSESession) {
+        connectionMutex.withLock {
+            sseSubscribers[sessionId] = session
+        }
+    }
+
+    /**
+     * 移除管理端 SSE 订阅者
+     * @param sessionId Session ID
+     */
+    suspend fun removeSseSubscriber(sessionId: String) {
+        connectionMutex.withLock {
+            sseSubscribers.remove(sessionId)
+        }
+    }
+
 
     /**
      * 清理无效连接

@@ -116,6 +116,9 @@ dependencies {
     // WebSocket
     implementation("io.ktor:ktor-server-websockets:$ktor_version")
 
+    // SSE
+    implementation("io.ktor:ktor-server-sse:$ktor_version")
+
     // 用于处理 Redis Lettuce Kotlin 相关异步操作
     // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-core
     runtimeOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:${kotlinx_coroutines_version}")
