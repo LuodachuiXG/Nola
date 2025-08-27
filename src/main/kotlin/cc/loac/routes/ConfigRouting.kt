@@ -2,7 +2,6 @@ package cc.loac.routes
 
 import cc.loac.data.exceptions.MyException
 import cc.loac.data.models.BlogInfo
-import cc.loac.data.models.Config
 import cc.loac.data.models.ICPFiling
 import cc.loac.data.models.User
 import cc.loac.data.models.enums.ConfigKey
@@ -11,7 +10,6 @@ import cc.loac.utils.respondSuccess
 import cc.loac.services.ConfigService
 import cc.loac.services.UserService
 import cc.loac.utils.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
@@ -135,7 +133,7 @@ fun Route.configAdminRouting() {
                         configService.setICPFiling(icpRequest).also {
                             if (it) {
                                 operate(
-                                    desc = "修改备案信息，ICP：[${icpRequest.icp}]，公网安备号：[${icpRequest.public}]",
+                                    desc = "修改备案信息，ICP：[${icpRequest.icp}]，公网安备号：[${icpRequest.police}]",
                                     call = call,
                                     isHighRisk = true
                                 )
