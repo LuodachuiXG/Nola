@@ -685,6 +685,15 @@ class PostDaoImpl : PostDao {
     }
 
     /**
+     * 获取文章总浏览量
+     */
+    override suspend fun postVisitCount(): Long = dbQuery {
+        Posts
+            .select(Posts.visit.sum())
+            .firstOrNull()?.get(Posts.visit.sum())?.toLong() ?: 0L
+    }
+
+    /**
      * 给列表中的文章填充分类和标签
      * @param posts 文章列表
      */

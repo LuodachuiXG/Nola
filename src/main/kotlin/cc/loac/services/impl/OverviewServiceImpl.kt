@@ -47,7 +47,9 @@ class OverviewServiceImpl : OverviewService {
             // 最后登录时间
             ioScope.async { userService.lastLoginDate(id = userId) },
             // 博客创建时间
-            ioScope.async { configService.blogInfo()?.createDate }
+            ioScope.async { configService.blogInfo()?.createDate },
+            // 文章总浏览量
+            ioScope.async { postService.postVisitCount() }
         )
 
         // 文章最多的 6 个标签
@@ -91,6 +93,7 @@ class OverviewServiceImpl : OverviewService {
         )
 
         OverviewResponse(
+            postVisitCount = countResult[8] ?: 0L,
             count = overviewCount,
             tags = tags,
             categories = categories,

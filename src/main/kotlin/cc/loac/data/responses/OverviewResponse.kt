@@ -6,6 +6,7 @@ import cc.loac.data.models.Tag
 
 /**
  * 概览响应数据类
+ * @param postVisitCount 文章总浏览量
  * @param count 项目数量
  * @param tags 文章最多的 6 个标签
  * @param categories 文章最多的 6 个分类
@@ -15,6 +16,7 @@ import cc.loac.data.models.Tag
  * @param createDate 博客创建时间
  */
 data class OverviewResponse(
+    val postVisitCount: Long,
     val count: OverviewCount,
     val tags: List<Tag>,
     val categories: List<Category>,

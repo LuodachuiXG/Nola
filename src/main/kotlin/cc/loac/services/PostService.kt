@@ -255,4 +255,10 @@ interface PostService {
      * 获取浏览量最多的文章
      */
     suspend fun mostViewedPost(): Post?
+
+
+    /**
+     * 获取文章总浏览量
+     */
+    suspend fun postVisitCount(): Long
 }

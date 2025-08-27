@@ -552,6 +552,13 @@ class PostServiceImpl : PostService {
         return postDao.mostViewedPost()
     }
 
+    /**
+     * 获取文章总浏览量
+     */
+    override suspend fun postVisitCount(): Long {
+        return postDao.postVisitCount()
+    }
+
 
     /**
      * 将文章内容写入临时文件夹
