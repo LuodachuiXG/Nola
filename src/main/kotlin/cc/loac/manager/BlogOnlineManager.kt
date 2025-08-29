@@ -37,7 +37,6 @@ class BlogOnlineManager private constructor() {
                 instance ?: BlogOnlineManager().also {
                     instance = it
 
-
                     if (job == null) {
                         // 启动定时任务
                         job = ioScope.launch {
@@ -178,6 +177,8 @@ class BlogOnlineManager private constructor() {
         connectionMutex.withLock {
             sseSubscribers[sessionId] = session
         }
+        // 向服务端广播在线人数
+        broadcastOnlineCountToSse(getCurrentCount())
     }
 
     /**
