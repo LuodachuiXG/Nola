@@ -71,9 +71,10 @@ fun firstPost(): PostRequest {
 fun newPostRequestByNameAndContent(name: String, content: String): PostRequest {
     return PostRequest(
         postId = null,
+        // 防止文章名称为 Markdown 文件名，剔除掉后缀名
         title = if (name.contains(".")) {
             val index = name.lastIndexOf(".")
-            name.substring(0, index)
+            name.take(index)
         } else {
             name
         },

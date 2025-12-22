@@ -106,7 +106,7 @@ class MenuServiceImpl : MenuService {
     override suspend fun addMenuItem(menuItem: MenuItemRequest): MenuItem? {
         // 添加前先检查父菜单是否存在
         menu(menuItem.parentMenuId) ?: throw MyException("父菜单 [${menuItem.parentMenuId}] 不存在")
-        // 如果父菜单项不为空，再检查一下父菜单项是否存在
+        // 如果父菜单不为空，再检查一下父菜单项是否存在
         if (menuItem.parentMenuItemId != null) {
             menuItem(menuItem.parentMenuItemId) ?: throw MyException("父菜单项 [${menuItem.parentMenuItemId}] 不存在")
         }
@@ -117,7 +117,7 @@ class MenuServiceImpl : MenuService {
      * 删除菜单项
      * @param menuItemIds 菜单项 ID 集合
      */
-    override suspend fun deleteMenus(menuItemIds: List<Long>): Boolean {
+    override suspend fun deleteMenuItems(menuItemIds: List<Long>): Boolean {
         // 先获取所有菜单项
         val menuItems = menuDao.menuItems()
         // 获取要删除的所有菜单项的所有子菜单项 ID

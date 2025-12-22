@@ -48,7 +48,7 @@ fun String.matches(regex: String, find: Boolean = false): Boolean {
  * 验证是否是邮箱
  */
 fun String.isEmail(): Boolean {
-    return this.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}\$")
+    return this.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
 }
 
 /**
@@ -56,7 +56,7 @@ fun String.isEmail(): Boolean {
  * 验证是否是由字母和数字组成
  */
 fun String.isAlphaAndNumeric(): Boolean {
-    return this.matches("^[A-Za-z0-9]+\$")
+    return this.matches("^[A-Za-z0-9]+$")
 }
 
 /**
@@ -64,7 +64,7 @@ fun String.isAlphaAndNumeric(): Boolean {
  * 验证是否是十六进制颜色值
  */
 fun String.isHexColor(): Boolean {
-    return this.matches("^#([0-9a-fA-F]{6})\$")
+    return this.matches("^#([0-9a-fA-F]{6})$")
 }
 
 /**

@@ -6,6 +6,7 @@ package cc.loac.data.responses
  * @param url 链接地址
  * @param logo logo 地址
  * @param description 描述
+ * @param isLost 是否失联
  */
 data class ApiLinkResponse(
     val displayName: String,

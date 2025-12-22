@@ -5,7 +5,6 @@ import cc.loac.data.requests.MenuItemRequest
 import cc.loac.data.requests.MenuRequest
 import cc.loac.services.MenuService
 import cc.loac.utils.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.routing.*
 import org.koin.java.KoinJavaComponent.inject
@@ -81,7 +80,7 @@ fun Route.menuAdminRouting() {
             /** 删除菜单项 **/
             delete("/item") {
                 val menuItemIds = call.receiveByDataClass<List<Long>>()
-                call.respondSuccess(menuService.deleteMenus(menuItemIds).also {
+                call.respondSuccess(menuService.deleteMenuItems(menuItemIds).also {
                     if (menuItemIds.isNotEmpty()) {
                         operate(
                             desc = "删除菜单项：[${menuItemIds.joinToString(", ")}]",

@@ -17,12 +17,13 @@ import cc.loac.extensions.markdownToPlainText
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
-import cc.loac.utils.*
-import io.ktor.server.routing.*
+import cc.loac.utils.createZip
+import cc.loac.utils.formatDate
+import cc.loac.utils.randomString
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
-import java.util.Date
+import java.util.*
 
 /**
  * 文章服务接口实现类
@@ -373,7 +374,7 @@ class PostServiceImpl : PostService {
         // 先判断文章是否存在
         if (!isPostExist(postId)) throw MyException("文章 [$postId] 不存在")
         // 判断草稿名是否已经存在
-        if (isPostDraftNameExist(postId, draftName)) throw MyException("草稿名 [$draftName] 已经存在")
+        if (isPostDraftNameExist(postId, draftName)) throw MyException("草稿名 [$draftName] 已存在")
         return postDao.addPostDraft(postId, content, draftName)
     }
 
@@ -651,7 +652,7 @@ class PostServiceImpl : PostService {
         if (str.isNullOrEmpty()) return ""
         var excerpt = str.markdownToPlainText()
         if (excerpt.length >= length) {
-            excerpt = excerpt.substring(0, length)
+            excerpt = excerpt.take(length)
         }
         return excerpt
     }

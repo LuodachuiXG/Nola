@@ -8,7 +8,6 @@ import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.PostTags
 import cc.loac.data.sql.tables.Tags
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 
 /**
@@ -64,6 +63,16 @@ class TagDaoImpl : TagDao {
     override suspend fun deleteTagsBySlugs(slugs: List<String>): Boolean = dbQuery {
         Tags.deleteWhere {
             slug inList slugs
+        } > 0
+    }
+
+    /**
+     * 根据标签 ID 集合删除对应的文章关联
+     * @param ids 标签 ID 集合
+     */
+    override suspend fun deletePostTagByTagIds(ids: List<Long>): Boolean = dbQuery {
+        PostTags.deleteWhere {
+            tagId inList ids
         } > 0
     }
 

@@ -98,7 +98,7 @@ fun Route.userApiRouting() {
                 call.respondSuccess(null)
                 return@get
             }
-            call.respondSuccess(userService.allUsers().first().toBloggerResponse())
+            call.respondSuccess(users.first().toBloggerResponse())
         }
     }
 }

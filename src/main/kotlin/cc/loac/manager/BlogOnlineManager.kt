@@ -108,7 +108,12 @@ class BlogOnlineManager private constructor() {
         return connectionMutex.withLock {
             connections.remove(sessionId)
             ipConnectionCount[clientIp]?.decrementAndGet()
-            val currentCount = onlineCount.decrementAndGet()
+            var currentCount = onlineCount.decrementAndGet()
+
+            if (currentCount <= 0) {
+                onlineCount.set(0)
+                currentCount = 0
+            }
 
             // 广播新的在线人数
             broadcastOnlineCount(currentCount)

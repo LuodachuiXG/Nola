@@ -26,6 +26,12 @@ interface TagDao {
     suspend fun deleteTagsBySlugs(slugs: List<String>): Boolean
 
     /**
+     * 根据标签 ID 集合删除对应的文章关联
+     * @param ids 标签 ID 集合
+     */
+    suspend fun deletePostTagByTagIds(ids: List<Long>): Boolean
+
+    /**
      * 修改标签
      * @param tag 标签数据类
      */

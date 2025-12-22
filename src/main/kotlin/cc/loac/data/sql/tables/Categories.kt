@@ -13,7 +13,7 @@ object Categories : Table("category") {
     val displayName = varchar("display_name", 256)
 
     /** 分类别名 **/
-    val slug = varchar("slug", 64, "utf8mb4_general_ci").uniqueIndex()
+    val slug = varchar("slug", 128, "utf8mb4_general_ci").uniqueIndex()
 
     /** 封面 **/
     val cover = varchar("cover", 256).nullable()

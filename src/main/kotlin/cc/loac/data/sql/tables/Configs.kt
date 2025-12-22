@@ -15,7 +15,7 @@ object Configs : Table("config") {
     val key = enumerationByName<ConfigKey>("key", 64).uniqueIndex()
 
     /** 配置数据 **/
-    val value = text("value");
+    val value = text("value")
 
     override val primaryKey = PrimaryKey(configId)
 }
