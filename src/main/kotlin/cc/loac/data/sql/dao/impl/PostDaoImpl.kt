@@ -182,13 +182,8 @@ class PostDaoImpl : PostDao {
      * 修改文章为删除状态
      * @param postIds 文章 ID 集合
      */
-    override suspend fun updatePostStatusToDeleted(postIds: List<Long>): Boolean = dbQuery {
-        Posts.update({
-            Posts.postId inList postIds
-        }) {
-            it[status] = PostStatus.DELETED
-        } > 0
-    }
+    override suspend fun updatePostStatusToDeleted(postIds: List<Long>): Boolean =
+        updatePostStatusTo(postIds, PostStatus.DELETED)
 
     /**
      * 将文章转为指定状态
@@ -836,18 +831,21 @@ class PostDaoImpl : PostDao {
             }
         }
 
-        when (sort) {
-            CREATE_DESC -> query.orderBy(Posts.createTime, SortOrder.DESC)
-            CREATE_ASC -> query.orderBy(Posts.createTime, SortOrder.ASC)
-            MODIFY_DESC -> query.orderBy(Posts.lastModifyTime, SortOrder.DESC)
-            MODIFY_ASC -> query.orderBy(Posts.lastModifyTime, SortOrder.ASC)
-            VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
-            VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
-            PINNED -> query.orderBy(Posts.pinned, SortOrder.DESC)
-            null -> query.orderBy(Posts.createTime, SortOrder.DESC)
+        if (sort != null) {
+            when (sort) {
+                CREATE_DESC -> query.orderBy(Posts.createTime, SortOrder.DESC)
+                CREATE_ASC -> query.orderBy(Posts.createTime, SortOrder.ASC)
+                MODIFY_DESC -> query.orderBy(Posts.lastModifyTime, SortOrder.DESC)
+                MODIFY_ASC -> query.orderBy(Posts.lastModifyTime, SortOrder.ASC)
+                VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
+                VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
+                PINNED -> query.orderBy(Posts.pinned, SortOrder.DESC)
+
+            }
+        } else {
+            // 默认都有按照创建时间降序
+            query.orderBy(Posts.createTime, SortOrder.DESC)
         }
-        // 默认都有按照创建时间降序
-        query.orderBy(Posts.createTime, SortOrder.DESC)
         return query
     }
 }

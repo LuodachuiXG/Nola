@@ -85,16 +85,17 @@ fun Route.configAdminRouting() {
                 })
             }
 
-            /** 博客信息 **/
-            get {
-                // 获取博客信息
-                val blogInfo = configService.blogInfo()
-                // 检查是否存在管理员
-                val user = userService.allUsers().firstOrNull()
-                call.respondSuccess(blogInfo?.copy(blogger = user?.displayName))
-            }
-
             authenticate {
+
+                /** 博客信息 **/
+                get {
+                    // 获取博客信息
+                    val blogInfo = configService.blogInfo()
+                    // 检查是否存在管理员
+                    val user = userService.allUsers().firstOrNull()
+                    call.respondSuccess(blogInfo?.copy(blogger = user?.displayName))
+                }
+
                 /** 修改博客信息 **/
                 put {
                     // 先判断博客是否已经创建

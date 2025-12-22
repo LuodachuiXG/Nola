@@ -236,7 +236,7 @@ class MenuDaoImpl : MenuDao {
 
 
     /**
-     * 获取菜单项数量
+     * 获取菜单数量
      */
     override suspend fun menuCount(): Long = dbQuery {
         Menus.selectAll().count()

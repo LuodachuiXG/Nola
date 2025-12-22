@@ -69,7 +69,7 @@ interface MenuService {
      * 删除菜单项
      * @param menuItemIds 菜单项 ID 集合
      */
-    suspend fun deleteMenus(menuItemIds: List<Long>): Boolean
+    suspend fun deleteMenuItems(menuItemIds: List<Long>): Boolean
 
     /**
      * 修改菜单项
