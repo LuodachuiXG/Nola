@@ -2,11 +2,6 @@ package cc.loac.utils
 
 import cc.loac.data.files.config.TencentCOSConfig
 import cc.loac.extensions.replaceDoubleSlash
-import com.qcloud.cos.model.Bucket
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 import kotlin.random.Random
 
 /**
@@ -29,7 +24,7 @@ fun randomString(length: Int): String {
 fun tencentCOSUrl(
     config: TencentCOSConfig,
     fileName: String,
-    fileGroupName: String?
+    fileGroupPath: String?
 ): String {
     return "https://" + StringBuilder().apply {
         append(config.bucket)
@@ -37,7 +32,7 @@ fun tencentCOSUrl(
         append(config.region)
         append(".myqcloud.com/")
         append("${config.path}/")
-        append(fileGroupName ?: "")
+        append(fileGroupPath ?: "")
         append("/$fileName")
     }.toString().replaceDoubleSlash()
 }

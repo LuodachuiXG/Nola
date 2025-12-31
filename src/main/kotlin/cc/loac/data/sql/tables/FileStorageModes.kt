@@ -11,7 +11,7 @@ object FileStorageModes : Table("file_storage_mode") {
     val fileStorageModeId = long("file_storage_mode_id").autoIncrement()
 
     /** 文件存储方式 **/
-    val storageMode = enumerationByName("storage_mode", 24, FileStorageModeEnum::class)
+    val storageMode = enumerationByName("storage_mode", 48, FileStorageModeEnum::class)
 
     /** 配置 **/
     val config = text("config")
