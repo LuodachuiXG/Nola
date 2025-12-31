@@ -15,14 +15,10 @@ import cc.loac.extensions.isInt
 import cc.loac.services.FileService
 import cc.loac.utils.*
 import io.ktor.http.content.*
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
-import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
 import io.ktor.utils.io.*
-import io.ktor.utils.io.jvm.javaio.*
 import io.ktor.utils.io.streams.*
 import org.koin.java.KoinJavaComponent.inject
 import java.io.InputStream
@@ -132,10 +128,10 @@ private fun Route.fileRouting() {
         })
     }
 
-    /** 根据文件索引数据类集合删除文件 **/
+    /** 根据文件索引集合删除文件 **/
     delete("/name") {
         val fileIndexes = call.receiveByDataClass<List<FileIndex>>()
-        call.respondSuccess(fileService.deleteFilesByFineIndexes(fileIndexes).also {
+        call.respondSuccess(fileService.deleteFilesByFileIndexes(fileIndexes).also {
             if (it.isNotEmpty()) {
                 operate(
                     desc = "删除文件：[${fileIndexes.joinToString(", ") { it -> it.name }}]",

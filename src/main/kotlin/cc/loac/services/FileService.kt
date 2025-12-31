@@ -126,7 +126,7 @@ interface FileService {
      * @param fileIndexes 文件索引数组
      * @return 删除成功的文件索引数组
      */
-    suspend fun deleteFilesByFineIndexes(fileIndexes: List<FileIndex>): List<FileIndex>
+    suspend fun deleteFilesByFileIndexes(fileIndexes: List<FileIndex>): List<FileIndex>
 
     /**
      * 移动文件

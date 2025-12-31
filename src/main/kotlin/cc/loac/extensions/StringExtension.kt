@@ -164,7 +164,7 @@ fun String.addRandomSuffix(): String {
     // 如果文件名最后已经有了 "_" 加五个随机字符的后缀，则重新修改该后缀
     // 先获取文件名最后六个字符，判断是否符合随机字符规则
     return if (fileName.length >= 6 &&
-        fileName.substring(fileName.length - 6).matches("^_[a-z0-9]+\$")
+        fileName.substring(fileName.length - 6).matches("^_[a-z0-9]+$")
     ) {
         // 符合规则，则重新修改该后缀
         fileName.substring(0, fileName.length - 6) + "_$randomStr.$fileExtension"

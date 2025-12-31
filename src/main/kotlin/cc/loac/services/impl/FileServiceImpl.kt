@@ -175,7 +175,7 @@ class FileServiceImpl : FileService {
     override suspend fun updateFileGroup(fileGroup: FileGroupUpdateRequest): Boolean {
         // 先获取要修改的文件组
         val oldFileGroup =
-            getFileGroup(fileGroup.fileGroupId) ?: throw MyException("文件组 [${fileGroup.fileGroupId}]不存在")
+            getFileGroup(fileGroup.fileGroupId) ?: throw MyException("文件组 [${fileGroup.fileGroupId}] 不存在")
 
         // 如果文件组名已经存在，并且不是自己的话，抛出异常
         val fg = getFileGroupByDisplayName(oldFileGroup.storageMode, fileGroup.displayName)
@@ -314,7 +314,7 @@ class FileServiceImpl : FileService {
                 url = if (storageMode == FileStorageModeEnum.LOCAL) {
                     ("/upload/" + (fileGroup?.path ?: "") + "/$actualFileName").formatSlash()
                 } else {
-                    tencentCOSUrl(tencentConfig!!, actualFileName, fileGroup?.displayName)
+                    tencentCOSUrl(tencentConfig!!, actualFileName, fileGroup?.path)
                 },
                 size = fileLength ?: 1L,
                 storageMode = storageMode,
@@ -330,7 +330,7 @@ class FileServiceImpl : FileService {
      * 添加上传文件记录
      * @param fileRecord 文件记录请求类
      */
-    override suspend fun uploadFileRecord(fileRecord: FileRecordRequest): FileResponse? {
+    override suspend fun uploadFileRecord(fileRecord: FileRecordRequest): FileResponse {
         val currentStorageMode = fileRecord.storageMode ?: FileStorageModeEnum.LOCAL
 
         var fileGroup: FileGroup? = null
@@ -379,7 +379,7 @@ class FileServiceImpl : FileService {
             url = if (currentStorageMode == FileStorageModeEnum.LOCAL) {
                 ("/upload/" + (fileGroup?.path ?: "") + "/${fileRecord.name}").formatSlash()
             } else {
-                tencentCOSUrl(tencentConfig!!, fileRecord.name, fileGroup?.displayName)
+                tencentCOSUrl(tencentConfig!!, fileRecord.name, fileGroup?.path)
             },
             size = fileRecord.size,
             storageMode = currentStorageMode,
@@ -406,7 +406,7 @@ class FileServiceImpl : FileService {
             )
         }
         // 删除文件，获取成功删除的文件索引数据类
-        val deletedResult = deleteFilesByFineIndexes(fileIndexes)
+        val deletedResult = deleteFilesByFileIndexes(fileIndexes)
 
         // 返回删除成功的文件 ID
         return if (deletedResult.size == ids.size) {
@@ -423,7 +423,7 @@ class FileServiceImpl : FileService {
      * @param fileIndexes 文件索引数组
      * @return 删除成功的文件索引数组
      */
-    override suspend fun deleteFilesByFineIndexes(fileIndexes: List<FileIndex>): List<FileIndex> {
+    override suspend fun deleteFilesByFileIndexes(fileIndexes: List<FileIndex>): List<FileIndex> {
         if (fileIndexes.isEmpty()) return emptyList()
         // 将不同存储形式的文件分离
         val localFileIndexes = fileIndexes.filter { it.storageMode == FileStorageModeEnum.LOCAL }
