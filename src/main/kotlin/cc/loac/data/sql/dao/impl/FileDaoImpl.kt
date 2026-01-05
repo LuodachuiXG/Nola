@@ -17,11 +17,17 @@ import cc.loac.extensions.formatSlash
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNull
 
 /**
  * 文件表操作接口实现类
  */
 class FileDaoImpl : FileDao {
+
+    companion object {
+        // 最大批量大小
+        const val BATCH_SIZE = 500
+    }
 
     /**
      * 将 ResultRow 转换为 FileGroup
@@ -221,6 +227,15 @@ class FileDaoImpl : FileDao {
     }
 
     /**
+     * 根据文件组路径获取文件组
+     */
+    override suspend fun getFileGroupsByPath(paths: List<String>): List<FileGroup> = dbQuery {
+        FileGroups.selectAll().where {
+            FileGroups.path inList paths
+        }.map(::resultToFileGroup)
+    }
+
+    /**
      * 添加文件
      * @param mFile 文件数据类
      */
@@ -266,6 +281,49 @@ class FileDaoImpl : FileDao {
         Files.deleteWhere {
             fileId inList fileIds
         } > 0
+    }
+
+    /**
+     * 根据文件组 ID 和文件名批量删除文件
+     */
+    override suspend fun deleteFileByGroupIdAndName(
+        pairs: List<Pair<Long?, String>>,
+        storageMode: FileStorageModeEnum
+    ): Boolean = dbQuery {
+
+        // 分开处理有文件组和没有文件组的数据
+        val withGroup = mutableListOf<Pair<Long, String>>()
+        val onlyName = mutableListOf<String>()
+        pairs.forEach {
+            if (it.first != null) {
+                withGroup.add(it.first!! to it.second)
+            } else {
+                onlyName.add(it.second)
+            }
+        }
+
+        // 影响的行数
+        var affectedRows = 0
+
+        // 先删除有文件组的记录
+        if (withGroup.isNotEmpty()) {
+            withGroup.chunked(BATCH_SIZE).forEach { chunk ->
+                affectedRows += Files.deleteWhere {
+                    (Files.storageMode eq storageMode) and ((Files.fileGroupId to Files.displayName) inList chunk)
+                }
+            }
+        }
+
+        // 删除没有文件组的记录
+        if (onlyName.isNotEmpty()) {
+            onlyName.chunked(BATCH_SIZE).forEach { chunk ->
+                affectedRows += Files.deleteWhere {
+                    (Files.storageMode eq storageMode) and (Files.fileGroupId.isNull()) and (Files.displayName inList chunk)
+                }
+            }
+        }
+
+        affectedRows > 0
     }
 
     /**
