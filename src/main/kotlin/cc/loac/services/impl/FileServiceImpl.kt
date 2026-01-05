@@ -27,6 +27,7 @@ import cc.loac.services.FileService
 import cc.loac.utils.*
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
+import java.io.File
 import java.io.InputStream
 import java.util.*
 
@@ -405,6 +406,8 @@ class FileServiceImpl : FileService {
                 storageMode = it.storageMode
             )
         }
+
+
         // 删除文件，获取成功删除的文件索引数据类
         val deletedResult = deleteFilesByFileIndexes(fileIndexes)
 
@@ -542,7 +545,7 @@ class FileServiceImpl : FileService {
         // 修改成功移动的文件的文件组
         val newFiles = mutableListOf<MFile>()
         movedFileNames.forEach { fileName ->
-            // 寻找成功删除的文件
+            // 寻找成功移动的文件
             val file = files.find {
                 ((it.fileGroupPath ?: "") + "/${it.fileName}") == fileName
             }
@@ -635,20 +638,59 @@ class FileServiceImpl : FileService {
      * @param fileIndexes 文件索引数据类集合
      */
     private suspend fun deleteDatabaseFilesByFileIndexes(fileIndexes: List<FileIndex>): Boolean {
-        // 因为 FileIndex 的 name 文件名属性，是包含了文件组的名字，如：/img/1.jpg
-        // 但是文件表的 displayName 文件名字段只会存储 1.jpg，所以需要取出真实文件名
-        val localFiles = fileIndexes.filter { it.storageMode == FileStorageModeEnum.LOCAL }.map {
-            it.name.substringAfterLast("/")
+        if (fileIndexes.isEmpty()) {
+            return false
         }
-        val tencentFiles = fileIndexes.filter { it.storageMode == FileStorageModeEnum.TENCENT_COS }.map {
-            it.name.substringAfterLast("/")
+
+        // 映射出本次要删除的文件的文件组地址（如果有）和文件索引
+        val pathIndexes = mutableListOf<Pair<String, FileIndex>>()
+        fileIndexes.forEach { fileIndex ->
+            var dir = fileIndex.name.substringBeforeLast(File.separatorChar)
+            if (dir.isNotBlank() && dir.first() != File.separatorChar) {
+                // 如果文件组地址没有斜杠开头，则加上斜杠，防止匹配不到数据库文件组数据
+                dir = File.separatorChar + dir
+            }
+
+            pathIndexes.add(dir to fileIndex)
         }
+
+        // 过滤出有文件组的文件
+        val hasPath =
+            pathIndexes.filter { it.first.isNotBlank() && it.first != "." && it.first != File.separatorChar.toString() }
+
+        // 获取本次要删除的文件涉及到的所有文件组
+        val fileGroups = fileDao.getFileGroupsByPath(hasPath.map { it.first })
+
+        // 文件组地址和 ID 映射
+        val fileGroupMap = fileGroups.associate { it.path to it.fileGroupId }
+
+        // 要删除的文件 <文件组 ID（如果有）, 文件名>
+        val localFiles = mutableListOf<Pair<Long?, String>>()
+        val tencentFiles = mutableListOf<Pair<Long?, String>>()
+
+        pathIndexes.forEach { index ->
+            val fileName = index.second.name.substringAfterLast(File.separatorChar)
+            var pair: Pair<Long?, String> = null to fileName
+            if (index.first.isNotBlank() && index.first != "." && index.first != File.separatorChar.toString()) {
+                // 当前文件有文件组
+                pair = fileGroupMap[index.first] to fileName
+            }
+
+            // 根据不同的存储策略，加入对应的数组
+            when (index.second.storageMode) {
+                FileStorageModeEnum.LOCAL -> localFiles.add(pair)
+                FileStorageModeEnum.TENCENT_COS -> tencentFiles.add(pair)
+            }
+        }
+
         if (localFiles.isNotEmpty()) {
-            fileDao.deleteFile(localFiles, FileStorageModeEnum.LOCAL)
+            fileDao.deleteFileByGroupIdAndName(localFiles, FileStorageModeEnum.LOCAL)
         }
+
         if (tencentFiles.isNotEmpty()) {
-            fileDao.deleteFile(tencentFiles, FileStorageModeEnum.TENCENT_COS)
+            fileDao.deleteFileByGroupIdAndName(tencentFiles, FileStorageModeEnum.TENCENT_COS)
         }
+
         return true
     }
 }

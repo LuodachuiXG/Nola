@@ -1,14 +1,13 @@
 package cc.loac.data.sql.dao
 
 import cc.loac.data.models.FileGroup
-import cc.loac.data.models.FileIndex
 import cc.loac.data.models.FileWithGroup
 import cc.loac.data.models.MFile
 import cc.loac.data.models.enums.FileSort
 import cc.loac.data.models.enums.FileStorageModeEnum
 import cc.loac.data.requests.FileGroupUpdateRequest
-import cc.loac.data.responses.FileResponse
 import cc.loac.data.responses.Pager
+import java.io.File
 
 /**
  * 文件表操作接口
@@ -87,6 +86,12 @@ interface FileDao {
      */
     suspend fun getFileGroups(fileStorageMode: FileStorageModeEnum?): List<FileGroup>
 
+
+    /**
+     * 根据文件组路径获取文件组
+     */
+    suspend fun getFileGroupsByPath(paths: List<String>): List<FileGroup>
+
     /**
      * 添加文件
      * @param mFile 文件数据类
@@ -111,6 +116,12 @@ interface FileDao {
      * @param fileIds 文件 ID 集合
      */
     suspend fun deleteFile(fileIds: List<Long>): Boolean
+
+
+    /**
+     * 根据文件组 ID 和文件名批量删除文件
+     */
+    suspend fun deleteFileByGroupIdAndName(pairs: List<Pair<Long?, String>>, storageMode: FileStorageModeEnum): Boolean
 
     /**
      * 修改文件
