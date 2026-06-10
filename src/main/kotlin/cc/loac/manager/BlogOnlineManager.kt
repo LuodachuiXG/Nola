@@ -5,12 +5,12 @@ import io.ktor.server.sse.ServerSSESession
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.send
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.koin.java.KoinJavaComponent.get
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -22,8 +22,6 @@ class BlogOnlineManager private constructor() {
     companion object {
         @Volatile
         private var instance: BlogOnlineManager? = null
-
-        private var ioScope = CoroutineScope(Dispatchers.IO)
 
         // 定时任务
         private var job: Job? = null
@@ -38,8 +36,9 @@ class BlogOnlineManager private constructor() {
                     instance = it
 
                     if (job == null) {
-                        // 启动定时任务
-                        job = ioScope.launch {
+                        // 启动定时任务，使用 Koin 管理的应用级协程作用域
+                        val appScope = get<CoroutineScope>(CoroutineScope::class.java)
+                        job = appScope.launch {
                             // 每 30 分钟尝试清理一次无效连接
                             while (true) {
                                 delay(1000 * 60 * 30)

@@ -9,6 +9,9 @@ import cc.loac.security.token.TokenService
 import cc.loac.services.*
 import cc.loac.services.impl.*
 import io.ktor.server.application.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
@@ -24,8 +27,14 @@ fun Application.configureKoin() {
     }
 }
 
+/** 应用级协程作用域，用于 fire-and-forget 的后台操作 **/
+val applicationScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
 /** 配置 Koin 注入模块 **/
 val appModule = module {
+    // 应用级协程作用域
+    single { applicationScope }
+
     // 令牌服务
     single<TokenService> { TokenServiceImpl() }
     single<HashingService> { HashingServiceImpl() }

@@ -21,7 +21,6 @@ import cc.loac.services.UserService
 import cc.loac.utils.operate
 import cc.loac.utils.operateSync
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
@@ -36,7 +35,7 @@ class UserServiceImpl : UserService {
     private val tokenService: TokenService by inject(TokenService::class.java)
     private val userDao: UserDao by inject(UserDao::class.java)
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
     /**
      * 初始化博客管理员

@@ -21,7 +21,7 @@ class AccessLogServiceImpl : AccessLogService {
      */
     override suspend fun addAccessLog(accessLog: AccessLog): AccessLog? {
         // 最大日志长度
-        val maxLength = globalEnvironment.config.propertyOrNull("accessLog.maxLength").let {
+        val maxLength = globalEnvironment?.config?.propertyOrNull("accessLog.maxLength").let {
             if (it == null) return@let 2000
             if (!it.getString().isInt()) return@let 2000
             it.getString().toInt()

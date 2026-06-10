@@ -1,12 +1,15 @@
 package cc.loac
 
+import cc.loac.data.redis.RedisSingleton
 import cc.loac.data.sql.DatabaseSingleton
 import cc.loac.plugins.*
 import cc.loac.security.token.TokenConfig
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
+import kotlinx.coroutines.cancel
 
-lateinit var globalEnvironment: ApplicationEnvironment
+var globalEnvironment: ApplicationEnvironment? = null
+    private set
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
 
@@ -24,7 +27,7 @@ fun Application.module() {
     // 初始化数据库
     DatabaseSingleton.init(environment.config)
     // 初始化 Redis
-//    RedisSingleton.init(environment.config)
+    RedisSingleton.init(environment.config)
     // WebSocket 配置
     configureWebSocket()
     // SSE 配置
@@ -47,4 +50,10 @@ fun Application.module() {
     configureStatusPage()
     // 监视器插件配置
 //    configureMonitorPlugin()
+
+    // 应用停止时取消应用级协程作用域并关闭 Redis
+    monitor.subscribe(ApplicationStopped) {
+        applicationScope.cancel()
+        RedisSingleton.closeSync()
+    }
 }

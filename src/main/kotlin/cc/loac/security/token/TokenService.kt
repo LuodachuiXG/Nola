@@ -11,7 +11,7 @@ interface TokenService {
      * @param userName 用户名
      * @param claims Token Claim
      */
-    fun generate(
+    suspend fun generate(
         config: TokenConfig,
         userId: Long,
         userName: String,
@@ -23,5 +23,5 @@ interface TokenService {
      * @param userId 用户 ID
      * @param token 令牌
      */
-    fun verify(userId: Long, token: String): Boolean
+    suspend fun verify(userId: Long, token: String): Boolean
 }

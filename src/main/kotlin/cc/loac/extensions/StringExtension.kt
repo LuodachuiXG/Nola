@@ -13,7 +13,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Safelist
 import org.koin.java.KoinJavaComponent.inject
-import java.io.File
 import java.util.regex.Pattern
 
 /**
@@ -21,8 +20,8 @@ import java.util.regex.Pattern
  * 判断文本是否是合法的 URL
  */
 fun String.isUrl(): Boolean {
-    // 判断标准为 http:// 或 https:// 开头，并且最少存在一个 .
-    return this.matches("^(http|https)://[^.]+\\.[^/]*\$")
+    // 判断标准为 http:// 或 https:// 开头，域名至少包含一个 .，后续可带路径、查询参数、锚点
+    return this.matches("^(http|https)://[^.]+\\.[^\\s]*$")
 }
 
 
@@ -73,8 +72,8 @@ fun String.isHexColor(): Boolean {
  * @param includeZero 是否包含零
  */
 fun String.isPositiveInt(includeZero: Boolean = false): Boolean {
-    if (includeZero) return this.matches("^[0-9]\\d*")
-    return this.matches("^[1-9]\\d*")
+    if (includeZero) return this.matches("^[0-9]\\d*$")
+    return this.matches("^[1-9]\\d*$")
 }
 
 /**
@@ -82,7 +81,7 @@ fun String.isPositiveInt(includeZero: Boolean = false): Boolean {
  * 验证是否是整数
  */
 fun String.isInt(): Boolean {
-    return this.matches("^\\d+")
+    return this.matches("^\\d+$")
 }
 
 /**
@@ -164,7 +163,7 @@ fun String.addRandomSuffix(): String {
     // 如果文件名最后已经有了 "_" 加五个随机字符的后缀，则重新修改该后缀
     // 先获取文件名最后六个字符，判断是否符合随机字符规则
     return if (fileName.length >= 6 &&
-        fileName.substring(fileName.length - 6).matches("^_[a-z0-9]+$")
+        fileName.substring(fileName.length - 6).matches("^_[a-zA-Z0-9]+$")
     ) {
         // 符合规则，则重新修改该后缀
         fileName.substring(0, fileName.length - 6) + "_$randomStr.$fileExtension"
@@ -176,22 +175,22 @@ fun String.addRandomSuffix(): String {
 
 /**
  * String 扩展函数
- * 将所有双正反斜杠替换为当前系统的单斜杠
+ * 将所有双斜杠替换为单斜杠
+ * 注意：此函数始终使用 "/" 作为分隔符，适用于 URL 和相对路径场景
  */
 fun String.replaceDoubleSlash(): String {
-    val systemSlash = File.separator
     return this
-        .replace("//", systemSlash)
-        .replace("\\\\", systemSlash)
+        .replace("//", "/")
+        .replace("\\\\", "/")
 }
 
 /**
  * 格式化斜杠
- * 把所有反斜杠替换为当前系统的单斜杠
+ * 把所有反斜杠替换为正斜杠，并合并双斜杠
+ * 注意：此函数始终使用 "/" 作为分隔符，适用于 URL 和相对路径场景
  */
 fun String.formatSlash(): String {
-    val systemSlash = File.separator
-    return this.replace("\\", systemSlash).replaceDoubleSlash()
+    return this.replace("\\", "/").replaceDoubleSlash()
 }
 
 

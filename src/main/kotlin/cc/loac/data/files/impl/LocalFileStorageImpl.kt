@@ -9,7 +9,7 @@ import java.io.InputStream
 const val URL_STORAGE_PATH = "/upload"
 
 // 本地存储路径
-const val LOCAL_STORAGE_PATH = ".nola/$URL_STORAGE_PATH"
+const val LOCAL_STORAGE_PATH = ".nola/upload"
 
 /**
  * 本地存储实现类
