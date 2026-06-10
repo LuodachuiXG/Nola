@@ -124,6 +124,30 @@ class CategoryDaoImpl : CategoryDao {
     }
 
     /**
+     * 根据文章 ID 集合批量获取分类（不含文章数量，用于 N+1 优化）
+     * @return Map<文章 ID, 分类>
+     */
+    override suspend fun categoriesByPostIds(postIds: List<Long>): Map<Long, Category> = dbQuery {
+        if (postIds.isEmpty()) return@dbQuery emptyMap()
+        val rows = PostCategories
+            .innerJoin(Categories, additionalConstraint = { PostCategories.categoryId eq Categories.categoryId })
+            .select(PostCategories.postId, Categories.categoryId, Categories.displayName,
+                Categories.slug, Categories.cover, Categories.unifiedCover)
+            .where { PostCategories.postId inList postIds }
+            .map { row ->
+                row[PostCategories.postId] to Category(
+                    categoryId = row[Categories.categoryId],
+                    displayName = row[Categories.displayName],
+                    slug = row[Categories.slug],
+                    cover = row[Categories.cover],
+                    unifiedCover = row[Categories.unifiedCover],
+                    postCount = 0
+                )
+            }
+        rows.associate { it.first to it.second }
+    }
+
+    /**
      * 根据分类 ID 获取分类
      * @param id 分类 ID
      */

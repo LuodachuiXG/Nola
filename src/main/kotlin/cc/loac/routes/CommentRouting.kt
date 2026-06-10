@@ -140,7 +140,7 @@ fun Route.commentAdminRouting() {
                     // 可空关键词
                     val key = call.receiveNullablePathParam("key")
 
-                    // 可空的链接排序
+                    // 可空的排序
                     val sort = call.receiveNullablePathParam("sort") {
                         it?.isEnum<CommentSort>()
                     }?.let { CommentSort.valueOf(it) }

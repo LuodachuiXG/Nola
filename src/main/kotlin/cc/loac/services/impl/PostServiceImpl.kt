@@ -34,7 +34,7 @@ class PostServiceImpl : PostService {
     private val tagService: TagService by inject(TagService::class.java)
     private val categoryService: CategoryService by inject(CategoryService::class.java)
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
     /**
      * 添加文章
@@ -475,7 +475,6 @@ class PostServiceImpl : PostService {
         var successCount = 0
         // 失败原因的数组
         val failResult = mutableListOf<String>()
-        val scope = CoroutineScope(Dispatchers.IO)
 
         // 文件夹名前缀
         val filePrefix = "${Date().formatDate()}_Post"
@@ -494,7 +493,7 @@ class PostServiceImpl : PostService {
         val jobs = mutableListOf<Job>()
         posts.forEach { post ->
             // 每个文章启动一个协程
-            jobs += scope.launch {
+            jobs += ioScope.launch {
                 // 当前文章的所有内容列表（包括正文和草稿）这里不是真实的文章内容
                 val postContentItems = postContents(post.postId)
                 // 获取文章的正文和所有草稿的实际内容，并写到文件

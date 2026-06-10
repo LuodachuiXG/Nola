@@ -27,7 +27,6 @@ import cc.loac.services.FileService
 import cc.loac.utils.*
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
-import java.io.File
 import java.io.InputStream
 import java.util.*
 
@@ -36,7 +35,7 @@ import java.util.*
  */
 class FileServiceImpl : FileService {
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
     private val fileDao: FileDao by inject(FileDao::class.java)
 
@@ -79,6 +78,26 @@ class FileServiceImpl : FileService {
             else -> {}
         }
         return null
+    }
+
+    /**
+     * 安全获取腾讯云对象存储实例（内部使用）
+     * 如果未配置或初始化失败，抛出异常
+     */
+    private suspend fun requireTencentCOS(): FileOption {
+        return initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
+            ?: throw FileStorageNotConfiguredException(FileStorageModeEnum.TENCENT_COS)
+    }
+
+    /**
+     * 安全获取腾讯云对象存储配置（内部使用）
+     * 如果未配置，抛出异常
+     */
+    private suspend fun requireTencentConfig(): TencentCOSConfig {
+        return tencentConfig ?: run {
+            initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
+            tencentConfig ?: throw FileStorageNotConfiguredException(FileStorageModeEnum.TENCENT_COS)
+        }
     }
 
     /**
@@ -242,7 +261,7 @@ class FileServiceImpl : FileService {
         storageMode: FileStorageModeEnum,
         fileGroupId: Long?,
         fileLength: Long?
-    ): FileResponse? {
+    ): FileResponse {
         var fileGroup: FileGroup? = null
         if (fileGroupId != null) {
             // 先尝试获取文件组
@@ -255,9 +274,7 @@ class FileServiceImpl : FileService {
         // 如果存储方式不为本地存储，就先查看对应的存储方式是否已经配置
         if (storageMode != FileStorageModeEnum.LOCAL) {
             // 先尝试初始化存储方式
-            initFileStorageMode(FileStorageModeEnum.TENCENT_COS) ?: throw FileStorageNotConfiguredException(
-                FileStorageModeEnum.TENCENT_COS
-            )
+            requireTencentCOS()
         }
 
 
@@ -286,7 +303,7 @@ class FileServiceImpl : FileService {
                 // 这会导致耗时操作，并且会占用不必要的内存
                 // 但是，请求头 Content-Length 传过来 fileLength 长度似乎和腾讯云对象存储的算出的不一致，
                 // 这会导致腾讯云对象存储报错，导致上传失败，这是待解决问题！
-                tencentCOS!!.uploadFile(
+                requireTencentCOS().uploadFile(
                     inputStream = inputStream,
                     path = fileGroup?.path ?: "",
                     fileName = actualFileName
@@ -315,7 +332,7 @@ class FileServiceImpl : FileService {
                 url = if (storageMode == FileStorageModeEnum.LOCAL) {
                     ("/upload/" + (fileGroup?.path ?: "") + "/$actualFileName").formatSlash()
                 } else {
-                    tencentCOSUrl(tencentConfig!!, actualFileName, fileGroup?.path)
+                    tencentCOSUrl(requireTencentConfig(), actualFileName, fileGroup?.path)
                 },
                 size = fileLength ?: 1L,
                 storageMode = storageMode,
@@ -323,7 +340,9 @@ class FileServiceImpl : FileService {
             )
 
         } else {
-            return null
+            val errMsg = "文件 [$actualFileName] 上传失败，存储方式：$storageMode"
+            errMsg.error()
+            throw MyException(errMsg)
         }
     }
 
@@ -347,9 +366,7 @@ class FileServiceImpl : FileService {
         // 如果存储方式不为本地存储，就先查看对应的存储方式是否已经配置
         if (currentStorageMode != FileStorageModeEnum.LOCAL) {
             // 先尝试初始化存储方式
-            initFileStorageMode(FileStorageModeEnum.TENCENT_COS) ?: throw FileStorageNotConfiguredException(
-                FileStorageModeEnum.TENCENT_COS
-            )
+            requireTencentCOS()
         }
 
         // 查看当前文件名是否已经存在
@@ -380,7 +397,7 @@ class FileServiceImpl : FileService {
             url = if (currentStorageMode == FileStorageModeEnum.LOCAL) {
                 ("/upload/" + (fileGroup?.path ?: "") + "/${fileRecord.name}").formatSlash()
             } else {
-                tencentCOSUrl(tencentConfig!!, fileRecord.name, fileGroup?.path)
+                tencentCOSUrl(requireTencentConfig(), fileRecord.name, fileGroup?.path)
             },
             size = fileRecord.size,
             storageMode = currentStorageMode,
@@ -434,13 +451,10 @@ class FileServiceImpl : FileService {
         // 成功删除的文件索引集合
         val resultFileIndexes = LinkedList<FileIndex>()
         if (tencentFileIndexes.isNotEmpty()) {
-            // 先尝试初始化存储方式
-            initFileStorageMode(FileStorageModeEnum.TENCENT_COS) ?: throw FileStorageNotConfiguredException(
-                FileStorageModeEnum.TENCENT_COS
-            )
+            val cos = requireTencentCOS()
 
             // 删除腾讯云对象存储文件
-            val tencentDeleteResult = tencentCOS!!.deleteFiles(tencentFileIndexes.map { it.name })
+            val tencentDeleteResult = cos.deleteFiles(tencentFileIndexes.map { it.name })
             if (tencentDeleteResult.size == tencentFileIndexes.size) {
                 // 如果成功删除的文件数目与请求删除的文件数目相等，就将所有请求删除的文件都加入删除成功结果集
                 resultFileIndexes.addAll(tencentFileIndexes)
@@ -530,12 +544,7 @@ class FileServiceImpl : FileService {
 
             FileStorageModeEnum.TENCENT_COS -> {
                 // 腾讯云对象存储文件移动
-                // 先尝试初始化腾讯云对象存储方式
-                // 先尝试初始化存储方式
-                initFileStorageMode(FileStorageModeEnum.TENCENT_COS) ?: throw FileStorageNotConfiguredException(
-                    FileStorageModeEnum.TENCENT_COS
-                )
-                tencentCOS!!.moveFile(waitForMoveFileNames, newFileGroup?.path ?: "").let {
+                requireTencentCOS().moveFile(waitForMoveFileNames, newFileGroup?.path ?: "").let {
                     // 将成功移动的文件名加入结果集合
                     movedFileNames.addAll(it)
                 }
@@ -603,10 +612,7 @@ class FileServiceImpl : FileService {
                             "$URL_STORAGE_PATH/${it.fileGroupPath ?: ""}/${it.fileName}".formatSlash()
                         // 腾讯云对象存储，返回绝对地址
                         FileStorageModeEnum.TENCENT_COS -> {
-                            // 先尝试初始化腾讯云对象存储
-                            initFileStorageMode(FileStorageModeEnum.TENCENT_COS)
-                                ?: throw FileStorageNotConfiguredException(FileStorageModeEnum.TENCENT_COS)
-                            tencentCOSUrl(tencentConfig!!, it.fileName, it.fileGroupPath)
+                            tencentCOSUrl(requireTencentConfig(), it.fileName, it.fileGroupPath)
                         }
 
                     },
@@ -635,6 +641,7 @@ class FileServiceImpl : FileService {
 
     /**
      * 根据文件索引数据类删除数据库中总的文件记录
+     * 统一使用 '/' 作为路径分隔符，兼容 Windows/macOS/Linux
      * @param fileIndexes 文件索引数据类集合
      */
     private suspend fun deleteDatabaseFilesByFileIndexes(fileIndexes: List<FileIndex>): Boolean {
@@ -642,21 +649,21 @@ class FileServiceImpl : FileService {
             return false
         }
 
+        // 将路径统一标准化为 '/' 分隔符，确保跨平台兼容
+        val normalizedIndexes = fileIndexes.map { it.copy(name = it.name.replace("\\", "/")) }
+
         // 映射出本次要删除的文件的文件组地址（如果有）和文件索引
         val pathIndexes = mutableListOf<Pair<String, FileIndex>>()
-        fileIndexes.forEach { fileIndex ->
-            var dir = fileIndex.name.substringBeforeLast(File.separatorChar)
-            if (dir.isNotBlank() && dir.first() != File.separatorChar) {
-                // 如果文件组地址没有斜杠开头，则加上斜杠，防止匹配不到数据库文件组数据
-                dir = File.separatorChar + dir
+        normalizedIndexes.forEach { fileIndex ->
+            var dir = fileIndex.name.substringBeforeLast("/")
+            if (dir.isNotBlank() && dir.first() != '/') {
+                dir = "/$dir"
             }
-
             pathIndexes.add(dir to fileIndex)
         }
 
-        // 过滤出有文件组的文件
-        val hasPath =
-            pathIndexes.filter { it.first.isNotBlank() && it.first != "." && it.first != File.separatorChar.toString() }
+        // 过滤出有文件组的文件（路径非空、非 "."、非 "/"）
+        val hasPath = pathIndexes.filter { it.first.isNotBlank() && it.first != "." && it.first != "/" }
 
         // 获取本次要删除的文件涉及到的所有文件组
         val fileGroups = fileDao.getFileGroupsByPath(hasPath.map { it.first })
@@ -669,9 +676,9 @@ class FileServiceImpl : FileService {
         val tencentFiles = mutableListOf<Pair<Long?, String>>()
 
         pathIndexes.forEach { index ->
-            val fileName = index.second.name.substringAfterLast(File.separatorChar)
+            val fileName = index.second.name.substringAfterLast("/")
             var pair: Pair<Long?, String> = null to fileName
-            if (index.first.isNotBlank() && index.first != "." && index.first != File.separatorChar.toString()) {
+            if (index.first.isNotBlank() && index.first != "." && index.first != "/") {
                 // 当前文件有文件组
                 pair = fileGroupMap[index.first] to fileName
             }

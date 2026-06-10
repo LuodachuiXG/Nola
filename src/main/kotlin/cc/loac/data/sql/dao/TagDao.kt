@@ -61,6 +61,12 @@ interface TagDao {
     suspend fun tags(postId: Long): List<Tag>
 
     /**
+     * 根据文章 ID 集合批量获取标签
+     * @return Map<文章 ID, 标签列表>
+     */
+    suspend fun tagsByPostIds(postIds: List<Long>): Map<Long, List<Tag>>
+
+    /**
      * 根据标签 ID 集合获取标签
      * @param tagIds 标签 ID 集合
      */

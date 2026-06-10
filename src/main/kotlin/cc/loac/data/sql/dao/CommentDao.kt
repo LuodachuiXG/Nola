@@ -23,6 +23,20 @@ interface CommentDao {
     suspend fun deleteCommentById(id: Long): Boolean
 
     /**
+     * 根据评论 ID 删除评论及其所有子评论（在同一事务中）
+     * @param id 评论 ID
+     * @param parentCommentId 父评论 ID（若为 null 则是顶层评论，需同步删除子评论）
+     */
+    suspend fun deleteCommentByIdWithChildren(id: Long, parentCommentId: Long?): Boolean
+
+    /**
+     * 根据评论 ID 数组删除评论及其所有子评论（在同一事务中）
+     * @param ids 评论 ID 数组
+     * @param topLevelIds 其中的顶层评论 ID（parentCommentId 为 null 的），需同步删除其子评论
+     */
+    suspend fun deleteCommentByIdsWithChildren(ids: List<Long>, topLevelIds: List<Long>): Boolean
+
+    /**
      * 根据评论 ID 数组删除评论
      * @param ids 评论 ID 数组
      */

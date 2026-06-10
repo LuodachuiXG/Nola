@@ -118,6 +118,28 @@ class TagDaoImpl : TagDao {
             .map(::resultRowToTag)
     }
 
+    /**
+     * 根据文章 ID 集合批量获取标签（不含文章数量，用于 N+1 优化）
+     * @return Map<文章 ID, 标签列表>
+     */
+    override suspend fun tagsByPostIds(postIds: List<Long>): Map<Long, List<Tag>> = dbQuery {
+        if (postIds.isEmpty()) return@dbQuery emptyMap()
+        val rows = PostTags
+            .innerJoin(Tags, additionalConstraint = { PostTags.tagId eq Tags.tagId })
+            .select(PostTags.postId, Tags.tagId, Tags.displayName, Tags.slug, Tags.color)
+            .where { PostTags.postId inList postIds }
+            .map { row ->
+                row[PostTags.postId] to Tag(
+                    tagId = row[Tags.tagId],
+                    displayName = row[Tags.displayName],
+                    slug = row[Tags.slug],
+                    color = row[Tags.color],
+                    postCount = 0
+                )
+            }
+        rows.groupBy({ it.first }, { it.second })
+    }
+
 
     /**
      * 根据标签 ID 获取标签

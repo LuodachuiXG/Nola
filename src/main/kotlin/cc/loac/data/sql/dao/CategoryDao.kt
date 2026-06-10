@@ -43,6 +43,12 @@ interface CategoryDao {
     suspend fun categoryByPostId(postId: Long): Category?
 
     /**
+     * 根据文章 ID 集合批量获取分类
+     * @return Map<文章 ID, 分类>
+     */
+    suspend fun categoriesByPostIds(postIds: List<Long>): Map<Long, Category>
+
+    /**
      * 分页获取所有分类
      * @param page 当前页数
      * @param size 每页条数

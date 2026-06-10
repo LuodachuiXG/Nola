@@ -69,6 +69,42 @@ class CommentDaoImpl : CommentDao {
     }
 
     /**
+     * 根据评论 ID 删除评论及其所有子评论（在同一事务中）
+     * @param id 评论 ID
+     * @param parentCommentId 父评论 ID（若为 null 则是顶层评论，需同步删除子评论）
+     */
+    override suspend fun deleteCommentByIdWithChildren(id: Long, parentCommentId: Long?): Boolean = dbQuery {
+        // 如果是顶层评论，先删除所有子评论
+        if (parentCommentId == null) {
+            Comments.deleteWhere {
+                Comments.parentCommentId eq id
+            }
+        }
+        // 再删除当前评论
+        Comments.deleteWhere {
+            commentId eq id
+        } > 0
+    }
+
+    /**
+     * 根据评论 ID 数组删除评论及其所有子评论（在同一事务中）
+     * @param ids 评论 ID 数组
+     * @param topLevelIds 其中的顶层评论 ID（parentCommentId 为 null 的），需同步删除其子评论
+     */
+    override suspend fun deleteCommentByIdsWithChildren(ids: List<Long>, topLevelIds: List<Long>): Boolean = dbQuery {
+        // 先删除所有顶层评论的子评论
+        if (topLevelIds.isNotEmpty()) {
+            Comments.deleteWhere {
+                parentCommentId inList topLevelIds
+            }
+        }
+        // 再删除所有指定评论
+        Comments.deleteWhere {
+            commentId inList ids
+        } > 0
+    }
+
+    /**
      * 根据评论 ID 数组删除评论
      * @param ids 评论 ID 数组
      */

@@ -22,7 +22,6 @@ import cc.loac.data.sql.tables.*
 import cc.loac.extensions.markdownToHtml
 import cc.loac.extensions.sha256Hex
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -40,7 +39,7 @@ class PostDaoImpl : PostDao {
     private val tagDao: TagDao by inject(TagDao::class.java)
     private val categoryDao: CategoryDao by inject(CategoryDao::class.java)
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
     /**
      * 将数据库检索结果转为 [Post] 文章数据类
@@ -242,6 +241,7 @@ class PostDaoImpl : PostDao {
             } else if (pr.encrypted == false) {
                 it[password] = ""
             }
+            it[lastModifyTime] = Date().time
         } > 0
     }
 
@@ -689,39 +689,32 @@ class PostDaoImpl : PostDao {
     }
 
     /**
-     * 给列表中的文章填充分类和标签
+     * 给列表中的文章填充分类和标签（批量查询，避免 N+1）
      * @param posts 文章列表
      */
-    private suspend fun getPostTagAndCategory(posts: List<Post>) = dbQuery {
+    private suspend fun getPostTagAndCategory(posts: List<Post>) {
+        if (posts.isEmpty()) return
+        val postIds = posts.map { it.postId }
+        val tagsMap = tagDao.tagsByPostIds(postIds)
+        val categoryMap = categoryDao.categoriesByPostIds(postIds)
         posts.forEach { post ->
-            // 获取文章标签
-            post.tags = tagDao.tags(post.postId)
-            // 获取文章分类
-            post.category = categoryDao.categoryByPostId(post.postId)
+            post.tags = tagsMap[post.postId] ?: emptyList()
+            post.category = categoryMap[post.postId]
         }
     }
 
     /**
-     * 给列表中的博客前端 API 响应文章填充分类和标签
+     * 给列表中的博客前端 API 响应文章填充分类和标签（批量查询，避免 N+1）
      * @param posts 文章列表
      */
-    private suspend fun getApiPostTagAndCategory(posts: List<ApiPostResponse>) = dbQuery {
+    private suspend fun getApiPostTagAndCategory(posts: List<ApiPostResponse>) {
+        if (posts.isEmpty()) return
+        val postIds = posts.map { it.postId }
+        val tagsMap = tagDao.tagsByPostIds(postIds)
+        val categoryMap = categoryDao.categoriesByPostIds(postIds)
         posts.forEach { post ->
-            // 如果当前是 API 请求，同时文章是加密状态的话就跳过当前文章的标签和分类检索
-//            if (post.encrypted) {
-//                post.category = null
-//                post.tags = emptyList()
-//            } else {
-//                // 获取文章标签
-//                post.tags = tagDao.tags(post.postId)
-//                // 获取文章分类
-//                post.category = categoryDao.categoryByPostId(post.postId)
-//            }
-
-            // 获取文章标签
-            post.tags = tagDao.tags(post.postId)
-            // 获取文章分类
-            post.category = categoryDao.categoryByPostId(post.postId)
+            post.tags = tagsMap[post.postId] ?: emptyList()
+            post.category = categoryMap[post.postId]
         }
     }
 
@@ -839,7 +832,9 @@ class PostDaoImpl : PostDao {
                 MODIFY_ASC -> query.orderBy(Posts.lastModifyTime, SortOrder.ASC)
                 VISIT_DESC -> query.orderBy(Posts.visit, SortOrder.DESC)
                 VISIT_ASC -> query.orderBy(Posts.visit, SortOrder.ASC)
-                PINNED -> query.orderBy(Posts.pinned, SortOrder.DESC)
+                PINNED -> query
+                    .orderBy(Posts.pinned, SortOrder.DESC)
+                    .orderBy(Posts.createTime, SortOrder.DESC)
 
             }
         } else {

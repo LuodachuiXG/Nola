@@ -5,13 +5,12 @@ import cc.loac.data.models.enums.OperationType
 import cc.loac.services.OperationService
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.inject
 
 private val operationService: OperationService by inject(OperationService::class.java)
 
-private val ioScope = CoroutineScope(Dispatchers.IO)
+private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
 /**
  * 记录操作记录（同步）

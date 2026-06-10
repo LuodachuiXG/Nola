@@ -81,14 +81,10 @@ class CommentServiceImpl : CommentService {
      * @param id 评论 ID
      */
     override suspend fun deleteCommentById(id: Long): Boolean {
-        // 先获取要删除的评论
+        // 先获取要删除的评论，确认存在
         val toBeDeleted = commentById(id) ?: return false
-        val result = commentDao.deleteCommentById(id)
-        // 如果父评论 ID 为空，那当前评论是顶层评论，那就有可能有子评论，同步删除子评论
-        if (result && toBeDeleted.parentCommentId == null) {
-            return deleteCommentByParentIds(listOf(toBeDeleted.commentId))
-        }
-        return result
+        // 在同一事务中删除评论及其子评论（如果是顶层评论的话），保证原子性
+        return commentDao.deleteCommentByIdWithChildren(id, toBeDeleted.parentCommentId)
     }
 
     /**
@@ -96,17 +92,13 @@ class CommentServiceImpl : CommentService {
      * @param ids 评论 ID 数组
      */
     override suspend fun deleteCommentByIds(ids: List<Long>): Boolean {
-        // 先尝试获取所有评论
+        // 先尝试获取所有要删除的评论
         val comments = commentDao.comments(ids)
-        // 删除所有评论
-        val result = commentDao.deleteCommentByIds(comments.map { it.commentId })
-        // 删除上面被删除的评论的可能存在的子评论
-        if (result) {
-            // 父评论 ID 为空的评论是顶层评论，可能有子评论
-            val toBeDeleted = comments.filter { it.parentCommentId == null }
-            deleteCommentByParentIds(toBeDeleted.map { it.commentId })
-        }
-        return result
+        if (comments.isEmpty()) return false
+        // 筛选出顶层评论（可能有子评论需要同步删除）
+        val topLevelIds = comments.filter { it.parentCommentId == null }.map { it.commentId }
+        // 在同一事务中删除评论及其子评论，保证原子性
+        return commentDao.deleteCommentByIdsWithChildren(comments.map { it.commentId }, topLevelIds)
     }
 
     /**
@@ -181,8 +173,11 @@ class CommentServiceImpl : CommentService {
         if (slug != null && mPostId == null) {
             // 文章别名不为空，文章 ID 为空
             // 先根据文章别名获取到文章，然后再填充文章 ID （此处为了博客前端可以通过文章别名获取评论）
-            postDao.postBySlug(slug)?.let {
-                mPostId = it.postId
+            val post = postDao.postBySlug(slug)
+            if (post != null) {
+                mPostId = post.postId
+            } else {
+                throw MyException("文章 [$slug] 不存在")
             }
         }
 
