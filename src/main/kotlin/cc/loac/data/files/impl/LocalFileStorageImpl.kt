@@ -15,13 +15,25 @@ const val LOCAL_STORAGE_PATH = ".nola/upload"
  * 本地存储实现类
  */
 class LocalFileStorageImpl : FileOption {
+
+    // 本地存储根目录的规范路径，用于路径遍历校验
+    private val storageRoot: File = File(LOCAL_STORAGE_PATH).canonicalFile
+
     init {
         // 检查文件夹是否存在
-        val dir = File(LOCAL_STORAGE_PATH)
-        if (!dir.exists()) {
+        if (!storageRoot.exists()) {
             // 创建目录
-            dir.mkdirs()
+            storageRoot.mkdirs()
         }
+    }
+
+    /**
+     * 校验文件是否位于本地存储根目录内，防止路径遍历
+     */
+    private fun File.isInsideStorage(): Boolean {
+        val root = storageRoot.canonicalPath
+        val path = canonicalPath
+        return path == root || path.startsWith("$root${File.separator}")
     }
 
     /**
@@ -40,16 +52,22 @@ class LocalFileStorageImpl : FileOption {
         return try {
             // 判断文件路径（文件夹是否存在）
             val newPath = File(filePath)
+            if (!newPath.isInsideStorage()) {
+                throw MyException("文件路径非法")
+            }
             if (!newPath.exists()) newPath.mkdirs()
 
             // 创建文件
             val newFile = File("$filePath/$fileName")
+            if (!newFile.isInsideStorage()) {
+                throw MyException("文件路径非法")
+            }
             newFile.outputStream().use {
                 inputStream.copyTo(it)
             }
             true
         } catch (e: Exception) {
-            throw MyException(e.message ?: "未知错误")
+            throw MyException(e.message ?: "本地文件上传失败", e)
         }
     }
 
@@ -62,7 +80,7 @@ class LocalFileStorageImpl : FileOption {
         val result = mutableListOf<String>()
         fileNames.forEach { fileName ->
             val file = File("$LOCAL_STORAGE_PATH/$fileName")
-            if (file.delete()) result.add(fileName)
+            if (file.isInsideStorage() && file.delete()) result.add(fileName)
         }
         return result
     }
@@ -77,22 +95,28 @@ class LocalFileStorageImpl : FileOption {
         // 成功移动的文件的旧文件名
         val result = mutableListOf<String>()
         val newGroupDir = File("$LOCAL_STORAGE_PATH/$newGroupName")
+        if (!newGroupDir.isInsideStorage()) {
+            return result
+        }
         if (!newGroupDir.exists()) newGroupDir.mkdirs()
         oldFileNames.forEach { oldFileName ->
             val oldFile = File("$LOCAL_STORAGE_PATH/$oldFileName")
-            if (oldFile.exists()) {
+            if (oldFile.isInsideStorage() && oldFile.exists()) {
                 val newFile = File(
                     "$LOCAL_STORAGE_PATH/$newGroupName/" +
                             oldFileName.substringAfterLast("/")
                 )
-                if (oldFile.renameTo(newFile)) {
+                if (newFile.isInsideStorage() && oldFile.renameTo(newFile)) {
                     result.add(oldFileName)
                 }
 
                 // 如果被移动的文件的父文件夹下没有文件了，就删除该文件夹
-                val parentDir = File(oldFileName.substringBeforeLast("/"))
-                if (parentDir.listFiles()?.isEmpty() == true) {
-                    parentDir.delete()
+                val parentPath = oldFileName.substringBeforeLast("/")
+                if (parentPath.isNotBlank() && parentPath != oldFileName) {
+                    val parentDir = File("$LOCAL_STORAGE_PATH/$parentPath")
+                    if (parentDir.isInsideStorage() && parentDir.isDirectory && parentDir.listFiles()?.isEmpty() == true) {
+                        parentDir.delete()
+                    }
                 }
             }
         }
@@ -107,6 +131,6 @@ class LocalFileStorageImpl : FileOption {
      */
     override fun isExist(fileName: String): Boolean {
         val file = File("$LOCAL_STORAGE_PATH/$fileName")
-        return file.exists()
+        return file.isInsideStorage() && file.exists()
     }
 }

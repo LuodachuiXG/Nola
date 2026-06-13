@@ -19,25 +19,40 @@ import java.io.InputStream
 /**
  * 腾讯云对象存储实现类
  */
-class TencentCOSImpl private constructor() : FileOption {
+class TencentCOSImpl private constructor(
+    private val config: TencentCOSConfig,
+    private val cosClient: COSClient
+) : FileOption {
+
     companion object {
-        private var _cosClient: COSClient? = null
-        private var _config: TencentCOSConfig? = null
+        @Volatile
+        private var instance: TencentCOSImpl? = null
+
+        private val lock = Any()
 
         fun getInstance(config: TencentCOSConfig?): TencentCOSImpl {
-            this._config = config
-            if (_cosClient == null && config == null)
-                throw IllegalArgumentException("腾讯云对象存储还未初始化，config 不能为 null")
-            if (_cosClient != null && config == null) return TencentCOSImpl()
-            if (config != null) {
+            if (config == null) {
+                return instance ?: throw IllegalArgumentException("腾讯云对象存储还未初始化，config 不能为 null")
+            }
+
+            return synchronized(lock) {
+                // 如果实例已存在且配置未变更，直接返回
+                instance?.let {
+                    if (it.config == config) return@synchronized it
+                    // 配置变更，关闭旧客户端
+                    it.cosClient.shutdown()
+                }
+
                 val cred = BasicCOSCredentials(config.secretId, config.secretKey)
                 val region = Region(config.region)
-                val clientConfig = ClientConfig(region)
-                clientConfig.httpProtocol = if (config.https)
-                    HttpProtocol.https else HttpProtocol.http
-                _cosClient = COSClient(cred, clientConfig)
+                val clientConfig = ClientConfig(region).apply {
+                    httpProtocol = if (config.https) HttpProtocol.https else HttpProtocol.http
+                }
+
+                TencentCOSImpl(config, COSClient(cred, clientConfig)).also {
+                    instance = it
+                }
             }
-            return TencentCOSImpl()
         }
     }
 
@@ -54,11 +69,10 @@ class TencentCOSImpl private constructor() : FileOption {
         fileName: String
     ): Boolean {
         val objectMetadata = ObjectMetadata()
-        val key = "${_config!!.path ?: ""}/$path/${fileName}".formatSlash()
-        val putObjectRequest =
-            PutObjectRequest(_config!!.bucket, key, inputStream, objectMetadata)
+        val key = "${config.path ?: ""}/$path/$fileName".formatSlash()
+        val putObjectRequest = PutObjectRequest(config.bucket, key, inputStream, objectMetadata)
         return try {
-            _cosClient!!.putObject(putObjectRequest)
+            cosClient.putObject(putObjectRequest)
             true
         } catch (e: Exception) {
             throw MyException(e.message ?: "未知错误")
@@ -71,13 +85,13 @@ class TencentCOSImpl private constructor() : FileOption {
      * @return 成功删除的文件名列表
      */
     override fun deleteFiles(fileNames: List<String>): List<String> {
-        val deleteObjectsRequest = DeleteObjectsRequest(_config!!.bucket)
+        val deleteObjectsRequest = DeleteObjectsRequest(config.bucket)
         val keyList = fileNames.map { fileName ->
-            KeyVersion("${_config!!.path ?: ""}/${fileName}".formatSlash())
+            KeyVersion("${config.path ?: ""}/$fileName".formatSlash())
         }
         deleteObjectsRequest.keys = keyList
         return try {
-            val deleteObjectsResult = _cosClient!!.deleteObjects(deleteObjectsRequest)
+            val deleteObjectsResult = cosClient.deleteObjects(deleteObjectsRequest)
             deleteObjectsResult.deletedObjects.map { it.key }
         } catch (e: Exception) {
             throw MyException(e.message ?: "未知错误")
@@ -91,13 +105,13 @@ class TencentCOSImpl private constructor() : FileOption {
      * @return 是否复制成功
      */
     private fun copyFile(oldName: String, newName: String): Boolean {
-        val mOldName = "${_config!!.path ?: ""}/${oldName}".formatSlash()
-        val mNewName = "${_config!!.path ?: ""}/${newName}".formatSlash()
+        val mOldName = "${config.path ?: ""}/$oldName".formatSlash()
+        val mNewName = "${config.path ?: ""}/$newName".formatSlash()
         val copyRequest = CopyObjectRequest(
-            Region(_config!!.region), _config!!.bucket, mOldName, _config!!.bucket, mNewName
+            Region(config.region), config.bucket, mOldName, config.bucket, mNewName
         )
         return try {
-            _cosClient!!.copyObject(copyRequest)
+            cosClient.copyObject(copyRequest)
             true
         } catch (e: Exception) {
             throw MyException(e.message ?: "未知错误")
@@ -134,10 +148,10 @@ class TencentCOSImpl private constructor() : FileOption {
      * @return 是否存在
      */
     override fun isExist(fileName: String): Boolean {
-        try {
-            return _cosClient!!.doesObjectExist(
-                _config!!.bucket,
-                "${_config!!.path ?: ""}/${fileName}".formatSlash()
+        return try {
+            cosClient.doesObjectExist(
+                config.bucket,
+                "${config.path ?: ""}/$fileName".formatSlash()
             )
         } catch (e: Exception) {
             throw MyException(e.message ?: "未知错误")

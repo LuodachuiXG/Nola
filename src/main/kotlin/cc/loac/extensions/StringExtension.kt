@@ -175,6 +175,20 @@ fun String.addRandomSuffix(): String {
 
 /**
  * String 扩展函数
+ * 文件名消毒：去除路径分隔符、父目录引用、控制字符
+ * 防止路径遍历与非法文件名
+ */
+fun String.sanitizeFileName(): String {
+    return this
+        .replace(Regex("[\\\\/]"), "_")
+        .replace(Regex("\\.{2,}"), "_")
+        .replace(Regex("[\\x00-\\x1f\\x7f]"), "")
+        .trim()
+        .takeIf { it.isNotBlank() } ?: "unnamed"
+}
+
+/**
+ * String 扩展函数
  * 将所有双斜杠替换为单斜杠
  * 注意：此函数始终使用 "/" 作为分隔符，适用于 URL 和相对路径场景
  */

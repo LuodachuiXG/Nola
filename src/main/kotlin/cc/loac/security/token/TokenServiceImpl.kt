@@ -64,4 +64,12 @@ class TokenServiceImpl: TokenService {
         val storedToken = RedisSingleton.getSync("$TOKEN_KEY_PREFIX$userId")
         return storedToken != null && storedToken == token
     }
+
+    /**
+     * 删除用户存储在 Redis 中的 Token
+     * @param userId 用户 ID
+     */
+    override suspend fun deleteToken(userId: Long): Boolean {
+        return RedisSingleton.deleteSync("$TOKEN_KEY_PREFIX$userId")?.let { it > 0 } ?: false
+    }
 }

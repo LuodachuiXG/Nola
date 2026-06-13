@@ -9,7 +9,10 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
+import org.slf4j.LoggerFactory
 import org.thymeleaf.exceptions.TemplateInputException
+
+private val logger = LoggerFactory.getLogger("StatusPage")
 
 /**
  * 配置状态页面插件
@@ -56,7 +59,7 @@ fun Application.configureStatusPage() {
 
         /** 默认异常类 **/
         exception<Exception> { call, e ->
-            e.printStackTrace()
+            logger.error("${call.ip()} - ${call.request.uri}: 未处理异常: ${e.message}")
             call.respondFailure("未知错误，请查看服务端日志", HttpStatusCode.InternalServerError)
         }
     }

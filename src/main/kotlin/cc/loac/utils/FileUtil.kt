@@ -13,24 +13,22 @@ import java.util.zip.ZipOutputStream
 fun File.createZip(zipFileName: String): File? {
     if (!this.exists()) return null
     if (!this.isDirectory) return null
-    val zipFile = FileOutputStream(zipFileName)
-    val zipOut = ZipOutputStream(zipFile)
-
-    this.walkTopDown().forEach { file ->
-        if (!file.isDirectory) {
-            val entryName = file.relativeTo(this).path.replace(File.separatorChar, '/')
-            val zipEntry = ZipEntry(entryName)
-            zipOut.putNextEntry(zipEntry)
-
-            val fileInputStream = FileInputStream(file)
-            fileInputStream.copyTo(zipOut)
-            fileInputStream.close()
-            zipOut.closeEntry()
+    return try {
+        ZipOutputStream(FileOutputStream(zipFileName).buffered()).use { zipOut ->
+            this.walkTopDown().forEach { file ->
+                if (!file.isDirectory) {
+                    val entryName = file.relativeTo(this).path.replace(File.separatorChar, '/')
+                    zipOut.putNextEntry(ZipEntry(entryName))
+                    FileInputStream(file).use { input ->
+                        input.copyTo(zipOut)
+                    }
+                    zipOut.closeEntry()
+                }
+            }
         }
+        File(zipFileName)
+    } catch (e: Exception) {
+        null
     }
-
-    zipOut.close()
-    zipFile.close()
-    return File(zipFileName)
 }
 

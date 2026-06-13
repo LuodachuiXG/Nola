@@ -186,6 +186,13 @@ class UserServiceImpl : UserService {
         if (!userInfo.email.isEmail()) throw MyException("邮箱格式错误")
         if (!userInfo.username.isAlphaAndNumeric()) throw MyException("用户名只支持英文和数字")
         if (userInfo.username.length < 4) throw MyException("用户名不能小于 4 位")
+
+        // 检查用户名是否已被其他用户占用
+        val existing = user(userInfo.username)
+        if (existing != null && existing.userId != userId) {
+            throw MyException("用户名 [${userInfo.username}] 已被使用")
+        }
+
         return userDao.updateUser(userId, userInfo)
     }
 
@@ -202,7 +209,14 @@ class UserServiceImpl : UserService {
 
         // 对密码生成加盐哈希
         val saltHash = hashingService.generatedSaltedHash(password)
-        return userDao.updatePassword(userId, saltHash)
+        val result = userDao.updatePassword(userId, saltHash)
+
+        // 修改成功后删除 Redis 中的 Token，强制重新登录
+        if (result) {
+            tokenService.deleteToken(userId)
+        }
+
+        return result
     }
 
     /**

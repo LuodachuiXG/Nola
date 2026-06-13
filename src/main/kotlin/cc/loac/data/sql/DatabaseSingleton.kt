@@ -25,35 +25,42 @@ object DatabaseSingleton {
         val jdbcURL = config.property("ktor.storage.jdbcURL").getString()
         val username = config.property("ktor.storage.username").getString()
         val password = config.property("ktor.storage.password").getString()
-        var database = Database.connect(
-            // 先不连接具体的数据库，只连接数据库服务器
-            createHikariDataSource(jdbcURL.substringBefore(databaseName), driverClassName, username, password)
+
+        // 先连接数据库服务器（不指定具体数据库），用于创建数据库
+        val initialDataSource = createHikariDataSource(
+            jdbcURL.substringBefore(databaseName),
+            driverClassName,
+            username,
+            password
         )
+        var database = Database.connect(initialDataSource)
 
         transaction(database) {
             if (!SchemaUtils.listDatabases().contains(databaseName)) {
                 // 数据库不存在，创建数据库
                 SchemaUtils.createDatabase(databaseName)
             }
-
-            // 连接到新创建的数据库
-            database = Database.connect(
-                createHikariDataSource(jdbcURL, driverClassName, username, password)
-            )
-
-            // 开启事物，要么全部成功，要么回滚
-            transaction(database) {
-                // 所有表
-                val tables = listOf(
-                    Users, Configs, Posts, Tags, Categories, PostTags,
-                    PostCategories, PostContents, Links, Menus, MenuItems, FileStorageModes,
-                    FileGroups, Files, Diaries, AccessLogs, Comments, Operations
-                )
-                // 创建表
-                SchemaUtils.create(*tables.toTypedArray())
-            }
         }
 
+        // 关闭初始连接池，避免连接泄漏
+        initialDataSource.close()
+
+        // 连接到新创建的数据库
+        database = Database.connect(
+            createHikariDataSource(jdbcURL, driverClassName, username, password)
+        )
+
+        // 开启事物，要么全部成功，要么回滚
+        transaction(database) {
+            // 所有表
+            val tables = listOf(
+                Users, Configs, Posts, Tags, Categories, PostTags,
+                PostCategories, PostContents, Links, Menus, MenuItems, FileStorageModes,
+                FileGroups, Files, Diaries, AccessLogs, Comments, Operations
+            )
+            // 创建表
+            SchemaUtils.create(*tables.toTypedArray())
+        }
     }
 
     /**

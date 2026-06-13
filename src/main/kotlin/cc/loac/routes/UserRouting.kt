@@ -8,6 +8,7 @@ import cc.loac.plugins.LIMITER_ADMIN_LOGIN
 import cc.loac.security.token.TokenConfig
 import cc.loac.services.UserService
 import cc.loac.utils.*
+import io.ktor.http.*
 import io.ktor.server.auth.*
 import io.ktor.server.plugins.ratelimit.*
 import io.ktor.server.routing.*
@@ -32,15 +33,17 @@ fun Route.userRouting(
 
             /** 获取登录用户信息 **/
             get {
-                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
-                call.respondSuccess(userService.user(userId.toLong())?.toUserInfoResponse())
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value?.toLongOrNull()
+                    ?: return@get call.respondFailure("登录已过期，请重新登录", HttpStatusCode.Unauthorized)
+                call.respondSuccess(userService.user(userId)?.toUserInfoResponse())
             }
 
             /** 修改登录用户的信息 **/
             put {
-                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value?.toLongOrNull()
+                    ?: return@put call.respondFailure("登录已过期，请重新登录", HttpStatusCode.Unauthorized)
                 val userInfo = call.receiveByDataClass<UserInfoRequest>()
-                call.respondSuccess(userService.updateUser(userId.toLong(), userInfo).also {
+                call.respondSuccess(userService.updateUser(userId, userInfo).also {
                     if (it) {
                         operate(
                             desc = "修改用户信息，用户 ID: [$userId]",
@@ -52,9 +55,10 @@ fun Route.userRouting(
 
             /** 修改密码 **/
             put("/password") {
-                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value!!
-                val newPassword = call.receiveMapByName("password")["password"]!!
-                call.respondSuccess(userService.updatePassword(userId.toLong(), newPassword).also {
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value?.toLongOrNull()
+                    ?: return@put call.respondFailure("登录已过期，请重新登录", HttpStatusCode.Unauthorized)
+                val newPassword = call.receiveMapByName("password")["password"] ?: ""
+                call.respondSuccess(userService.updatePassword(userId, newPassword).also {
                     if (it) {
                         operate(
                             desc = "修改用户密码，用户 ID: [$userId]",

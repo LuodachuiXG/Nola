@@ -81,13 +81,11 @@ suspend fun ApplicationCall.receiveMapByName(
  */
 suspend fun ApplicationCall.receiveMapByName(
     vararg names: String
-): Map<String, String?> {
-    val list = mutableListOf<RequestParam>()
-    names.forEach { name ->
-        list.add(name.nonNull())
+): Map<String, String> {
+    val list = names.map { it.nonNull() }
+    return receiveMapByName(*list.toTypedArray()).mapValues {
+        it.value ?: throw ParamMismatchException()
     }
-    // * 将数组转为可变数量的参数
-    return receiveMapByName(*list.toTypedArray())
 }
 
 /**
