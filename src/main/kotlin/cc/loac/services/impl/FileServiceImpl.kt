@@ -22,10 +22,13 @@ import cc.loac.data.sql.dao.FileDao
 import cc.loac.extensions.addRandomSuffix
 import cc.loac.extensions.formatSlash
 import cc.loac.extensions.jsonToClass
+import cc.loac.extensions.sanitizeFileName
 import cc.loac.extensions.toJSONString
 import cc.loac.services.FileService
 import cc.loac.utils.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.java.KoinJavaComponent.inject
 import java.io.InputStream
 import java.util.*
@@ -48,6 +51,9 @@ class FileServiceImpl : FileService {
 
         // 腾讯云对象存储配置
         private var tencentConfig: TencentCOSConfig? = null
+
+        // 保护腾讯云对象存储初始化与配置读写
+        private val tencentInitMutex = Mutex()
     }
 
     init {
@@ -63,21 +69,19 @@ class FileServiceImpl : FileService {
      * @return 已经初始化或初始化成功返回对象，初始化失败返回 null
      */
     private suspend fun initFileStorageMode(storageMode: FileStorageModeEnum): FileOption? {
-        when (storageMode) {
+        return when (storageMode) {
             FileStorageModeEnum.TENCENT_COS -> {
-                // 腾讯云对象存储已经初始化，直接返回对象
-                if (tencentCOS != null) return tencentCOS
-                // 腾讯云对象存储配置文件不存在，返回 null
-                val configStr = fileDao.getFileStorageConfig(storageMode) ?: return null
-                tencentConfig = configStr.jsonToClass()
-                // 设置腾讯云对象存储
-                tencentCOS = TencentCOSImpl.getInstance(tencentConfig)
-                return tencentCOS
+                tencentInitMutex.withLock {
+                    tencentCOS?.let { return@withLock it }
+                    val configStr = fileDao.getFileStorageConfig(storageMode) ?: return@withLock null
+                    tencentConfig = configStr.jsonToClass()
+                    tencentCOS = TencentCOSImpl.getInstance(tencentConfig)
+                    tencentCOS
+                }
             }
 
-            else -> {}
+            else -> null
         }
-        return null
     }
 
     /**
@@ -152,10 +156,29 @@ class FileServiceImpl : FileService {
     }
 
     /**
+     * 校验文件组路径是否合法，防止路径遍历
+     * @param path 文件组路径
+     */
+    private fun validateFileGroupPath(path: String) {
+        if (path.isBlank()) throw MyException("文件组路径不能为空")
+        if (path.startsWith("/") || path.startsWith("\\")) {
+            throw MyException("文件组路径不能以斜杠开头")
+        }
+        if (path.contains("..")) throw MyException("文件组路径不能包含父目录引用")
+        if (path.contains("\\")) throw MyException("文件组路径不能包含反斜杠")
+        if (!path.matches("^[a-zA-Z0-9_\\-/]+$".toRegex())) {
+            throw MyException("文件组路径包含非法字符")
+        }
+    }
+
+    /**
      * 添加文件组
      * @param fileGroup 文件组数据类
      */
     override suspend fun addFileGroup(fileGroup: FileGroup): FileGroup? {
+        // 校验文件组路径
+        validateFileGroupPath(fileGroup.path)
+
         // 如果文件存储方式不是本地存储，就先检查对应的存储方式是否已经设置
         if (fileGroup.storageMode != FileStorageModeEnum.LOCAL) {
             if (fileDao.getFileStorageConfig(fileGroup.storageMode) == null) {
@@ -262,6 +285,9 @@ class FileServiceImpl : FileService {
         fileGroupId: Long?,
         fileLength: Long?
     ): FileResponse {
+        // 文件名消毒，防止路径遍历与非法字符
+        val sanitizedFileName = fileName.sanitizeFileName()
+
         var fileGroup: FileGroup? = null
         if (fileGroupId != null) {
             // 先尝试获取文件组
@@ -279,8 +305,8 @@ class FileServiceImpl : FileService {
 
 
         // 查看当前文件名是否已经存在
-        val file = fileDao.getFile(fileName, fileGroupId, storageMode)
-        var actualFileName = fileName
+        val file = fileDao.getFile(sanitizedFileName, fileGroupId, storageMode)
+        var actualFileName = sanitizedFileName
         // 如果文件已经存在，给文件名加上 5 个随机数字或字母
         if (file != null) {
             actualFileName = actualFileName.addRandomSuffix()
@@ -460,8 +486,10 @@ class FileServiceImpl : FileService {
                 resultFileIndexes.addAll(tencentFileIndexes)
             } else {
                 // 如果成功删除的文件数目与请求删除的文件数目不相等，就只把成功删除的文件加入删除成功结果集
-                tencentDeleteResult.forEach {
-                    resultFileIndexes.add(tencentFileIndexes.find { fileIndex -> fileIndex.name == it }!!)
+                tencentDeleteResult.forEach { name ->
+                    tencentFileIndexes.find { it.name == name }?.let {
+                        resultFileIndexes.add(it)
+                    }
                 }
             }
         }
@@ -474,8 +502,10 @@ class FileServiceImpl : FileService {
                 resultFileIndexes.addAll(localFileIndexes)
             } else {
                 // 如果成功删除的文件数目与请求删除的文件数目不相等，就只把成功删除的文件加入删除成功结果集
-                localDeleteResult.forEach {
-                    resultFileIndexes.add(localFileIndexes.find { fileIndex -> fileIndex.name == it }!!)
+                localDeleteResult.forEach { name ->
+                    localFileIndexes.find { it.name == name }?.let {
+                        resultFileIndexes.add(it)
+                    }
                 }
             }
         }

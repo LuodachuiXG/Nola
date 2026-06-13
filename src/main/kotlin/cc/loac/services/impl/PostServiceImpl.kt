@@ -20,10 +20,12 @@ import cc.loac.services.TagService
 import cc.loac.utils.createZip
 import cc.loac.utils.formatDate
 import cc.loac.utils.randomString
+import cc.loac.utils.secureRandomString
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
 import java.io.File
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * 文章服务接口实现类
@@ -469,15 +471,15 @@ class PostServiceImpl : PostService {
      * 导出所有文章
      */
     override suspend fun exportPosts(): ExportPostResponse {
-        // 总处理文章数量
-        var totalCount = 0
+        // 总处理文章数量（使用线程安全类型，避免并发统计错误）
+        val totalCount = AtomicInteger(0)
         // 成功的文章数量
-        var successCount = 0
+        val successCount = AtomicInteger(0)
         // 失败原因的数组
-        val failResult = mutableListOf<String>()
+        val failResult = Collections.synchronizedList(mutableListOf<String>())
 
-        // 文件夹名前缀
-        val filePrefix = "${Date().formatDate()}_Post"
+        // 文件夹名前缀（加入随机后缀，防止被枚举）
+        val filePrefix = "${Date().formatDate()}_${secureRandomString(16)}_Post"
 
         // 临时文件夹地址，一般以当前时间命名
         val tempDir = File("./.nola/temp/$filePrefix")
@@ -498,7 +500,7 @@ class PostServiceImpl : PostService {
                 val postContentItems = postContents(post.postId)
                 // 获取文章的正文和所有草稿的实际内容，并写到文件
                 postContentItems.forEach { contentItem ->
-                    totalCount++
+                    totalCount.incrementAndGet()
                     // 获取当前文章的具体内容
                     val content = postContent(contentItem.postId, contentItem.status, contentItem.draftName)
                     if (content == null) {
@@ -507,7 +509,7 @@ class PostServiceImpl : PostService {
                         } else {
                             "[${post.title}] 文章的 [${contentItem.draftName}] 草稿没有任何内容"
                         }
-                        return@launch
+                        return@forEach
                     }
                     // 将当前文章内容写到临时文件夹
                     postToTempDir(post, content, tempDir) { errMsg ->
@@ -517,7 +519,7 @@ class PostServiceImpl : PostService {
                     }.let {
                         if (it) {
                             // 文章内容写到文件成功
-                            successCount++
+                            successCount.incrementAndGet()
                         }
                     }
                 }
@@ -537,11 +539,11 @@ class PostServiceImpl : PostService {
         // 删除临时文件夹
         tempDir.deleteRecursively()
         return ExportPostResponse(
-            successCount = successCount,
+            successCount = successCount.get(),
             failCount = failResult.size,
             failResult = failResult,
             path = "/backup/${filePrefix}.zip",
-            count = totalCount,
+            count = totalCount.get(),
         )
     }
 

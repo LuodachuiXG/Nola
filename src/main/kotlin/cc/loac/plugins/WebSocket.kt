@@ -13,8 +13,8 @@ fun Application.configureWebSocket() {
         // 超时时间
         timeout = 15.seconds
 
-        // 帧最大大小
-        maxFrameSize = Long.MAX_VALUE
+        // 帧最大大小（限制为 8MB，防止单条超大帧导致内存耗尽）
+        maxFrameSize = 8L * 1024 * 1024
 
         // 是否使用掩码
         masking = false

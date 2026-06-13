@@ -24,4 +24,9 @@ interface TokenService {
      * @param token 令牌
      */
     suspend fun verify(userId: Long, token: String): Boolean
+    /**
+     * 删除用户 Token（如修改密码后强制重新登录）
+     * @param userId 用户 ID
+     */
+    suspend fun deleteToken(userId: Long): Boolean
 }

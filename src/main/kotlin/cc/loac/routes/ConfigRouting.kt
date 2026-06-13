@@ -67,10 +67,10 @@ fun Route.configAdminRouting() {
 
                 // 封装用户类
                 val user = User(
-                    username = receive["username"]!!,
-                    email = receive["email"]!!,
-                    displayName = receive["displayName"]!!,
-                    password = receive["password"]!!,
+                    username = receive["username"] ?: "",
+                    email = receive["email"] ?: "",
+                    displayName = receive["displayName"] ?: "",
+                    password = receive["password"] ?: "",
                     salt = ""
                 )
                 // 初始化管理员

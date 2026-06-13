@@ -3,6 +3,7 @@ package cc.loac.utils
 import cc.loac.data.files.config.TencentCOSConfig
 import cc.loac.extensions.replaceDoubleSlash
 import kotlin.random.Random
+import java.security.SecureRandom
 
 /** 随机字符串字符集：数字 + 小写字母 + 大写字母，共 62 个字符 */
 private const val RANDOM_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -14,6 +15,16 @@ private const val RANDOM_CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJ
  */
 fun randomString(length: Int): String {
     return (1..length).map { RANDOM_CHARS[Random.nextInt(RANDOM_CHARS.length)] }.joinToString("")
+}
+
+/**
+ * 使用密码学安全随机源生成指定长度的随机字符
+ * 包括数字或字母（大小写）
+ * @param length 长度
+ */
+fun secureRandomString(length: Int): String {
+    val secureRandom = SecureRandom()
+    return (1..length).map { RANDOM_CHARS[secureRandom.nextInt(RANDOM_CHARS.length)] }.joinToString("")
 }
 
 /**

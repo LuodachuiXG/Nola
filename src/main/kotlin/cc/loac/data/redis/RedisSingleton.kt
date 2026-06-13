@@ -33,12 +33,16 @@ object RedisSingleton {
      */
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     fun init(config: ApplicationConfig) {
-        val redisURL = config.property("ktor.redis.redisURL").getString()
-        val client = RedisClient.create(redisURL)
-        val conn = client.connect()
-        redisClient = client
-        connection = conn
-        instance = conn.coroutines()
+        try {
+            val redisURL = config.property("ktor.redis.redisURL").getString()
+            val client = RedisClient.create(redisURL)
+            val conn = client.connect()
+            redisClient = client
+            connection = conn
+            instance = conn.coroutines()
+        } catch (e: Exception) {
+            throw IllegalStateException("Redis 初始化失败，请检查 ktor.redis.redisURL 配置及 Redis 服务是否可用", e)
+        }
     }
 
     /**
