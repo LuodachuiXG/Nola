@@ -32,7 +32,10 @@ object RedisSingleton {
      * 初始化 Redis Lettuce 实例
      */
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
+    @Synchronized
     fun init(config: ApplicationConfig) {
+        // dev 模式重载时先关闭旧连接，避免连接泄漏
+        closeSync()
         try {
             val redisURL = config.property("ktor.redis.redisURL").getString()
             val client = RedisClient.create(redisURL)
@@ -132,9 +135,19 @@ object RedisSingleton {
     }
 
     /**
+     * 检查 Redis 是否可用
+     */
+    @OptIn(ExperimentalLettuceCoroutinesApi::class)
+    suspend fun ping(): Boolean = runCatching {
+        checkInstance()
+        instance.ping()?.equals("PONG", ignoreCase = true) == true
+    }.getOrDefault(false)
+
+    /**
      * 关闭 Redis（同步）
      * 先关闭连接，再关闭客户端线程池，确保无重连干扰
      */
+    @Synchronized
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     fun closeSync() {
         // 1. 先关连接（同时会使 instance 失效）

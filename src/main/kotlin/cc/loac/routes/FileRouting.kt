@@ -16,6 +16,7 @@ import cc.loac.services.FileService
 import cc.loac.utils.*
 import io.ktor.http.content.*
 import io.ktor.server.auth.*
+import io.ktor.server.plugins.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import io.ktor.utils.io.*
@@ -73,7 +74,14 @@ private fun Route.fileRouting() {
                 }
 
                 is PartData.FileItem -> {
-                    inputStream = part.provider().readRemaining().inputStream()
+                    val fileBytes = part.provider()
+                        .readRemaining(RequestLimits.MAX_UPLOAD_FILE_BYTES + 1)
+                        .inputStream()
+                        .readBytes()
+                    if (fileBytes.size > RequestLimits.MAX_UPLOAD_FILE_BYTES) {
+                        throw PayloadTooLargeException(RequestLimits.MAX_UPLOAD_FILE_BYTES)
+                    }
+                    inputStream = fileBytes.inputStream()
                     originName = part.originalFileName
                 }
 

@@ -14,6 +14,7 @@ import cc.loac.data.requests.newPostRequestByNameAndContent
 import cc.loac.data.responses.*
 import cc.loac.data.sql.dao.PostDao
 import cc.loac.extensions.markdownToPlainText
+import cc.loac.extensions.sanitizeBackupFileName
 import cc.loac.services.CategoryService
 import cc.loac.services.PostService
 import cc.loac.services.TagService
@@ -199,7 +200,21 @@ class PostServiceImpl : PostService {
      * 获取文章总数
      */
     override suspend fun postCount(): Long {
-        return postDao.postCount();
+        return postDao.postCount()
+    }
+
+    /**
+     * 获取公开文章总数（已发布且可见）
+     */
+    override suspend fun publicPostCount(): Long {
+        return postDao.publicPostCount()
+    }
+
+    /**
+     * 获取公开文章总浏览量（已发布且可见）
+     */
+    override suspend fun publicPostVisitCount(): Long {
+        return postDao.publicPostVisitCount()
     }
 
     /**
@@ -249,6 +264,24 @@ class PostServiceImpl : PostService {
      */
     override suspend fun postBySlug(slug: String): Post? {
         return postDao.postBySlug(slug)
+    }
+
+    /**
+     * 获取公开文章 - 根据文章 ID
+     * 仅返回已发布且可见的文章
+     * @param postId 文章 ID
+     */
+    override suspend fun publicPost(postId: Long): Post? {
+        return postDao.publicPost(postId)
+    }
+
+    /**
+     * 获取公开文章 - 根据文章别名
+     * 仅返回已发布且可见的文章
+     * @param slug 文章别名
+     */
+    override suspend fun publicPostBySlug(slug: String): Post? {
+        return postDao.publicPostBySlug(slug)
     }
 
     /**
@@ -316,16 +349,12 @@ class PostServiceImpl : PostService {
      */
     override suspend fun apiPostContent(postId: Long?, slug: String?, password: String?): ApiPostContentResponse? {
         if (postId == null && slug == null) return null
-        // 如果文章 ID 不为空，通过文章 ID 获取文章
+        // 博客前端 API 只能获取已发布且可见的文章
         val post = if (postId != null) {
-            posts(listOf(postId), true).firstOrNull() ?: return null
+            publicPost(postId) ?: return null
         } else {
-            // 通过文章别名获取文章
-            postBySlug(slug!!) ?: return null
+            publicPostBySlug(slug!!) ?: return null
         }
-
-        // 博客前端 API 只能获取已发布文章内容
-        if (post.status != PostStatus.PUBLISHED) return null
 
         // 判断文章是否有密码，以及密码是否正确
         if (post.encrypted) {
@@ -542,7 +571,7 @@ class PostServiceImpl : PostService {
             successCount = successCount.get(),
             failCount = failResult.size,
             failResult = failResult,
-            path = "/backup/${filePrefix}.zip",
+            path = "/admin/backup/download/${filePrefix}.zip",
             count = totalCount.get(),
         )
     }
@@ -575,18 +604,39 @@ class PostServiceImpl : PostService {
         dir: File,
         onFail: (String) -> Unit = {}
     ): Boolean {
-        if (!dir.exists()) {
-            dir.mkdirs()
-        } else if (!dir.isDirectory) {
+        val dirCanonical = try {
+            dir.canonicalFile
+        } catch (e: Exception) {
+            onFail("[${post.title}] 写入临时文件夹失败，${e.message}")
+            return false
+        }
+
+        if (!dirCanonical.exists()) {
+            dirCanonical.mkdirs()
+        } else if (!dirCanonical.isDirectory) {
             onFail("[${post.title}] 写入临时文件夹失败，因为临时文件夹地址不是一个文件夹")
             return false
         }
 
-        var postFileName = post.title
-        if (postContent.status == PostContentStatus.DRAFT) {
-            postFileName += "_${postContent.draftName}"
+        val fileName = buildString {
+            append(post.postId)
+            append('_')
+            append(post.slug.sanitizeBackupFileName("post"))
+            append('_')
+            append(postContent.postContentId)
+            if (postContent.status == PostContentStatus.DRAFT) {
+                append("_draft_")
+                append((postContent.draftName ?: "draft").sanitizeBackupFileName("draft"))
+            }
+            append(".md")
         }
-        val postFile = File(dir, "$postFileName.md")
+
+        val postFile = File(dirCanonical, fileName).canonicalFile
+        if (postFile.parentFile != dirCanonical) {
+            onFail("[${post.title}] 写入临时文件夹失败，文件名不合法")
+            return false
+        }
+
         try {
             postFile.writeText(postContent.content)
             return true;

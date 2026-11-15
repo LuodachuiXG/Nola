@@ -6,6 +6,8 @@ import cc.loac.data.models.enums.CommentSort
 import cc.loac.data.requests.CommentPassRequest
 import cc.loac.data.requests.CommentRequest
 import cc.loac.data.requests.CommentUpdateRequest
+import cc.loac.data.responses.toApiCommentPager
+import cc.loac.data.responses.toApiCommentResponse
 import cc.loac.extensions.isBoolean
 import cc.loac.extensions.isEmail
 import cc.loac.extensions.isEnum
@@ -195,7 +197,7 @@ fun Route.commentApiRouting() {
                             isPass = false
                         ),
                         isApiRequest = true
-                    )
+                    )?.toApiCommentResponse()
                 )
             }
 
@@ -216,16 +218,16 @@ fun Route.commentApiRouting() {
                     throw MyException("文章 ID 和文章别名至少提供一个")
                 }
 
-                call.respondSuccess(
-                    commentService.comments(
-                        page = page,
-                        size = size,
-                        postId = postId,
-                        slug = slug,
-                        isPass = true,
-                        tree = true
-                    )
+                val commentsPager = commentService.comments(
+                    page = page,
+                    size = size,
+                    postId = postId,
+                    slug = slug,
+                    isPass = true,
+                    tree = true,
+                    publicOnly = true
                 )
+                call.respondSuccess(commentsPager.toApiCommentPager())
             }
         }
     }

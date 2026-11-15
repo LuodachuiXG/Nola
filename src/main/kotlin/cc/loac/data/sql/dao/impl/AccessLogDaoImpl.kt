@@ -9,6 +9,7 @@ import cc.loac.data.sql.tables.AccessLogs
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.less
 
 /**
  * 访问日志操作接口实现类
@@ -32,16 +33,33 @@ class AccessLogDaoImpl : AccessLogDao {
      * @param accessLog 访问日志数据类
      */
     override suspend fun addAccessLog(accessLog: AccessLog): AccessLog? = dbQuery {
+        val safeLog = accessLog.sanitized()
         val insertStatement = AccessLogs.insert {
-            it[path] = accessLog.path
-            it[ip] = accessLog.ip
-            it[accessTime] = accessLog.accessTime
-            it[type] = accessLog.type
-            it[message] = accessLog.message
+            it[path] = safeLog.path
+            it[ip] = safeLog.ip
+            it[accessTime] = safeLog.accessTime
+            it[type] = safeLog.type
+            it[message] = safeLog.message
         }
         insertStatement.resultedValues?.singleOrNull()?.let { resultRow ->
             resultRowToAccessLog(resultRow)
         }
+    }
+
+    /**
+     * 批量增加访问日志
+     * @param accessLogs 访问日志数据类集合
+     */
+    override suspend fun addAccessLogs(accessLogs: List<AccessLog>): Boolean = dbQuery {
+        if (accessLogs.isEmpty()) return@dbQuery true
+        AccessLogs.batchInsert(accessLogs.map { it.sanitized() }) { log ->
+            this[AccessLogs.path] = log.path
+            this[AccessLogs.ip] = log.ip
+            this[AccessLogs.accessTime] = log.accessTime
+            this[AccessLogs.type] = log.type
+            this[AccessLogs.message] = log.message
+        }
+        true
     }
 
     /**
@@ -51,6 +69,17 @@ class AccessLogDaoImpl : AccessLogDao {
     override suspend fun deleteLog(accessLogId: Long): Boolean = dbQuery {
         AccessLogs.deleteWhere {
             AccessLogs.accessLogId eq accessLogId
+        } > 0
+    }
+
+    /**
+     * 批量删除访问日志
+     * @param accessLogIds 访问日志 ID 集合
+     */
+    override suspend fun deleteLogs(accessLogIds: List<Long>): Boolean = dbQuery {
+        if (accessLogIds.isEmpty()) return@dbQuery true
+        AccessLogs.deleteWhere {
+            accessLogId inList accessLogIds
         } > 0
     }
 
@@ -68,6 +97,23 @@ class AccessLogDaoImpl : AccessLogDao {
                     it[accessLogId]
                 }
         } > 0
+    }
+
+    /**
+     * 删除指定时间以前的日志
+     * @param time 时间戳（毫秒）
+     */
+    override suspend fun deleteBefore(time: Long): Boolean = dbQuery {
+        AccessLogs.deleteWhere {
+            AccessLogs.accessTime less time
+        } > 0
+    }
+
+    /**
+     * 删除全部访问日志
+     */
+    override suspend fun deleteAll(): Boolean = dbQuery {
+        AccessLogs.deleteAll() > 0
     }
 
     /**
@@ -89,7 +135,7 @@ class AccessLogDaoImpl : AccessLogDao {
      */
     override suspend fun accessLogs(page: Int, size: Int): Pager<AccessLog> {
         return AccessLogs.startPage(page, size, ::resultRowToAccessLog) {
-            selectAll()
+            selectAll().orderBy(AccessLogs.accessTime, SortOrder.DESC)
         }
     }
 
@@ -99,4 +145,13 @@ class AccessLogDaoImpl : AccessLogDao {
     override suspend fun count(): Long = dbQuery {
         AccessLogs.selectAll().count()
     }
+
+    /**
+     * 截断超出数据库字段长度的内容，避免异步写入失败
+     */
+    private fun AccessLog.sanitized() = copy(
+        path = path.take(256),
+        ip = ip.take(64),
+        message = message?.take(256)
+    )
 }

@@ -20,6 +20,7 @@ val qcloud_version: String by project
 val pinyin4j_version: String by project
 
 val commons_codec_version: String by project
+val bcrypt_version: String by project
 
 val jackson_module_kotlin_version: String by project
 
@@ -29,7 +30,7 @@ val commonmark_version: String by project
 
 plugins {
     kotlin("jvm") version "2.0.21"
-    id("io.ktor.plugin") version "3.0.1"
+    id("io.ktor.plugin") version "3.2.3"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.21"
 }
 
@@ -103,6 +104,8 @@ dependencies {
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     implementation("commons-codec:commons-codec:$commons_codec_version")
+    // BCrypt 密码哈希
+    implementation("at.favre.lib:bcrypt:$bcrypt_version")
     testImplementation("io.ktor:ktor-server-test-host-jvm:$ktor_version")
 
     // Jsoup

@@ -36,7 +36,7 @@ class BlogOnlineManager private constructor() {
                     instance = it
 
                     if (job == null) {
-                        // 启动定时任务，使用 Koin 管理的应用级协程作用域
+                        // 启动定时任务，使用当前 Application 的协程作用域
                         val appScope = get<CoroutineScope>(CoroutineScope::class.java)
                         job = appScope.launch {
                             // 每 30 分钟尝试清理一次无效连接
@@ -49,6 +49,25 @@ class BlogOnlineManager private constructor() {
                 }
             }
         }
+
+        /**
+         * 重置在线状态
+         * Application 重载或停止时调用，避免旧连接和已取消的定时任务残留
+         */
+        fun reset() {
+            synchronized(this) {
+                job?.cancel()
+                job = null
+                instance?.let { manager ->
+                    manager.connections.clear()
+                    manager.connectionIps.clear()
+                    manager.ipConnectionCount.clear()
+                    manager.sseSubscribers.clear()
+                    manager.onlineCount.set(0)
+                }
+                instance = null
+            }
+        }
     }
 
 
@@ -56,6 +75,9 @@ class BlogOnlineManager private constructor() {
 
     // 当前连接的 Session
     private val connections = ConcurrentHashMap<String, WebSocketSession>()
+
+    // Session 对应的客户端 IP
+    private val connectionIps = ConcurrentHashMap<String, String>()
 
     // 在线人数
     private val onlineCount = AtomicInteger(0)
@@ -89,6 +111,7 @@ class BlogOnlineManager private constructor() {
             }
 
             connections[sessionId] = session
+            connectionIps[sessionId] = clientIp
             ipCount.incrementAndGet()
             val currentCount = onlineCount.incrementAndGet()
 
@@ -101,22 +124,33 @@ class BlogOnlineManager private constructor() {
     /**
      * 移除连接
      * @param sessionId Session ID
-     * @param clientIp 客户端 IP
      */
-    suspend fun removeConnection(sessionId: String, clientIp: String) {
+    suspend fun removeConnection(sessionId: String) {
         return connectionMutex.withLock {
-            connections.remove(sessionId)
-            ipConnectionCount[clientIp]?.decrementAndGet()
-            var currentCount = onlineCount.decrementAndGet()
-
-            if (currentCount <= 0) {
-                onlineCount.set(0)
-                currentCount = 0
-            }
-
+            if (!removeConnectionLocked(sessionId)) return@withLock
+            val currentCount = onlineCount.get()
             // 广播新的在线人数
             broadcastOnlineCount(currentCount)
         }
+    }
+
+    /**
+     * 移除连接并同步维护在线人数、IP 计数
+     * 调用方必须持有 connectionMutex
+     */
+    private fun removeConnectionLocked(sessionId: String): Boolean {
+        val removed = connections.remove(sessionId) != null
+        if (!removed) return false
+
+        connectionIps.remove(sessionId)?.let { ip ->
+            ipConnectionCount[ip]?.let { ipCount ->
+                if (ipCount.decrementAndGet() <= 0) {
+                    ipConnectionCount.remove(ip, ipCount)
+                }
+            }
+        }
+        onlineCount.updateAndGet { count -> (count - 1).coerceAtLeast(0) }
+        return true
     }
 
     /**
@@ -142,12 +176,11 @@ class BlogOnlineManager private constructor() {
 
         // 清理死连接
         deadConnections.forEach { sessionId ->
-            connections.remove(sessionId)
-            onlineCount.decrementAndGet()
+            removeConnectionLocked(sessionId)
         }
 
         // 向管理端 SSE 广播消息
-        broadcastOnlineCountToSse(count)
+        broadcastOnlineCountToSse(onlineCount.get())
     }
 
     /**
@@ -213,8 +246,7 @@ class BlogOnlineManager private constructor() {
             }
 
             deadConnections.forEach { sessionId ->
-                connections.remove(sessionId)
-                onlineCount.decrementAndGet()
+                removeConnectionLocked(sessionId)
             }
         }
     }

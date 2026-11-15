@@ -219,7 +219,17 @@ suspend fun ApplicationCall.receivePageAndSize(
     if (page != "0" && size == "0") {
         throw ParamMismatchException()
     }
-    block(page.toInt(), size.toInt())
+    // page=0 表示不分页获取全部数据，仅允许已登录的管理员使用
+    if (page == "0" && principal<JWTPrincipal>() == null) {
+        throw ParamMismatchException()
+    }
+    val pageInt = page.toIntOrNull() ?: throw ParamMismatchException()
+    val sizeInt = size.toIntOrNull() ?: throw ParamMismatchException()
+    // 限制每页最大条数，避免一次查询过多数据
+    if (sizeInt > RequestLimits.MAX_PAGE_SIZE) {
+        throw ParamMismatchException()
+    }
+    block(pageInt, sizeInt)
 }
 
 /**
@@ -247,7 +257,9 @@ fun ApplicationCall.getUser(): Pair<Long, String> {
  * 获取请求的用户的 IP 地址
  */
 fun ApplicationCall.ip(): String {
-    return this.request.headers["X-Forwarded-For"] ?: this.request.origin.remoteAddress
+    // XForwardedHeaders 插件只会在可信代理转发时改写 origin，
+    // 因此这里直接使用 origin，避免客户端伪造 X-Forwarded-For
+    return this.request.origin.remoteHost
 }
 
 /**

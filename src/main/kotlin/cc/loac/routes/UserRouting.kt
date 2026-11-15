@@ -68,6 +68,18 @@ fun Route.userRouting(
                     }
                 })
             }
+
+            /** 注销登录 **/
+            post("/logout") {
+                val userId = call.getTokenClaim(TokenClaimEnum.USER_ID)?.value?.toLongOrNull()
+                    ?: return@post call.respondFailure("登录已过期，请重新登录", HttpStatusCode.Unauthorized)
+                call.respondSuccess(userService.logout(userId).also {
+                    operate(
+                        desc = "用户注销，用户 ID: [$userId]",
+                        call = call
+                    )
+                })
+            }
         }
 
         // 对用户登录接口进行限流

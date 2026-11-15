@@ -20,7 +20,8 @@ import cc.loac.data.sql.dao.TagDao
 import cc.loac.data.sql.startPage
 import cc.loac.data.sql.tables.*
 import cc.loac.extensions.markdownToHtml
-import cc.loac.extensions.sha256Hex
+import cc.loac.security.hashing.HashingService
+import cc.loac.security.hashing.SaltedHash
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.*
@@ -38,6 +39,7 @@ class PostDaoImpl : PostDao {
 
     private val tagDao: TagDao by inject(TagDao::class.java)
     private val categoryDao: CategoryDao by inject(CategoryDao::class.java)
+    private val hashingService: HashingService by inject(HashingService::class.java)
 
     private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
@@ -111,6 +113,14 @@ class PostDaoImpl : PostDao {
 
 
     /**
+     * 生成文章密码哈希
+     */
+    private fun hashPostPassword(password: String?): String? {
+        if (password.isNullOrEmpty()) return null
+        return hashingService.generatedSaltedHash(password).hash
+    }
+
+    /**
      * 添加文章
      * @param pr 添加文章请求数据类
      */
@@ -127,7 +137,7 @@ class PostDaoImpl : PostDao {
             it[pinned] = pr.pinned
             it[status] = pr.status
             it[visible] = pr.visible
-            it[password] = pr.password.sha256Hex()
+            it[password] = hashPostPassword(pr.password)
             it[createTime] = currentTime
             it[lastModifyTime] = null
         }.resultedValues?.firstOrNull()?.let(::resultRowToPost)
@@ -237,7 +247,7 @@ class PostDaoImpl : PostDao {
             it[cover] = pr.cover
             it[pinned] = pr.pinned
             if (pr.encrypted != null && pr.encrypted) {
-                it[password] = pr.password.sha256Hex()
+                it[password] = hashPostPassword(pr.password)
             } else if (pr.encrypted == false) {
                 it[password] = ""
             }
@@ -308,7 +318,29 @@ class PostDaoImpl : PostDao {
      * 获取文章总数
      */
     override suspend fun postCount(): Long = dbQuery {
-        Posts.selectAll().count()
+        // 回收站文章不计入文章总数
+        Posts.selectAll().where { Posts.status neq PostStatus.DELETED }.count()
+    }
+
+    /**
+     * 获取公开文章总数（已发布且可见）
+     */
+    override suspend fun publicPostCount(): Long = dbQuery {
+        Posts.selectAll().where {
+            (Posts.status eq PostStatus.PUBLISHED) and (Posts.visible eq PostVisible.VISIBLE)
+        }.count()
+    }
+
+    /**
+     * 获取公开文章总浏览量（已发布且可见）
+     */
+    override suspend fun publicPostVisitCount(): Long = dbQuery {
+        Posts
+            .select(Posts.visit.sum())
+            .where {
+                (Posts.status eq PostStatus.PUBLISHED) and (Posts.visible eq PostVisible.VISIBLE)
+            }
+            .firstOrNull()?.get(Posts.visit.sum())?.toLong() ?: 0L
     }
 
     /**
@@ -398,6 +430,44 @@ class PostDaoImpl : PostDao {
         val post = Posts
             .selectAll()
             .where { Posts.slug eq slug }
+            .map(::resultRowToPost)
+            .firstOrNull() ?: return@dbQuery null
+        getPostTagAndCategory(listOf(post))
+        post
+    }
+
+    /**
+     * 获取公开文章 - 根据文章 ID
+     * 仅返回已发布且可见的文章，供博客前端 API 使用
+     * @param postId 文章 ID
+     */
+    override suspend fun publicPost(postId: Long): Post? = dbQuery {
+        val post = Posts
+            .selectAll()
+            .where {
+                (Posts.postId eq postId) and
+                        (Posts.status eq PostStatus.PUBLISHED) and
+                        (Posts.visible eq PostVisible.VISIBLE)
+            }
+            .map(::resultRowToPost)
+            .firstOrNull() ?: return@dbQuery null
+        getPostTagAndCategory(listOf(post))
+        post
+    }
+
+    /**
+     * 获取公开文章 - 根据文章别名
+     * 仅返回已发布且可见的文章，供博客前端 API 使用
+     * @param slug 文章别名
+     */
+    override suspend fun publicPostBySlug(slug: String): Post? = dbQuery {
+        val post = Posts
+            .selectAll()
+            .where {
+                (Posts.slug eq slug) and
+                        (Posts.status eq PostStatus.PUBLISHED) and
+                        (Posts.visible eq PostVisible.VISIBLE)
+            }
             .map(::resultRowToPost)
             .firstOrNull() ?: return@dbQuery null
         getPostTagAndCategory(listOf(post))
@@ -655,13 +725,26 @@ class PostDaoImpl : PostDao {
      * @param password 密码
      */
     override suspend fun isPostPasswordValid(postId: Long, password: String): Boolean = dbQuery {
-        Posts
-            .selectAll()
-            .where {
-                Posts.postId eq postId and (Posts.password eq password.sha256Hex())
+        val storedHash = Posts
+            .select(Posts.password)
+            .where { Posts.postId eq postId }
+            .firstOrNull()
+            ?.get(Posts.password)
+            ?: return@dbQuery false
+
+        if (storedHash.isEmpty()) return@dbQuery false
+
+        if (!hashingService.verify(password, SaltedHash(storedHash, ""))) {
+            return@dbQuery false
+        }
+
+        // 旧 SHA-256 哈希在验证成功后透明升级为 BCrypt
+        if (hashingService.needsRehash(storedHash)) {
+            Posts.update({ Posts.postId eq postId }) {
+                it[Posts.password] = hashPostPassword(password)
             }
-            .map { it[Posts.postId] }
-            .firstOrNull() != null
+        }
+        true
     }
 
     /**
@@ -670,7 +753,11 @@ class PostDaoImpl : PostDao {
     override suspend fun mostViewedPost(): Post? = dbQuery {
         val post = Posts
             .selectAll()
-            .where { Posts.visit greaterEq 0 }
+            .where {
+                (Posts.visit greaterEq 0) and
+                        (Posts.status eq PostStatus.PUBLISHED) and
+                        (Posts.visible eq PostVisible.VISIBLE)
+            }
             .orderBy(Posts.visit, SortOrder.DESC)
             .limit(1)
             .map { resultRowToPost(it) }

@@ -1,7 +1,7 @@
 package cc.loac.plugins
 
+import cc.loac.utils.ip
 import io.ktor.server.application.*
-import io.ktor.server.plugins.origin
 import io.ktor.server.plugins.ratelimit.*
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -44,7 +44,7 @@ fun Application.configureRateLimit() {
         register(LIMITER_ONLINE_COUNT_WB) {
             rateLimiter(limit = 10, refillPeriod = 1.minutes)
             requestKey { call ->
-                call.request.origin.remoteHost
+                call.ip()
             }
         }
     }

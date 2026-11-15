@@ -5,9 +5,9 @@ import cc.loac.plugins.LIMITER_ONLINE_COUNT_WB
 import cc.loac.services.OverviewService
 import cc.loac.utils.error
 import cc.loac.utils.getUser
+import cc.loac.utils.ip
 import cc.loac.utils.respondSuccess
 import io.ktor.server.auth.authenticate
-import io.ktor.server.plugins.origin
 import io.ktor.server.plugins.ratelimit.rateLimit
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
@@ -87,7 +87,7 @@ fun Route.overviewApiRouting() {
         rateLimit(LIMITER_ONLINE_COUNT_WB) {
             webSocket("online") {
                 val sessionId = UUID.randomUUID().toString()
-                val clientIp = call.request.origin.remoteHost
+                val clientIp = call.ip()
                 val manager = BlogOnlineManager.getInstance()
 
                 // 验证连接
@@ -121,7 +121,7 @@ fun Route.overviewApiRouting() {
                 } catch (e: Exception) {
                     e.localizedMessage.error()
                 } finally {
-                    manager.removeConnection(sessionId, clientIp)
+                    manager.removeConnection(sessionId)
                 }
             }
         }

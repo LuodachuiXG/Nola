@@ -7,6 +7,7 @@ import io.ktor.server.config.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -16,10 +17,16 @@ import org.jetbrains.exposed.sql.transactions.transaction
  */
 object DatabaseSingleton {
 
+    // 当前数据库连接池
+    private var dataSource: HikariDataSource? = null
+
     /**
      * 初始化数据库
      */
+    @Synchronized
     fun init(config: ApplicationConfig) {
+        // dev 模式重载时先关闭旧连接池，避免连接泄漏
+        close()
         val driverClassName = config.property("ktor.storage.driverClassName").getString()
         val databaseName = config.property("ktor.storage.databaseName").getString()
         val jdbcURL = config.property("ktor.storage.jdbcURL").getString()
@@ -46,9 +53,9 @@ object DatabaseSingleton {
         initialDataSource.close()
 
         // 连接到新创建的数据库
-        database = Database.connect(
-            createHikariDataSource(jdbcURL, driverClassName, username, password)
-        )
+        val newDataSource = createHikariDataSource(jdbcURL, driverClassName, username, password)
+        dataSource = newDataSource
+        database = Database.connect(newDataSource)
 
         // 开启事物，要么全部成功，要么回滚
         transaction(database) {
@@ -88,6 +95,26 @@ object DatabaseSingleton {
         validate()
     })
 
+    /**
+     * 关闭当前数据库连接池
+     */
+    @Synchronized
+    fun close() {
+        dataSource?.close()
+        dataSource = null
+    }
+
     suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
+
+    /**
+     * 检查数据库是否可用
+     */
+    suspend fun isHealthy(): Boolean = runCatching {
+        dbQuery {
+            TransactionManager.current().exec("SELECT 1") { resultSet ->
+                resultSet.next()
+            } == true
+        }
+    }.getOrDefault(false)
 }

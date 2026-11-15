@@ -28,6 +28,9 @@ fun Application.configureRouting(
     tokenConfig: TokenConfig
 ) {
     routing {
+        // 健康检查
+        healthRouting()
+
         // 静态资源
         staticResources("/css", "/static/templates/css")
         staticResources("/js", "/static/templates/js")
@@ -35,7 +38,6 @@ fun Application.configureRouting(
 
         // 本地存储文件路由
         staticFiles("/upload", File(".nola/upload"))
-        staticFiles("/backup", File(".nola/backup"))
 
         // 快捷接口
         quickRouting()
@@ -83,6 +85,8 @@ fun Application.configureRouting(
             commentAdminRouting()
             // operation 操作记录管理员路由
             operationAdminRouting()
+            // access-log 访问日志管理员路由
+            accessLogAdminRouting()
             // overview 概览管理员路由
             overviewAdminRouting()
         }

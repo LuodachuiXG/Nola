@@ -7,6 +7,7 @@ import cc.loac.utils.error
 import cc.loac.utils.ip
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.plugins.*
 import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import org.slf4j.LoggerFactory
@@ -50,6 +51,12 @@ fun Application.configureStatusPage() {
             call.respondFailure("Thymeleaf 模板解析异常", HttpStatusCode.InternalServerError)
         }
 
+
+        /** 请求体过大 **/
+        exception<PayloadTooLargeException> { call, _ ->
+            "${call.ip()} - ${call.request.uri}: 413 请求体过大".error()
+            call.respondFailure("请求体过大", HttpStatusCode.PayloadTooLarge)
+        }
 
         /** 参数不匹配异常 **/
         exception<ParamMismatchException> { call, e ->

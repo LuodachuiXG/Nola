@@ -1,0 +1,1 @@
+import{d as e,h as a,c as o,a as t,o as n,bp as s}from"./index-BUZClAFS.js";const c={class:"container"},p=e({__name:"FileView",setup(r){return a(()=>{}),(_,i)=>(n(),o("div",c,[t(s)]))}});export{p as default};

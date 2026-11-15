@@ -84,6 +84,16 @@ interface PostDao {
     suspend fun postCount(): Long
 
     /**
+     * 获取公开文章总数（已发布且可见）
+     */
+    suspend fun publicPostCount(): Long
+
+    /**
+     * 获取公开文章总浏览量（已发布且可见）
+     */
+    suspend fun publicPostVisitCount(): Long
+
+    /**
      * 获取所有文章
      * @param includeTagAndCategory 包含标签和分类（耗时操作，非必要不包含）
      */
@@ -123,6 +133,20 @@ interface PostDao {
      * @param slug 文章别名
      */
     suspend fun postBySlug(slug: String): Post?
+
+    /**
+     * 获取公开文章 - 根据文章 ID
+     * 仅返回已发布且可见的文章，供博客前端 API 使用
+     * @param postId 文章 ID
+     */
+    suspend fun publicPost(postId: Long): Post?
+
+    /**
+     * 获取公开文章 - 根据文章别名
+     * 仅返回已发布且可见的文章，供博客前端 API 使用
+     * @param slug 文章别名
+     */
+    suspend fun publicPostBySlug(slug: String): Post?
 
     /**
      * 根据关键字获取文章

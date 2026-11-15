@@ -189,6 +189,20 @@ fun String.sanitizeFileName(): String {
 
 /**
  * String 扩展函数
+ * 清理备份文件名中的路径分隔符和非法字符，避免路径穿越和同名覆盖
+ */
+fun String.sanitizeBackupFileName(fallback: String): String {
+    val sanitized = this
+        .replace(Regex("[\\\\/:*?\"<>|\\p{Cntrl}]"), "_")
+        .replace(Regex("\\s+"), "_")
+        .replace("..", "_")
+        .trim('.', '_')
+        .take(80)
+    return sanitized.ifBlank { fallback }
+}
+
+/**
+ * String 扩展函数
  * 将所有双斜杠替换为单斜杠
  * 注意：此函数始终使用 "/" 作为分隔符，适用于 URL 和相对路径场景
  */

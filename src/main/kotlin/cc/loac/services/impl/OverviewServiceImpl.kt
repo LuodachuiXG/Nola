@@ -9,9 +9,7 @@ import cc.loac.data.responses.ApiOverviewResponse
 import cc.loac.data.responses.OverviewCount
 import cc.loac.data.responses.OverviewResponse
 import cc.loac.data.responses.toApiPostResponse
-import cc.loac.manager.BlogOnlineManager
 import cc.loac.services.*
-import com.google.protobuf.Api
 import kotlinx.coroutines.*
 import org.koin.java.KoinJavaComponent.inject
 
@@ -20,7 +18,7 @@ import org.koin.java.KoinJavaComponent.inject
  */
 class OverviewServiceImpl : OverviewService {
 
-    private val ioScope = CoroutineScope(Dispatchers.IO)
+    private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
 
     private val postService: PostService by inject(PostService::class.java)
     private val tagService: TagService by inject(TagService::class.java)
@@ -42,6 +40,8 @@ class OverviewServiceImpl : OverviewService {
         // 统计数量
         val countJob = listOf(
             ioScope.async { postService.postCount() },
+            ioScope.async { tagService.tagCount() },
+            ioScope.async { categoryService.categoryCount() },
             ioScope.async { commentService.commentCount() },
             ioScope.async { diaryService.diaryCount() },
             ioScope.async { fileService.fileCount() },
@@ -86,24 +86,24 @@ class OverviewServiceImpl : OverviewService {
         // 概览项目数量
         val overviewCount = OverviewCount(
             post = countResult[0] ?: 0L,
-            tag = tags.size.toLong(),
-            category = categories.size.toLong(),
-            comment = countResult[1] ?: 0L,
-            diary = countResult[2] ?: 0L,
-            file = countResult[3] ?: 0L,
-            link = countResult[4] ?: 0L,
-            menu = countResult[5] ?: 0L
+            tag = countResult[1] ?: 0L,
+            category = countResult[2] ?: 0L,
+            comment = countResult[3] ?: 0L,
+            diary = countResult[4] ?: 0L,
+            file = countResult[5] ?: 0L,
+            link = countResult[6] ?: 0L,
+            menu = countResult[7] ?: 0L
         )
 
         OverviewResponse(
-            postVisitCount = countResult[8] ?: 0L,
+            postVisitCount = countResult[10] ?: 0L,
             count = overviewCount,
             tags = tags,
             categories = categories,
             mostViewedPost = mostViewedPost,
             lastOperation = lastOperation?.operationDesc,
-            lastLoginDate = countResult[6],
-            createDate = countResult[7]
+            lastLoginDate = countResult[8],
+            createDate = countResult[9]
         )
     }
 
@@ -113,14 +113,16 @@ class OverviewServiceImpl : OverviewService {
     override suspend fun getApiOverview(): ApiOverviewResponse {
         // 统计数量
         val countJob = listOf(
-            ioScope.async { postService.postCount() },
-            ioScope.async { commentService.commentCount() },
+            ioScope.async { postService.publicPostCount() },
+            ioScope.async { tagService.tagCount() },
+            ioScope.async { categoryService.categoryCount() },
+            ioScope.async { commentService.publicCommentCount() },
             ioScope.async { diaryService.diaryCount() },
             ioScope.async { linkService.linkCount() },
             // 博客创建时间
             ioScope.async { configService.blogInfo()?.createDate },
-            // 文章总浏览量
-            ioScope.async { postService.postVisitCount() }
+            // 公开文章总浏览量
+            ioScope.async { postService.publicPostVisitCount() }
         )
 
         // 文章最多的 6 个标签
@@ -147,20 +149,20 @@ class OverviewServiceImpl : OverviewService {
         // 概览项目数量
         val overviewCount = ApiOverviewCount(
             post = countResult[0] ?: 0L,
-            tag = tags.size.toLong(),
-            category = categories.size.toLong(),
-            comment = countResult[1] ?: 0L,
-            diary = countResult[2] ?: 0L,
-            link = countResult[3] ?: 0L,
+            tag = countResult[1] ?: 0L,
+            category = countResult[2] ?: 0L,
+            comment = countResult[3] ?: 0L,
+            diary = countResult[4] ?: 0L,
+            link = countResult[5] ?: 0L,
         )
 
         return ApiOverviewResponse(
-            postVisitCount = countResult[5] ?: 0L,
+            postVisitCount = countResult[7] ?: 0L,
             count = overviewCount,
             tags = tags,
             categories = categories,
             mostViewedPost = mostViewedPost?.toApiPostResponse(),
-            createDate = countResult[4]
+            createDate = countResult[6]
         )
     }
 

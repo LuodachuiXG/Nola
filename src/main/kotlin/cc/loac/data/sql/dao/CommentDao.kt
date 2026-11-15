@@ -84,6 +84,8 @@ interface CommentDao {
      * @param isPass 是否通过审核
      * @param key 关键字（内容、名称、邮箱）
      * @param sort 排序方式（默认时间降序）
+     * @param topLevelOnly 是否仅查询顶层评论
+     * @param publicOnly 是否仅查询公开文章下的评论（已发布且可见）
      */
     suspend fun comments(
         page: Int,
@@ -93,8 +95,24 @@ interface CommentDao {
         parentId: Long? = null,
         isPass: Boolean? = null,
         key: String? = null,
-        sort: CommentSort? = null
+        sort: CommentSort? = null,
+        topLevelOnly: Boolean = false,
+        publicOnly: Boolean = false
     ): Pager<Comment>
+
+    /**
+     * 根据父评论 ID 数组获取所有子评论
+     * @param parentIds 父评论 ID 数组
+     * @param isPass 是否通过审核
+     * @param sort 排序方式（默认时间降序）
+     * @param publicOnly 是否仅查询公开文章下的评论（已发布且可见）
+     */
+    suspend fun commentsByParentIds(
+        parentIds: List<Long>,
+        isPass: Boolean? = null,
+        sort: CommentSort? = null,
+        publicOnly: Boolean = false
+    ): List<Comment>
 
 
     /**
@@ -107,5 +125,10 @@ interface CommentDao {
      * 获取评论数量
      */
     suspend fun commentCount(): Long
+
+    /**
+     * 获取公开评论数量（已审核且文章已发布、可见）
+     */
+    suspend fun publicCommentCount(): Long
 
 }

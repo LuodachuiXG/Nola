@@ -66,6 +66,7 @@ interface CommentService {
      * @param sort 排序方式（默认时间降序）
      * @param tree 是否将子评论放置到父评论的 children 字段中（默认 false）
      *             此项为 true 时，commentId、parentId、email、displayName、key 参数无效
+     * @param publicOnly 是否仅查询公开文章（已发布且可见）下的评论
      */
     suspend fun comments(
         page: Int,
@@ -77,7 +78,8 @@ interface CommentService {
         isPass: Boolean? = null,
         key: String? = null,
         sort: CommentSort? = null,
-        tree: Boolean = false
+        tree: Boolean = false,
+        publicOnly: Boolean = false
     ): Pager<Comment>
 
     /**
@@ -91,4 +93,9 @@ interface CommentService {
      * 获取评论数量
      */
     suspend fun commentCount(): Long
+
+    /**
+     * 获取公开评论数量（已审核且文章已发布、可见）
+     */
+    suspend fun publicCommentCount(): Long
 }

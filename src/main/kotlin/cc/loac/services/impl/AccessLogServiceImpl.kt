@@ -6,7 +6,15 @@ import cc.loac.data.sql.dao.AccessLogDao
 import cc.loac.extensions.isInt
 import cc.loac.globalEnvironment
 import cc.loac.services.AccessLogService
+import cc.loac.utils.error
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import org.koin.java.KoinJavaComponent.inject
+import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * 访问日志服务接口实现类
@@ -14,24 +22,47 @@ import org.koin.java.KoinJavaComponent.inject
 class AccessLogServiceImpl : AccessLogService {
 
     private val accessLogDao: AccessLogDao by inject(AccessLogDao::class.java)
+    private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
+
+    private val writerStarted = AtomicBoolean(false)
+    private val pendingLogs = Channel<AccessLog>(
+        capacity = 2048,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+
+    override fun startWriter() {
+        if (!writerStarted.compareAndSet(false, true)) return
+        ioScope.launch {
+            while (isActive) {
+                delay(1000)
+                val batch = mutableListOf<AccessLog>()
+                while (batch.size < 500) {
+                    val log = pendingLogs.tryReceive().getOrNull() ?: break
+                    batch += log
+                }
+                if (batch.isEmpty()) continue
+                runCatching {
+                    accessLogDao.addAccessLogs(batch)
+                    trimLogs()
+                }.onFailure {
+                    "写入访问日志失败：${it.message}".error()
+                }
+            }
+        }
+    }
+
+    override fun enqueueAccessLog(accessLog: AccessLog) {
+        startWriter()
+        pendingLogs.trySend(accessLog)
+    }
 
     /**
      * 增加访问日志
      * @param accessLog 访问日志数据类
      */
     override suspend fun addAccessLog(accessLog: AccessLog): AccessLog? {
-        // 最大日志长度
-        val maxLength = globalEnvironment?.config?.propertyOrNull("accessLog.maxLength").let {
-            if (it == null) return@let 2000
-            if (!it.getString().isInt()) return@let 2000
-            it.getString().toInt()
-        }
         val result = accessLogDao.addAccessLog(accessLog)
-        // 日志数量大于最大长度时，删除最早日志
-        val currentCount = count()
-        if (currentCount > maxLength) {
-            deleteEarliestLogs(currentCount.toInt() - maxLength)
-        }
+        trimLogs()
         return result
     }
 
@@ -44,11 +75,36 @@ class AccessLogServiceImpl : AccessLogService {
     }
 
     /**
+     * 批量删除访问日志
+     * @param accessLogIds 访问日志 ID 集合
+     */
+    override suspend fun deleteLogs(accessLogIds: List<Long>): Boolean {
+        if (accessLogIds.isEmpty()) return true
+        return accessLogDao.deleteLogs(accessLogIds)
+    }
+
+    /**
      * 删除最早的指定数量的日志
      * @param count 要删除的日志数量
      */
     override suspend fun deleteEarliestLogs(count: Int): Boolean {
+        if (count <= 0) return true
         return accessLogDao.deleteEarliestLogs(count)
+    }
+
+    /**
+     * 删除指定时间以前的日志
+     * @param time 时间戳（毫秒）
+     */
+    override suspend fun deleteBefore(time: Long): Boolean {
+        return accessLogDao.deleteBefore(time)
+    }
+
+    /**
+     * 删除全部访问日志
+     */
+    override suspend fun deleteAll(): Boolean {
+        return accessLogDao.deleteAll()
     }
 
     /**
@@ -73,5 +129,28 @@ class AccessLogServiceImpl : AccessLogService {
      */
     override suspend fun count(): Long {
         return accessLogDao.count()
+    }
+
+    /**
+     * 超过配置上限时删除最早日志
+     */
+    private suspend fun trimLogs() {
+        val maxLength = maxLogLength()
+        val currentCount = count()
+        if (currentCount > maxLength) {
+            deleteEarliestLogs((currentCount - maxLength).coerceAtMost(Int.MAX_VALUE.toLong()).toInt())
+        }
+    }
+
+    private fun maxLogLength(): Int {
+        val configured = globalEnvironment?.config?.propertyOrNull("accessLog.maxLength")
+            ?.getString()
+            ?.takeIf { it.isInt() }
+            ?.toInt()
+        return configured?.takeIf { it > 0 } ?: DEFAULT_MAX_LOG_LENGTH
+    }
+
+    private companion object {
+        const val DEFAULT_MAX_LOG_LENGTH = 2000
     }
 }

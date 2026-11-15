@@ -28,4 +28,10 @@ interface HashingService {
      * @return 如果重新计算的哈希值与给定的哈希值一致，则返回 true，否则返回 false
      */
     fun verify(value: String, saltedHash: SaltedHash): Boolean
+
+    /**
+     * 判断哈希是否需要升级为 BCrypt
+     * @param hash 已存储的哈希值
+     */
+    fun needsRehash(hash: String): Boolean
 }

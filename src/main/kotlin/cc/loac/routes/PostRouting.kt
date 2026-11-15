@@ -352,9 +352,9 @@ fun Route.postApiRouting() {
         /** 获取文章 - 根据文章 ID **/
         get("/{postId}") {
             val postId = call.receiveIntPathParam("postId").toLong()
-            val post = postService.posts(listOf(postId), true).firstOrNull()
-            // 如果文章不存在，或者文章未发布，则返回 404
-            if (post == null || post.status != PostStatus.PUBLISHED) {
+            val post = postService.publicPost(postId)
+            // 如果文章不存在、未发布或不可见，则返回 404
+            if (post == null) {
                 return@get call.respondFailure(HttpStatusCode.NotFound.description, HttpStatusCode.NotFound)
             }
             call.respondSuccess(post.toApiPostResponse())
@@ -363,9 +363,9 @@ fun Route.postApiRouting() {
         /** 获取文章 - 根据文章别名 **/
         get("/slug/{slug}") {
             val slug = call.receivePathParam("slug")
-            val post = postService.postBySlug(slug)
-            // 如果文章不存在，或者文章不可见，或者文章未发布，则返回 404
-            if (post == null || post.status != PostStatus.PUBLISHED) {
+            val post = postService.publicPostBySlug(slug)
+            // 如果文章不存在、未发布或不可见，则返回 404
+            if (post == null) {
                 return@get call.respondFailure(HttpStatusCode.NotFound.description, HttpStatusCode.NotFound)
             }
             call.respondSuccess(post.toApiPostResponse())
@@ -392,6 +392,19 @@ fun Route.postApiRouting() {
                 // 如果文章返回空
                 val postContent = postService.apiPostContent(postId, slug, password)
                     ?: throw MyException("文章不存在或不可见")
+                call.respondSuccess(postContent)
+            }
+
+            /** 获取文章内容（密码放在请求体，避免进入日志） **/
+            post("/content") {
+                val request = call.receiveByDataClass<ApiPostContentRequest> {
+                    it.id != null || !it.slug.isNullOrBlank()
+                }
+                val postContent = postService.apiPostContent(
+                    postId = request.id,
+                    slug = request.slug,
+                    password = request.password
+                ) ?: throw MyException("文章不存在或不可见")
                 call.respondSuccess(postContent)
             }
         }

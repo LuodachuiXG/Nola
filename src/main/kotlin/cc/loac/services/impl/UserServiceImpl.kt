@@ -22,6 +22,8 @@ import cc.loac.utils.operate
 import cc.loac.utils.operateSync
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.java.KoinJavaComponent.inject
 
 /**
@@ -36,6 +38,9 @@ class UserServiceImpl : UserService {
     private val userDao: UserDao by inject(UserDao::class.java)
 
     private val ioScope: CoroutineScope by inject(CoroutineScope::class.java)
+
+    /** 管理员初始化锁，防止并发请求创建多个管理员 */
+    private val initAdminMutex = Mutex()
 
     /**
      * 初始化博客管理员
@@ -71,7 +76,13 @@ class UserServiceImpl : UserService {
             salt = saltHash.salt
         )
         // 添加用户
-        val result = userDao.addUser(u) != null
+        val result = initAdminMutex.withLock {
+            // 加锁后再次检查，避免并发请求同时通过首次检查
+            if (allUsers().isNotEmpty()) {
+                throw MyException("管理员已经创建")
+            }
+            userDao.addUser(u) != null
+        }
         if (result) {
             ioScope.launch {
                 // 管理员初始化完成，判断是否有文章，没有的话就插入默认文章
@@ -220,6 +231,14 @@ class UserServiceImpl : UserService {
     }
 
     /**
+     * 注销用户，删除 Redis 中保存的 Token
+     * @param userId 用户 ID
+     */
+    override suspend fun logout(userId: Long): Boolean {
+        return tokenService.deleteToken(userId)
+    }
+
+    /**
      * 用户登录
      * @param tokenConfig Token 令牌配置
      * @param username 用户名
@@ -260,6 +279,14 @@ class UserServiceImpl : UserService {
         if (!isValidPassword) {
             loginErrorOperate()
             throw MyException("非法用户名或密码")
+        }
+
+        // 旧哈希在登录成功后透明升级为 BCrypt
+        if (hashingService.needsRehash(user.password)) {
+            userDao.updatePassword(
+                userId = user.userId,
+                saltHash = hashingService.generatedSaltedHash(password)
+            )
         }
 
         // 生成 Token

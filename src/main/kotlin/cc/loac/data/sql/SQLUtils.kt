@@ -21,6 +21,11 @@ suspend fun <T> FieldSet.startPage(
     transform: (ResultRow) -> T,
     query: FieldSet.() -> Query
 ): Pager<T> {
+    // page=0 表示不分页获取全部数据（调用方需确保已鉴权）
+    if (page <= 0 || size <= 0) {
+        val data = dbQuery { query().map(transform) }
+        return Pager(0, 0, data, data.size.toLong(), 1)
+    }
     // 计算 limit 的偏移量
     val offset = ((page - 1) * size).toLong()
     // 查询给定的 query 检索条件下的总条数

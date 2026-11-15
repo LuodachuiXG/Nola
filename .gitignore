@@ -38,3 +38,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 本地文档 ###
+docs/CODE_REVIEW_AND_FIX_PLAN.md

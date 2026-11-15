@@ -54,6 +54,12 @@ interface UserService {
     suspend fun updatePassword(userId: Long, password: String): Boolean
 
     /**
+     * 注销用户，删除 Redis 中保存的 Token
+     * @param userId 用户 ID
+     */
+    suspend fun logout(userId: Long): Boolean
+
+    /**
      * 用户登录
      * @param tokenConfig Token 令牌配置
      * @param username 用户名

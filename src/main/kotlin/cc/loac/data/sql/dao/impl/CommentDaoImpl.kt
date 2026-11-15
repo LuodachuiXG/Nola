@@ -2,6 +2,8 @@ package cc.loac.data.sql.dao.impl
 
 import cc.loac.data.models.Comment
 import cc.loac.data.models.enums.CommentSort
+import cc.loac.data.models.enums.PostStatus
+import cc.loac.data.models.enums.PostVisible
 import cc.loac.data.responses.Pager
 import cc.loac.data.sql.DatabaseSingleton.dbQuery
 import cc.loac.data.sql.dao.CommentDao
@@ -185,6 +187,8 @@ class CommentDaoImpl : CommentDao {
      * @param isPass 是否通过审核
      * @param key 关键字
      * @param sort 排序方式（默认时间降序）
+     * @param topLevelOnly 是否仅查询顶层评论
+     * @param publicOnly 是否仅查询公开文章下的评论
      */
     override suspend fun comments(
         page: Int,
@@ -194,7 +198,9 @@ class CommentDaoImpl : CommentDao {
         parentId: Long?,
         isPass: Boolean?,
         key: String?,
-        sort: CommentSort?
+        sort: CommentSort?,
+        topLevelOnly: Boolean,
+        publicOnly: Boolean
     ): Pager<Comment> {
         val query = Comments
             .leftJoin(Posts, additionalConstraint = {
@@ -207,6 +213,12 @@ class CommentDaoImpl : CommentDao {
         parentId?.let { query.andWhere { Comments.parentCommentId eq it } }
         isPass?.let { query.andWhere { Comments.isPass eq it } }
         key?.let { query.andWhere { Comments.content like "%$it%" or (Comments.email like "%$it%") or (Comments.displayName like "%$it%") } }
+        if (topLevelOnly) query.andWhere { Comments.parentCommentId.isNull() }
+        if (publicOnly) {
+            query.andWhere {
+                (Posts.status eq PostStatus.PUBLISHED) and (Posts.visible eq PostVisible.VISIBLE)
+            }
+        }
         when (sort) {
             CommentSort.CREATE_TIME_DESC -> query.orderBy(Comments.createTime, SortOrder.DESC)
             CommentSort.CREATE_TIME_ASC -> query.orderBy(Comments.createTime, SortOrder.ASC)
@@ -222,6 +234,41 @@ class CommentDaoImpl : CommentDao {
         } else {
             Comments.startPage(page, size, ::resultRowToComment) { query }
         }
+    }
+
+    /**
+     * 根据父评论 ID 数组获取所有子评论
+     * @param parentIds 父评论 ID 数组
+     * @param isPass 是否通过审核
+     * @param sort 排序方式（默认时间降序）
+     * @param publicOnly 是否仅查询公开文章下的评论
+     */
+    override suspend fun commentsByParentIds(
+        parentIds: List<Long>,
+        isPass: Boolean?,
+        sort: CommentSort?,
+        publicOnly: Boolean
+    ): List<Comment> = dbQuery {
+        if (parentIds.isEmpty()) return@dbQuery emptyList()
+        val query = Comments
+            .leftJoin(Posts, additionalConstraint = {
+                Posts.postId eq Comments.postId
+            })
+            .selectAll()
+            .where { Comments.parentCommentId inList parentIds }
+
+        isPass?.let { query.andWhere { Comments.isPass eq it } }
+        if (publicOnly) {
+            query.andWhere {
+                (Posts.status eq PostStatus.PUBLISHED) and (Posts.visible eq PostVisible.VISIBLE)
+            }
+        }
+        when (sort) {
+            CommentSort.CREATE_TIME_DESC -> query.orderBy(Comments.createTime, SortOrder.DESC)
+            CommentSort.CREATE_TIME_ASC -> query.orderBy(Comments.createTime, SortOrder.ASC)
+            else -> query.orderBy(Comments.createTime, SortOrder.DESC)
+        }
+        query.map(::resultRowToComment)
     }
 
     /**
@@ -241,5 +288,22 @@ class CommentDaoImpl : CommentDao {
      */
     override suspend fun commentCount(): Long = dbQuery {
         Comments.selectAll().count()
+    }
+
+    /**
+     * 获取公开评论数量（已审核且文章已发布、可见）
+     */
+    override suspend fun publicCommentCount(): Long = dbQuery {
+        Comments
+            .leftJoin(Posts, additionalConstraint = {
+                Posts.postId eq Comments.postId
+            })
+            .selectAll()
+            .where {
+                (Comments.isPass eq true) and
+                        (Posts.status eq PostStatus.PUBLISHED) and
+                        (Posts.visible eq PostVisible.VISIBLE)
+            }
+            .count()
     }
 }

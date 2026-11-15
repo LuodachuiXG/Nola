@@ -26,35 +26,42 @@ class CommentServiceImpl : CommentService {
      */
     override suspend fun addComment(comment: Comment, isApiRequest: Boolean): Comment? {
         var newComment = comment
-        // 检查评论对应的文章是否存在
-        val post = postDao.posts(listOf(newComment.postId), false).also {
-            if (it.isEmpty()) throw MyException("文章 [${newComment.postId}] 不存在")
+        // 博客前端只能对已发布且可见的文章发表评论
+        val post = if (isApiRequest) {
+            postDao.publicPost(newComment.postId)
+                ?: throw MyException("文章 [${newComment.postId}] 不存在或不可见")
+        } else {
+            postDao.posts(listOf(newComment.postId), false).firstOrNull()
+                ?: throw MyException("文章 [${newComment.postId}] 不存在")
         }
 
-        if (isApiRequest && !post.first().allowComment) {
+        if (isApiRequest && !post.allowComment) {
             // 当前添加评论是博客前端用户提交的请求，并且当前文章禁止评论
             throw MyException("文章 [${newComment.postId}] 禁止评论")
         }
 
-        // 检查父评论是否存在
-        newComment.parentCommentId?.let {
-            commentById(it) ?: throw MyException("父评论 [${it}] 不存在")
+        // 检查父评论是否存在，且必须属于同一篇文章
+        newComment.parentCommentId?.let { parentId ->
+            val parent = commentById(parentId) ?: throw MyException("父评论 [$parentId] 不存在")
+            if (parent.postId != newComment.postId) throw MyException("父评论 [$parentId] 不存在")
         }
 
         // 如果 replyCommentId 不为空，但是 parentCommentId 为空，则代表当前评论未指定父评论
         // 如果是回复父评论下的某一个子评论，需要同时指定这两个字段
-        newComment.replyCommentId?.let {
+        newComment.replyCommentId?.let { replyId ->
             if (newComment.parentCommentId == null) throw MyException("未指定父评论")
-            // 回复的评论是否存在
-            commentById(it)?.let { c ->
-                // 如果要回复的评论的父评论 ID 和新添加的评论的父评论 ID 不同，也任务回复的评论不存在
-                if (c.parentCommentId != newComment.parentCommentId) throw MyException("回复的评论 [${it}] 不存在")
+            // 回复的评论是否存在于同一篇文章，且父评论一致
+            val reply = commentById(replyId) ?: throw MyException("回复的评论 [$replyId] 不存在")
+            if (reply.postId != newComment.postId ||
+                reply.parentCommentId != newComment.parentCommentId
+            ) {
+                throw MyException("回复的评论 [$replyId] 不存在")
+            }
 
-                // 设置 replyDisplayName
-                newComment = newComment.copy(
-                    replyDisplayName = c.displayName
-                )
-            } ?: throw MyException("回复的评论 [${it}] 不存在")
+            // 设置 replyDisplayName
+            newComment = newComment.copy(
+                replyDisplayName = reply.displayName
+            )
         }
 
         // 评论内容为空
@@ -167,23 +174,28 @@ class CommentServiceImpl : CommentService {
         isPass: Boolean?,
         key: String?,
         sort: CommentSort?,
-        tree: Boolean
+        tree: Boolean,
+        publicOnly: Boolean
     ): Pager<Comment> {
         var mPostId = postId
         if (slug != null && mPostId == null) {
             // 文章别名不为空，文章 ID 为空
             // 先根据文章别名获取到文章，然后再填充文章 ID （此处为了博客前端可以通过文章别名获取评论）
-            val post = postDao.postBySlug(slug)
+            val post = if (publicOnly) postDao.publicPostBySlug(slug) else postDao.postBySlug(slug)
             if (post != null) {
                 mPostId = post.postId
             } else {
-                throw MyException("文章 [$slug] 不存在")
+                throw MyException("文章 [$slug] 不存在或不可见")
             }
         }
 
+        if (publicOnly && mPostId != null) {
+            // 博客前端只能看到已发布且可见的文章下的评论
+            postDao.publicPost(mPostId) ?: throw MyException("文章 [$mPostId] 不存在或不可见")
+        }
 
         if (tree) {
-            // 需要把子评论放到父评论的 children 字段中
+            // 先按顶层评论分页，保证 totalData / 页数与实际返回的父评论一致
             val pager = commentDao.comments(
                 page = page,
                 size = size,
@@ -192,24 +204,25 @@ class CommentServiceImpl : CommentService {
                 parentId = null,
                 isPass = isPass,
                 key = null,
-                sort = sort
+                sort = sort,
+                topLevelOnly = true,
+                publicOnly = publicOnly
             )
-            val idToComment = pager.data.associateBy { it.commentId }
-            // pager.data 是所有平铺的评论 List，parentCommentId 为 null 的评论认为是顶层评论（父评论）
-            // 将子评论放到对应的父评论的 children 字段中
-            pager.data.forEach { comment ->
-                comment.parentCommentId?.let {
-                    // 当前评论的父评论 ID 不为空，获得父评论
-                    val parent = idToComment[it] ?: return@let
-                    if (parent.children == null) parent.children = LinkedList()
-                    parent.children!!.add(comment)
+            // 再一次性查询当前页所有父评论的子评论，避免子评论因分页被丢弃
+            val children = commentDao.commentsByParentIds(
+                parentIds = pager.data.map { it.commentId },
+                isPass = isPass,
+                sort = sort,
+                publicOnly = publicOnly
+            )
+            val childrenByParentId = children.groupBy { it.parentCommentId }
+            pager.data.forEach { parent ->
+                val subComments = childrenByParentId[parent.commentId] ?: emptyList()
+                if (subComments.isNotEmpty()) {
+                    parent.children = LinkedList(subComments)
                 }
             }
-
-            return pager.copy(
-                // 此时 pager.data 中的所有父评论的 children 中都已经填充了子评论，所以这里直接过滤掉子评论
-                data = pager.data.filter { it.parentCommentId == null }
-            )
+            return pager
         } else {
             return commentDao.comments(
                 page = page,
@@ -219,7 +232,8 @@ class CommentServiceImpl : CommentService {
                 parentId = parentId,
                 isPass = isPass,
                 key = key,
-                sort = sort
+                sort = sort,
+                publicOnly = publicOnly
             )
         }
     }
@@ -237,5 +251,12 @@ class CommentServiceImpl : CommentService {
      */
     override suspend fun commentCount(): Long {
         return commentDao.commentCount()
+    }
+
+    /**
+     * 获取公开评论数量（已审核且文章已发布、可见）
+     */
+    override suspend fun publicCommentCount(): Long {
+        return commentDao.publicCommentCount()
     }
 }

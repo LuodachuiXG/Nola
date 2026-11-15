@@ -10,8 +10,6 @@ import cc.loac.services.*
 import cc.loac.services.impl.*
 import io.ktor.server.application.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import org.koin.dsl.module
 import org.koin.ktor.plugin.Koin
 import org.koin.logger.slf4jLogger
@@ -19,20 +17,18 @@ import org.koin.logger.slf4jLogger
 /**
  * 配置 Koin
  * 依赖注入插件
+ * @param applicationScope 当前 Application 的协程作用域
  */
-fun Application.configureKoin() {
+fun Application.configureKoin(applicationScope: CoroutineScope) {
     install(Koin) {
         slf4jLogger()
-        modules(appModule)
+        modules(appModule(applicationScope))
     }
 }
 
-/** 应用级协程作用域，用于 fire-and-forget 的后台操作 **/
-val applicationScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
 /** 配置 Koin 注入模块 **/
-val appModule = module {
-    // 应用级协程作用域
+fun appModule(applicationScope: CoroutineScope) = module {
+    // 应用级协程作用域，随 Application 生命周期创建和销毁
     single { applicationScope }
 
     // 令牌服务
@@ -58,6 +54,9 @@ val appModule = module {
     // 文章服务
     single<PostService> { PostServiceImpl() }
     single<PostDao> { PostDaoImpl() }
+
+    // 备份服务
+    single<BackupService> { BackupServiceImpl() }
 
     // 链接服务
     single<LinkService> { LinkServiceImpl() }
