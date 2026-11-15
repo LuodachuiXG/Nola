@@ -1,0 +1,1 @@
+import{Cn as e,cn as t,dn as n,in as r,sn as i,xn as a}from"./Wave-BaVmjZD-.js";import{n as o}from"./index-D6eSujYa.js";n();var s={class:`container`},c=t({__name:`FileView`,setup(t){return a(()=>{}),(t,n)=>(e(),r(`div`,s,[i(o)]))}});export{c as default};
