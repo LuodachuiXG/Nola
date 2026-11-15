@@ -200,7 +200,7 @@ fun ApplicationCall.receiveLongPathParam(
 
 /**
  * 接收用于分页的页数和页面条数
- * 如果 page 为空或 0，page 和 size 都回调 0
+ * 如果 page 为空或 0，page 和 size 都回调 0（获取全部数据）
  */
 suspend fun ApplicationCall.receivePageAndSize(
     block: suspend (page: Int, size: Int) -> Unit
@@ -217,10 +217,6 @@ suspend fun ApplicationCall.receivePageAndSize(
     }
     // 如果 page 不为 0，size 为 0，抛出参数不匹配异常
     if (page != "0" && size == "0") {
-        throw ParamMismatchException()
-    }
-    // page=0 表示不分页获取全部数据，仅允许已登录的管理员使用
-    if (page == "0" && principal<JWTPrincipal>() == null) {
         throw ParamMismatchException()
     }
     val pageInt = page.toIntOrNull() ?: throw ParamMismatchException()

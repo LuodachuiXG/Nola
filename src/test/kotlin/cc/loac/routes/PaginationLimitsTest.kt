@@ -23,10 +23,12 @@ class PaginationLimitsTest {
     }
 
     @Test
-    fun `page zero without principal is rejected`() = testApplication {
+    fun `page zero fetches all without principal`() = testApplication {
         application { paginationTestApp() }
 
-        assertEquals(HttpStatusCode.Conflict, client.get("/page/0/0").status)
+        val response = client.get("/page/0/0")
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("0:0", response.bodyAsText())
     }
 
     @Test
@@ -46,6 +48,15 @@ class PaginationLimitsTest {
         assertEquals("1:100", response.bodyAsText())
     }
 
+    @Test
+    fun `missing page fetches all`() = testApplication {
+        application { paginationTestApp() }
+
+        val response = client.get("/query")
+        assertEquals(HttpStatusCode.OK, response.status)
+        assertEquals("0:0", response.bodyAsText())
+    }
+
     private fun Application.paginationTestApp() {
         install(StatusPages) {
             exception<ParamMismatchException> { call, _ ->
@@ -54,6 +65,11 @@ class PaginationLimitsTest {
         }
         routing {
             get("/page/{page}/{size}") {
+                call.receivePageAndSize { page, size ->
+                    call.respondText("$page:$size")
+                }
+            }
+            get("/query") {
                 call.receivePageAndSize { page, size ->
                     call.respondText("$page:$size")
                 }
